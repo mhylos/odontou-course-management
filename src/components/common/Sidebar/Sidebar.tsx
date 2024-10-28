@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import SidebarItem from "./SidebarItem";
 
 const items = [
   {
@@ -32,16 +33,20 @@ export default function Sidebar() {
           className="object-scale-down"
         />
       </div>
-      <nav className="flex flex-col gap-5 p-5">
+      <nav className="grid gap-1 justify-between">
         {items.map((item) => (
-          <Link
+          <SidebarItem
             key={item.title}
-            href={item.href}
-            className="text-xl text-center font-extralight"
-          >
-            {item.title}
-          </Link>
+            title={item.title}
+            href={item}
+            className="border-b-2 border-solid border-primary"
+          />
         ))}
+        <SidebarItem
+          title={"Cerrar Sesión"}
+          href={"/logout"}
+          className="row-end-[-1]"
+        />
       </nav>
     </aside>
   );
