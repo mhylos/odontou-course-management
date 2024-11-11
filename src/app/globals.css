@@ -25,3 +25,9 @@ html, body {
     text-wrap: balance;
   }
 }
+
+
+:root {
+  --toastify-color-success: #004C93;
+  --toastify-font-family: 'Inter', sans-serif;
+}

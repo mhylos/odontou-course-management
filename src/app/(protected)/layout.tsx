@@ -29,7 +29,7 @@ export default async function RootLayout({
         ]}
       />
       {modal}
-      {children}
+      <main className="p-5">{children}</main>
     </>
   );
 }

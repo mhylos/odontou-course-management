@@ -18,7 +18,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={"antialiased"}>
         <ToastContainer />
-        {children}
+        <div className="grid grid-cols-[20rem_1fr] h-screen">{children}</div>
       </body>
     </html>
   );

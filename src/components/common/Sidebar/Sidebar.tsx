@@ -12,7 +12,7 @@ export default function Sidebar({ routes }: SidebarProps) {
   return (
     <aside
       id="logo-sidebar"
-      className="fixed top-0 left-0 z-40 w-72 h-full border-r-2 border-solid border-primary grid grid-rows-[200px_1fr]"
+      className="z-40 h-full border-r-2 border-solid border-primary grid grid-rows-[200px_1fr]"
       aria-label="Sidebar"
     >
       <div className="bg-primary p-5">
