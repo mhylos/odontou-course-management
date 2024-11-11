@@ -1,5 +1,4 @@
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
+import LoginForm from "@/components/login/LoginForm";
 import Image from "next/image";
 
 export default function Login() {
@@ -16,20 +15,14 @@ export default function Login() {
           <h2 className="text-4xl font-extralight text-center">
             Inicio de Sesión
           </h2>
-          <form className="flex flex-col justify-between h-full">
-            <fieldset className="flex flex-col gap-10">
-              <Input label={"RUT"} type="text" />
-              <Input label={"Contraseña"} type="password" />
-            </fieldset>
-            <Button>Iniciar Sesión</Button>
-          </form>
+          <LoginForm />
         </div>
         <Image
           src="/login_side_bg.png"
           alt="Logo de la Universidad de Chile"
           width={300}
           height={400}
-          className="object-cover h-full"
+          className="object-cover"
         />
       </div>
     </main>

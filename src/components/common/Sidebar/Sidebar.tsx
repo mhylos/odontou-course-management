@@ -1,27 +1,18 @@
 import Image from "next/image";
-import Link from "next/link";
 import SidebarItem from "./SidebarItem";
 
-const items = [
-  {
-    title: "Inicio",
-    href: "/",
-  },
-  {
-    title: "Usuarios",
-    href: "/users",
-  },
-  {
-    title: "Cursos",
-    href: "/courses",
-  },
-];
+interface SidebarProps {
+  routes: Array<{
+    title: string;
+    href: string;
+  }>;
+}
 
-export default function Sidebar() {
+export default function Sidebar({ routes }: SidebarProps) {
   return (
     <aside
       id="logo-sidebar"
-      className="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full sm:translate-x-0 border-r-2 border-solid border-primary"
+      className="fixed top-0 left-0 z-40 w-72 h-full border-r-2 border-solid border-primary grid grid-rows-[200px_1fr]"
       aria-label="Sidebar"
     >
       <div className="bg-primary p-5">
@@ -33,19 +24,19 @@ export default function Sidebar() {
           className="object-scale-down"
         />
       </div>
-      <nav className="grid gap-1 justify-between">
-        {items.map((item) => (
+      <nav className="flex flex-col py-5 h-full px-5">
+        {routes.map((item) => (
           <SidebarItem
             key={item.title}
             title={item.title}
-            href={item}
+            href={item.href}
             className="border-b-2 border-solid border-primary"
           />
         ))}
         <SidebarItem
           title={"Cerrar Sesión"}
           href={"/logout"}
-          className="row-end-[-1]"
+          className="mt-auto border-t-2 border-solid border-primary"
         />
       </nav>
     </aside>
