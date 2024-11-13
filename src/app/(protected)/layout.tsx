@@ -1,13 +1,17 @@
 import { auth } from "@/auth";
 import Sidebar from "@/components/common/Sidebar/Sidebar";
 
+interface RootLayoutProps {
+  children: React.ReactNode;
+  content: React.ReactNode;
+  modal: React.ReactNode;
+}
+
 export default async function RootLayout({
   children,
+  content,
   modal,
-}: Readonly<{
-  children: React.ReactNode;
-  modal: React.ReactNode;
-}>) {
+}: RootLayoutProps) {
   const session = await auth();
 
   if (!session) {
@@ -15,7 +19,7 @@ export default async function RootLayout({
   }
 
   return (
-    <>
+    <div className="grid grid-cols-[20rem_1fr] h-screen">
       <Sidebar
         routes={[
           {
@@ -29,7 +33,7 @@ export default async function RootLayout({
         ]}
       />
       {modal}
-      <main className="p-5">{children}</main>
-    </>
+      {content}
+    </div>
   );
 }
