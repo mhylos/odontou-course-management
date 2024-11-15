@@ -11,10 +11,11 @@ const config: Config = {
     extend: {
       colors: {
         primary: "#004C93",
-        secondary: "#FFD700",
+        secondary: "#0078B6",
       },
     },
   },
   plugins: [addDynamicIconSelectors()],
+  
 };
 export default config;

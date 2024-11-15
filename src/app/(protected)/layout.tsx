@@ -28,7 +28,9 @@ export default async function RootLayout({ children, modal }: RootLayoutProps) {
         ]}
       />
       {modal}
-      <main className="p-5 grid grid-rows-[10rem_1fr] gap-2">{children}</main>
+      <main className="p-5 grid grid-rows-[10rem_1fr] gap-2 h-screen">
+        {children}
+      </main>
     </div>
   );
 }

@@ -24,8 +24,10 @@ export default function Courses() {
         </div>
         <Button>Crear curso</Button>
       </div>
-      <div className="grid">
-        <CoursePreview />
+      <div className="grid grid-cols-3 gap-2 h-full overflow-y-auto pe-3">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <CoursePreview key={index} />
+        ))}
       </div>
     </>
   );
