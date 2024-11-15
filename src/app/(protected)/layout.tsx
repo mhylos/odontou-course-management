@@ -3,15 +3,10 @@ import Sidebar from "@/components/common/Sidebar/Sidebar";
 
 interface RootLayoutProps {
   children: React.ReactNode;
-  content: React.ReactNode;
   modal: React.ReactNode;
 }
 
-export default async function RootLayout({
-  children,
-  content,
-  modal,
-}: RootLayoutProps) {
+export default async function RootLayout({ children, modal }: RootLayoutProps) {
   const session = await auth();
 
   if (!session) {
@@ -33,7 +28,7 @@ export default async function RootLayout({
         ]}
       />
       {modal}
-      {content}
+      <main className="p-5 grid grid-rows-[10rem_1fr] gap-2">{children}</main>
     </div>
   );
 }
