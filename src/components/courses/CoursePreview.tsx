@@ -7,7 +7,7 @@ interface CoursePreviewProps {
 
 export default function CoursePreview({}: CoursePreviewProps) {
   return (
-    <div className="bg-white shadow-lg rounded-lg p-5 grid grid-rows-[2fr_1fr_1fr_1fr_2fr] gap-1 hover:scale-105 transition-transform h-96 ">
+    <div className="bg-white shadow-lg rounded-lg p-5 grid grid-rows-[2fr_1fr_1fr_1fr_2fr] gap-1 hover:scale-[101%] transition-transform h-96 ">
       <h2 className="text-2xl font-medium line-clamp-2">Title</h2>
       <div className="flex flex-col">
         <span>Modalidad</span>
@@ -23,8 +23,14 @@ export default function CoursePreview({}: CoursePreviewProps) {
       </div>
       <div className="self-end grid grid-cols-[1fr_5rem] gap-2">
         <div className="flex gap-1 justify-items-center">
-          <span className="text-xl">Valor arancel: </span>
-          <div className="p-3 text-2xl border-b-2 text-nowrap">$ 1.000.000</div>
+          <span className="text-xl">
+            Valor
+            <br />
+            arancel:
+          </span>
+          <div className="p-3 text-2xl border-b-2 text-nowrap flex-1">
+            $ 1.000.000
+          </div>
         </div>
         <Button>
           <span className="icon-[icon-park-outline--preview-open] text-white text-2xl" />

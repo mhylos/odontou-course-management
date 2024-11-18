@@ -2,7 +2,7 @@ import { FieldError } from "react-hook-form";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  errors: FieldError | undefined;
+  errors?: FieldError;
 }
 
 export default function Input(props: InputProps) {

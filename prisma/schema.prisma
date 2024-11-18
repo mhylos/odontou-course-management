@@ -9,30 +9,133 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL")
+  // provider = "postgresql"
+  // url      = env("POSTGRES_PRISMA_URL")
+    provider = "sqlite"
+    url      = "file:./dev.db"
+}
+
+model Course {
+  id            Int              @id @default(autoincrement())
+  enroll_value Int 
+  direct_hours  Int
+  indirect_hours Int
+  inperson_hours Int
+  online_hours  Int
+  name          String
+  objective     String
+  additional_comments String
+  date_from     DateTime
+  date_to       DateTime
+  hour_value    Int
+
+  department_fk  Int
+  program_fk    Int
+  
+  program    Program       @relation(fields: [program_fk], references: [id])
+  department    Department       @relation(fields: [department_fk], references: [id])
+  
+  expenses      Expenses[]
+  enrolled      Enrolled[]
+  manages       Manages[]
+}
+
+model Student {
+  rut           Int           @id
+  genre         String
+  name          String
+  email         String
+
+  enrolled      Enrolled[]
+}
+
+model Enrolled {
+  student_fk           Int
+  course_fk     Int
+  paid         Boolean
+  payment_type String
+  discount     Int
+  ticket_num  Int
+  payment_date DateTime
+
+  @@id([student_fk, course_fk])
+
+  student       Student         @relation(fields: [student_fk], references: [rut])
+  course        Course          @relation(fields: [course_fk], references: [id])
+}
+
+model Expenses {
+  course_fk     Int
+  name          String          
+  unit_value    Int
+  quantity      Int
+
+  @@id(name: "expenses_id", [name, course_fk])
+
+  course        Course          @relation(fields: [course_fk], references: [id])
+}
+
+model Program {
+  id            Int              @id @default(autoincrement())
+  name          String
+  courses       Course[]
+}
+
+model Department {
+  id            Int              @id @default(autoincrement())
+  name          String
+  courses       Course[]
+}
+
+model Manages {
+  academic_fk          Int
+  course_fk            Int
+  dedicated_hours Int
+  contract_hours  Int
+  hierarchy_type  String
+  percentage      Int
+  paid      Int
+
+
+  @@id([academic_fk, course_fk])
+
+  academic       Academic         @relation(fields: [academic_fk], references: [user_fk])
+  course        Course          @relation(fields: [course_fk], references: [id])
 }
 
 model Academic {
-  rut           String           @id
+  user_fk           Int           @id
   department    String
-  user          User             @relation(fields: [rut], references: [rut])
+  isFOUCH       Boolean 
+
+  user          User             @relation(fields: [user_fk], references: [rut])
+
+  manages      Manages[]
+}
+
+model Administrator {
+  user_fk           Int           @id
+
+  user          User             @relation(fields: [user_fk], references: [rut], onDelete: Cascade)
 }
 
 model User {
-  rut           String           @id
+  rut           Int           @id
   password      String
   name          String?
   email         String?          @unique
-  isFOUCH       Boolean          
+
   accounts      Account[]
+  academic    Academic?
+  administrator Administrator? 
+
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
  
 model Account {
-  userRut            String
+  user_fk            Int
   type              String
   provider          String
   providerAccountId String
@@ -42,12 +145,12 @@ model Account {
   token_type        String?
   scope             String?
   id_token          String?
-  session_state     String?
+  session_state     String?  
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
  
-  user User @relation(fields: [userRut], references: [rut], onDelete: Cascade)
+  user User @relation(fields: [user_fk], references: [rut], onDelete: Cascade)
  
   @@id([provider, providerAccountId])
 }

@@ -1,7 +1,7 @@
-import LoginForm from "@/components/login/LoginForm";
+import RegisterAdminForm from "@/components/common/start/registerAdminForm";
 import Image from "next/image";
 
-export default function Login() {
+export default function Start() {
   return (
     <main className="flex flex-col justify-center items-center w-full h-full">
       <Image
@@ -11,19 +11,12 @@ export default function Login() {
         height={100}
       />
       <div className="border-2 rounded border-solid border-primary flex overflow-hidden">
-        <div className="p-5 flex flex-col flex-1 gap-10 h-full w-80">
+        <div className="p-5 flex flex-col flex-1 gap-10 h-full w-[70%]">
           <h2 className="text-4xl font-extralight text-center">
-            Inicio de Sesión
+            Creación del usuario administrador
           </h2>
-          <LoginForm />
+          <RegisterAdminForm />
         </div>
-        <Image
-          src="/login_side_bg.png"
-          alt="Logo de la Universidad de Chile"
-          width={300}
-          height={400}
-          className="object-cover"
-        />
       </div>
     </main>
   );

@@ -4,19 +4,19 @@ import { useEffect } from "react";
 import { logoutAction } from "@/app/actions/auth-actions";
 
 export default function Logout() {
-  // const handleLogout = async () => {
-  //   try {
-  //     await logoutAction();
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
+  const handleLogout = async () => {
+    try {
+      await logoutAction();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     handleLogout();
-  //   }, 1000);
-  // }, []);
+  useEffect(() => {
+    setTimeout(() => {
+      handleLogout();
+    }, 1000);
+  }, []);
 
   return (
     <div className="absolute left-0 top-0 w-screen h-screen z-50">

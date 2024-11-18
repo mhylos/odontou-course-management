@@ -11,16 +11,21 @@ export default function Courses() {
         <TitlePage className="col-span-2 text-ellipsis overflow-hidden">
           Cursos
         </TitlePage>
-        <div className="flex gap-2 pe-2">
+        <div className="grid grid-cols-[2fr_1fr] gap-2 pe-2">
           <SearchInput
             label={"Buscar por nombre"}
             value={""}
-            className="flex-1"
-            onChange={function (value: string): void {
+            onChange={function (): void {
               throw new Error("Function not implemented.");
             }}
           />
-          <Dropdown />
+          <Dropdown
+            label="Filtrar pagos"
+            options={[
+              { value: 1, name: "Pagados" },
+              { value: 2, name: "Pendientes" },
+            ]}
+          />
         </div>
         <Button>Crear curso</Button>
       </div>

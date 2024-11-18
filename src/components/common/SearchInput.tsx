@@ -1,26 +1,23 @@
-interface SearchInputProps {
+interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  value: string;
-  onChange: (value: string) => void;
   className?: string;
 }
 
 export default function SearchInput({
   label,
-  value,
-  onChange,
+  id,
   className,
 }: SearchInputProps) {
   return (
     <fieldset className={className}>
-      <label htmlFor="default-search" className="mb-2 text-md text-gray-900 ">
+      <label htmlFor={id} className="mb-2 text-md text-gray-900 ">
         {label}
       </label>
       <div className="relative">
         <input
           type="search"
-          id="default-search"
-          className="block w-full p-4 ps-5 text-sm text-gray-900 border border-gray-300 rounded bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+          id={id}
+          className="block outline-none w-full p-4 ps-5 text-sm text-gray-900 border border-gray-300 rounded bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
         />
         <button
           type="submit"

@@ -1,3 +1,5 @@
+import TitlePage from "@/components/common/TitlePage";
+
 export default function Home() {
-  return <div className="">Inicio</div>;
+  return <TitlePage>Panel de gestión de pagos y cobros</TitlePage>;
 }

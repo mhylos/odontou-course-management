@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, Form, useForm } from "react-hook-form";
-import { LoginSchema, loginSchema } from "@/lib/zod";
+import { loginSchemaType, loginSchema } from "@/lib/zod";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
 import { runFormatter } from "@/lib/utils";
@@ -10,15 +10,13 @@ import { loginAction } from "@/app/actions/auth-actions";
 import { toast } from "react-toastify";
 
 export default function LoginForm() {
-  const { control } = useForm<LoginSchema>({
+  const { control } = useForm<loginSchemaType>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginSchema) => {
+  const onSubmit = async (data: loginSchemaType) => {
     try {
       const response = await loginAction(data);
-      console.log(response);
-
       toast(response.message, { type: response.success ? "success" : "error" });
     } catch (error) {
       console.error(error);
@@ -27,7 +25,7 @@ export default function LoginForm() {
 
   return (
     <Form
-      className="flex flex-col justify-between h-full w-80"
+      className="flex flex-col justify-between h-full"
       control={control}
       onSubmit={({ data }) => onSubmit(data)}
     >

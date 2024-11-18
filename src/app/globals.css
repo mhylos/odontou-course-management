@@ -2,19 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
+html,
+body {
   width: 100vw;
   height: 100vh;
 }
 
+::-webkit-scrollbar {
+  width: 16px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background-color: #e7e7e7;
+  border: 1px solid #cacaca;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  background-color: #004c93;
+}
+
 @layer base {
   @font-face {
-    font-family: 'Inter';
+    font-family: "Inter";
     font-style: normal;
     font-display: swap;
-    src: url(/fonts/Inter-VariableFont_opsz,wght) format('ttf');
+    src: url(/fonts/Inter-VariableFont_opsz,wght) format("ttf");
   }
-  
+
   html {
     font-family: "Inter", system-ui, sans-serif;
   }
@@ -26,8 +44,7 @@ html, body {
   }
 }
 
-
 :root {
-  --toastify-color-success: #004C93;
-  --toastify-font-family: 'Inter', sans-serif;
+  --toastify-color-success: #004c93;
+  --toastify-font-family: "Inter", sans-serif;
 }
