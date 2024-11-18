@@ -1,4 +1,5 @@
 import Button from "@/components/common/Button";
+import Link from "next/link";
 
 interface CoursePreviewProps {
   // course: Course;
@@ -23,7 +24,7 @@ export default function CoursePreview({}: CoursePreviewProps) {
       </div>
       <div className="self-end grid grid-cols-[1fr_5rem] gap-2">
         <div className="flex gap-1 justify-items-center">
-          <span className="text-xl">
+          <span className="2xl:text-xl">
             Valor
             <br />
             arancel:
@@ -32,9 +33,11 @@ export default function CoursePreview({}: CoursePreviewProps) {
             $ 1.000.000
           </div>
         </div>
-        <Button>
-          <span className="icon-[icon-park-outline--preview-open] text-white text-2xl" />
-        </Button>
+        <Link href={"/courses/1"}>
+          <Button>
+            <span className="icon-[icon-park-outline--preview-open] text-white text-2xl" />
+          </Button>
+        </Link>
       </div>
     </div>
   );
