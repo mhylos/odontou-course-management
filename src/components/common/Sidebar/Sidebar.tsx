@@ -16,7 +16,10 @@ const SIDEBAR_GAP = 10; // sidebar item gap
 
 export default function Sidebar({ routes }: SidebarProps) {
   const pathname = usePathname();
-  const activeIndex = routes.findIndex((item) => item.href === pathname);
+  const currentSectionPath = `/${pathname.split("/")[1]}`;
+  const activeIndex = routes.findIndex(
+    (item) => item.href === currentSectionPath
+  );
 
   return (
     <aside
@@ -53,7 +56,7 @@ export default function Sidebar({ routes }: SidebarProps) {
                 key={item.title}
                 title={item.title}
                 href={item.href}
-                isActive={pathname === item.href}
+                isActive={currentSectionPath === item.href}
                 height={ITEM_HEIGHT}
                 className="border-b-2 border-solid border-primary rounded-md"
               />
@@ -63,7 +66,7 @@ export default function Sidebar({ routes }: SidebarProps) {
             <SidebarItem
               title={"Cerrar Sesión"}
               href={"/logout"}
-              isActive={pathname === "/logout"}
+              isActive={currentSectionPath === "/logout"}
               height={ITEM_HEIGHT}
             />
           </div>
