@@ -1,6 +1,7 @@
 import ItemInput from "@/components/courses/[id]/ItemInput";
 import Section from "@/components/courses/[id]/Section";
 import SectionItem from "@/components/courses/[id]/SectionItem";
+import { convertToMoney } from "@/lib/utils";
 
 const courseInfo = {
   responsables: {
@@ -148,7 +149,7 @@ export default function CourseInfo() {
         <SectionItem title={"Valor del arancel"}>
           <ItemInput
             isEditing={false}
-            value={`$ ${courseInfo.datosGenerales.valorArancel.toString()}`}
+            value={convertToMoney(courseInfo.datosGenerales.valorArancel)}
           />
         </SectionItem>
       </Section>

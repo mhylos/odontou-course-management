@@ -8,8 +8,10 @@ import Input from "@/components/common/Input";
 import { runFormatter } from "@/lib/utils";
 import { loginAction } from "@/app/actions/auth-actions";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
+  const router = useRouter();
   const { control } = useForm<loginSchemaType>({
     resolver: zodResolver(loginSchema),
   });
@@ -18,6 +20,7 @@ export default function LoginForm() {
     try {
       const response = await loginAction(data);
       toast(response.message, { type: response.success ? "success" : "error" });
+      router.push("/");
     } catch (error) {
       console.error(error);
     }

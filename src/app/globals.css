@@ -9,6 +9,7 @@ body {
 }
 
 ::-webkit-scrollbar {
+  margin-left: 5px;
   width: 16px;
 }
 

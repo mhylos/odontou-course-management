@@ -6,3 +6,10 @@ export function runFormatter(run: string) {
     "$1.$2.$3-$4"
   );
 }
+
+export function convertToMoney(value: number) {
+  return new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+  }).format(value);
+}

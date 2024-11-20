@@ -22,9 +22,9 @@ export default function CourseLayout({
         Curso Ultrasonografía Maxilofacial: Fundamentos Imagenológicos y
         Anatómicos
       </TitlePage>
-      <div className="flex flex-col">
+      <div className="flex flex-col overflow-auto gap-2">
         <NavigationBar routes={routes} />
-        <div className="py-5 flex-1">{children}</div>
+        <div className="py-5 flex-1 overflow-auto">{children}</div>
       </div>
     </>
   );
