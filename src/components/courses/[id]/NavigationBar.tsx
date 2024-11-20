@@ -21,7 +21,7 @@ export default function NavigationBar({ routes }: NavigationBarProps) {
     route === currentRoute ? ACTIVE_CLASS : INACTIVE_CLASS;
 
   return (
-    <div className="w-full border-b-4 border-primary flex justify-between">
+    <div className="w-full h-max border-b-4 border-primary flex justify-between">
       {routes.map((item) => (
         <Link
           href={item.href}
