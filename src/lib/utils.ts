@@ -13,3 +13,7 @@ export function convertToMoney(value: number) {
     currency: "CLP",
   }).format(value);
 }
+
+export function dublicateItems<T> (arr: Array<T>, numberOfRepetitions: number) {
+  return arr.flatMap((i) => Array.from({ length: numberOfRepetitions }).fill(i));
+}
