@@ -30,7 +30,7 @@ function Row({ row, currentRow }: RowProps) {
 
 export default function Table({ headers, rows }: TableProps) {
   return (
-    <div className="relative overflow-x-auto shadow-md">
+    <div className="relative overflow-auto shadow-md">
       <table className="w-full text-sm text-left rtl:text-right">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50">
           <tr>

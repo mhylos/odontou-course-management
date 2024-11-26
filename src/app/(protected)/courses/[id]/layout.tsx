@@ -24,7 +24,9 @@ export default function CourseLayout({
       </TitlePage>
       <div className="flex flex-col overflow-auto gap-2">
         <NavigationBar routes={routes} />
-        <div className="py-5 flex-1 overflow-auto">{children}</div>
+        <div className="flex-1 flex w-full h-full overflow-auto">
+          {children}
+        </div>
       </div>
     </>
   );

@@ -15,9 +15,9 @@ let students = [
   },
 ];
 
-export default function CourseStudents() {
-  students = dublicateItems(students, 15);
+students = dublicateItems(students, 10);
 
+export default function CourseStudents() {
   const ViewDetails = () => (
     <Button>
       <span className="icon-[mdi--account-details]"></span>
@@ -25,8 +25,15 @@ export default function CourseStudents() {
   );
 
   return (
-    <div className="flex flex-col gap-2">
-      <SearchInput label={"Buscar"} />
+    <div className="flex flex-col gap-2 w-full h-full">
+      <div className="flex gap-2">
+        <SearchInput label={"Buscar"} className="flex-1" />
+        <Button className="max-w-max aspect-square group">
+          <span className="icon-[ph--student] text-2xl group-hover:icon-[ph--student-fill]" />
+
+          <span className="icon-[ph--plus] text-xs align-top group-hover:icon-[ph--plus-bold]" />
+        </Button>
+      </div>
       <Table
         headers={[
           "Nombre",

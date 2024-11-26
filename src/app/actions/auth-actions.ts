@@ -42,6 +42,7 @@ export async function createAdminAction(values: registerSchemaType) {
       redirectTo: "/",
     });
   } catch (error) {
+    console.error(error);
     return { success: false, message: "Error inesperado" };
   }
   redirect("/");
