@@ -10,25 +10,27 @@ interface NavigationBarProps {
   }>;
 }
 
-const ACTIVE_CLASS = "bg-primary border-primary text-white text-xl";
-const INACTIVE_CLASS = "border-gray-100";
+const ACTIVE_CLASS =
+  "bg-primary border-primary text-white text-xl pointer-events-none";
+const INACTIVE_CLASS = "border-gray-100 text-sm h-max";
 
 export default function NavigationBar({ routes }: NavigationBarProps) {
   const pathname = usePathname();
   const currentRoute = routes.find((route) => route.href === pathname);
 
-  const getClassName = (route: { href: string }) =>
-    route === currentRoute ? ACTIVE_CLASS : INACTIVE_CLASS;
-
   return (
-    <div className="w-full h-max border-b-4 border-primary flex justify-between">
+    <div className="w-full h-max border-b-4 border-primary flex justify-between items-end">
       {routes.map((item) => (
         <Link
           href={item.href}
           key={item.title}
-          className={
-            `border-solid py-2 px-3 border-x-2 border-t-2 rounded-t transition-all text-center grid place-items-center ` +
-            getClassName(item)
+          className={`border-solid py-2 px-3 border-x-2 border-t-2 rounded-t transition-all text-center grid place-items-center 
+            ${item === currentRoute ? ACTIVE_CLASS : INACTIVE_CLASS}`}
+          onMouseEnter={(e) =>
+            e.currentTarget.classList.add("text-base", "bg-gray-100")
+          }
+          onMouseLeave={(e) =>
+            e.currentTarget.classList.remove("text-base", "bg-gray-100")
           }
         >
           {item.title}

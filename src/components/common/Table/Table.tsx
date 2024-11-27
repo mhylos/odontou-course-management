@@ -46,7 +46,11 @@ export default function Table({ headers, rows }: TableProps) {
         </thead>
         <tbody>
           {rows.map((row, index) => (
-            <Row row={row} currentRow={index + 1} key={row.toString()} />
+            <Row
+              row={row}
+              currentRow={index + 1}
+              key={row.toString() + index}
+            />
           ))}
         </tbody>
       </table>
