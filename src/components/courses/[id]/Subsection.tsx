@@ -1,16 +1,30 @@
+import Button from "@/components/common/Button";
 import Subtitle from "@/components/common/Subtitle";
 
-interface TableDropdownProps {
+interface SubsectionProps {
+  title: string;
   isOpen: boolean;
+  isExpandable: boolean;
   setIsOpen: () => void;
   children: React.ReactNode;
 }
 
-export default function TableDropdown({
+export default function Subsection({
+  title,
   isOpen,
+  isExpandable,
   setIsOpen,
   children,
-}: TableDropdownProps) {
+}: SubsectionProps) {
+  if (!isExpandable) {
+    return (
+      <div className="bg-secondary rounded-t">
+        <Subtitle>{title}</Subtitle>
+        {children}
+      </div>
+    );
+  }
+
   return (
     <>
       <div
@@ -19,7 +33,7 @@ export default function TableDropdown({
         }`}
         onClick={setIsOpen}
       >
-        <Subtitle>Nómina académicos FOUCH</Subtitle>
+        <Subtitle>{title}</Subtitle>
         <span
           className={`icon-[ci--chevron-down] text-white text-xl transition-transform ${
             isOpen ? "rotate-180" : "rotate-0"

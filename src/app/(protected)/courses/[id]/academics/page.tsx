@@ -1,8 +1,7 @@
 "use client";
 
-import Subtitle from "@/components/common/Subtitle";
 import Table from "@/components/common/Table/Table";
-import TableDropdown from "@/components/courses/[id]/ExpandableSection";
+import TableDropdown from "@/components/courses/[id]/Subsection";
 import { convertToMoney, dublicateItems } from "@/lib/utils";
 import { useState } from "react";
 
@@ -26,12 +25,13 @@ const invitedAcademics = [];
 export default function CourseAcademics() {
   const [academicMenuOpen, setAcademicMenuOpen] = useState(true);
   const [invitedMenuOpen, setInvitedMenuOpen] = useState(false);
-  console.log(academicsFouch);
 
   return (
     <div className="flex flex-col gap-2 w-full h-full">
       <TableDropdown
+        title="Académicos Fouch"
         isOpen={academicMenuOpen}
+        isExpandable={true}
         setIsOpen={() => setAcademicMenuOpen(!academicMenuOpen)}
       >
         <Table
@@ -56,7 +56,9 @@ export default function CourseAcademics() {
         />
       </TableDropdown>
       <TableDropdown
+        title="Académicos Invitados"
         isOpen={invitedMenuOpen}
+        isExpandable={true}
         setIsOpen={() => setInvitedMenuOpen(!invitedMenuOpen)}
       >
         <Table

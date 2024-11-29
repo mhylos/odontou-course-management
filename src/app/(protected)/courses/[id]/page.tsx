@@ -31,7 +31,7 @@ const courseInfo = {
 
 export default function CourseInfo() {
   return (
-    <div className="grid grid-cols-[1fr_2fr] gap-2 h-full">
+    <div className="grid grid-cols-[1fr_2fr] gap-2 h-full w-full">
       <div className="flex flex-col gap-10 justify-between">
         <Section title={"Responsables"} className="flex flex-col gap-2">
           <SectionItem title={"Departamento Ejecutor"}>

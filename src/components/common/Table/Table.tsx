@@ -30,9 +30,9 @@ function Row({ row, currentRow }: RowProps) {
 
 export default function Table({ headers, rows }: TableProps) {
   return (
-    <div className="relative overflow-auto shadow-md">
+    <div className="relative overflow-auto shadow-md rounded">
       <table className="w-full text-sm text-left rtl:text-right">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-100">
           <tr>
             <th scope="col" className="px-6 py-3">
               N°
@@ -44,7 +44,7 @@ export default function Table({ headers, rows }: TableProps) {
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody className="overflow-auto">
           {rows.map((row, index) => (
             <Row
               row={row}
