@@ -1,6 +1,7 @@
 interface TableProps {
   headers: string[];
   rows: Cell[][];
+  className?: string;
 }
 
 type Cell = string | number | JSX.Element;
@@ -28,9 +29,11 @@ function Row({ row, currentRow }: RowProps) {
   );
 }
 
-export default function Table({ headers, rows }: TableProps) {
+export default function Table({ headers, rows, className = "" }: TableProps) {
   return (
-    <div className="relative overflow-auto shadow-md rounded">
+    <div
+      className={`relative overflow-auto shadow-md rounded ${className}`.trimEnd()}
+    >
       <table className="w-full text-sm text-left rtl:text-right">
         <thead className="text-xs text-gray-700 uppercase bg-gray-100">
           <tr>

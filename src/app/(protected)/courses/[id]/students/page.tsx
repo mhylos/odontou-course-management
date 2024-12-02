@@ -20,8 +20,20 @@ students = dublicateItems(students, 10);
 export default function CourseStudents() {
   const ViewDetails = () => (
     <Button>
-      <span className="icon-[mdi--account-details]"></span>
+      <span className="icon-[mdi--account-details] text-xl"></span>
     </Button>
+  );
+
+  const EditBtn = () => <Button buttonType="edit" />;
+
+  const removeBtn = () => <Button buttonType="delete" />;
+
+  const Actions = () => (
+    <div className="flex gap-2">
+      {ViewDetails()}
+      {EditBtn()}
+      {removeBtn()}
+    </div>
   );
 
   return (
@@ -43,7 +55,7 @@ export default function CourseStudents() {
           "Fecha pago",
           "Dcto.",
           "Total",
-          "Detalles",
+          "Acciones",
         ]}
         rows={students.map((student) => [
           student.name,
@@ -53,7 +65,7 @@ export default function CourseStudents() {
           student.fechapago,
           `${student.dcto} %`,
           convertToMoney(student.total),
-          ViewDetails(),
+          Actions(),
         ])}
       />
     </div>

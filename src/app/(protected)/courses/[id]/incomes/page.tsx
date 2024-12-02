@@ -17,17 +17,9 @@ const incomes = [
 ];
 
 export default function CourseIncomes() {
-  const EditBtn = () => (
-    <Button>
-      <span className="icon-[ph--pencil]"></span>
-    </Button>
-  );
+  const EditBtn = () => <Button buttonType="edit" />;
 
-  const removeBtn = () => (
-    <Button className="bg-red-500">
-      <span className="icon-[ph--trash]"></span>
-    </Button>
-  );
+  const removeBtn = () => <Button buttonType="delete" />;
 
   const Actions = () => (
     <div className="flex gap-2">
@@ -40,6 +32,7 @@ export default function CourseIncomes() {
     <div className="flex flex-col gap-2 w-full h-full">
       <Table
         headers={["Tipo", "Valor", "Comentario", "Acciones"]}
+        className="flex-1"
         rows={incomes.map(({ type, value, comment }) => [
           type,
           convertToMoney(value),
