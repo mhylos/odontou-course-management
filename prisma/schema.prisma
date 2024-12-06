@@ -3,154 +3,144 @@
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// prettier-ignore
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi"]
 }
 
 datasource db {
   // provider = "postgresql"
   // url      = env("POSTGRES_PRISMA_URL")
-    provider = "sqlite"
-    url      = "file:./dev.db"
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Course {
-  id            Int              @id @default(autoincrement())
-  enroll_value Int 
-  direct_hours  Int
-  indirect_hours Int
-  inperson_hours Int
-  online_hours  Int
-  name          String
-  objective     String
+  id                  Int      @id @default(autoincrement())
+  enroll_value        Int
+  direct_hours        Float
+  indirect_hours      Float
+  inperson_hours      Float
+  online_hours        Float
+  name                String
+  objective           String
   additional_comments String
-  date_from     DateTime
-  date_to       DateTime
-  hour_value    Int
+  date_from           DateTime
+  date_to             DateTime
+  hour_value          Int
 
-  department_fk  Int
-  program_fk    Int
-  
-  program    Program       @relation(fields: [program_fk], references: [id])
-  department    Department       @relation(fields: [department_fk], references: [id])
-  
-  expenses      Expenses[]
-  enrolled      Enrolled[]
-  manages       Manages[]
+  department_fk      Int
+  program_fk         Int
+  course_director_fk Int
+  coordinator_fk     Int
+
+  program         Program    @relation(fields: [program_fk], references: [id])
+  department      Department @relation(fields: [department_fk], references: [id])
+  course_director User       @relation(fields: [course_director_fk], references: [rut], name: "course_director")
+  coordinator     User       @relation(fields: [coordinator_fk], references: [rut], name: "coordinator")
+
+  expenses Expenses[]
+  enrolled Enrolled[]
+  manages  Manages[]
 }
 
 model Student {
-  rut           Int           @id
-  genre         String
-  name          String
-  email         String
+  rut   Int    @id
+  genre String
+  name  String
+  email String
 
-  enrolled      Enrolled[]
+  enrolled Enrolled[]
 }
 
 model Enrolled {
-  student_fk           Int
-  course_fk     Int
+  student_fk   Int
+  course_fk    Int
   paid         Boolean
   payment_type String
   discount     Int
-  ticket_num  Int
+  ticket_num   Int
   payment_date DateTime
 
-  @@id([student_fk, course_fk])
+  student Student @relation(fields: [student_fk], references: [rut])
+  course  Course  @relation(fields: [course_fk], references: [id])
 
-  student       Student         @relation(fields: [student_fk], references: [rut])
-  course        Course          @relation(fields: [course_fk], references: [id])
+  @@id([student_fk, course_fk])
 }
 
 model Expenses {
-  course_fk     Int
-  name          String          
-  unit_value    Int
-  quantity      Int
+  course_fk  Int
+  name       String
+  unit_value Int
+  quantity   Int
+
+  course Course @relation(fields: [course_fk], references: [id])
 
   @@id(name: "expenses_id", [name, course_fk])
-
-  course        Course          @relation(fields: [course_fk], references: [id])
 }
 
 model Program {
-  id            Int              @id @default(autoincrement())
-  name          String
-  courses       Course[]
+  id      Int      @id @default(autoincrement())
+  name    String
+  courses Course[]
 }
 
 model Department {
-  id            Int              @id @default(autoincrement())
-  name          String
-  courses       Course[]
+  id          Int    @id @default(autoincrement())
+  name        String
+  director_fk Int?
+
+  director User? @relation(fields: [director_fk], references: [rut])
+
+  courses  Course[]
+  academic Academic[]
 }
 
 model Manages {
-  academic_fk          Int
-  course_fk            Int
+  academic_fk     Int
+  course_fk       Int
   dedicated_hours Int
   contract_hours  Int
   hierarchy_type  String
   percentage      Int
-  paid      Int
+  paid            Int
 
+  academic Academic @relation(fields: [academic_fk], references: [user_fk])
+  course   Course   @relation(fields: [course_fk], references: [id])
 
   @@id([academic_fk, course_fk])
-
-  academic       Academic         @relation(fields: [academic_fk], references: [user_fk])
-  course        Course          @relation(fields: [course_fk], references: [id])
 }
 
 model Academic {
-  user_fk           Int           @id
-  department    String
-  isFOUCH       Boolean 
+  user_fk       Int     @id
+  department_fk Int
+  isFOUCH       Boolean
 
-  user          User             @relation(fields: [user_fk], references: [rut])
+  department Department @relation(fields: [department_fk], references: [id])
+  user       User       @relation(fields: [user_fk], references: [rut])
 
-  manages      Manages[]
+  manages Manages[]
 }
 
 model Administrator {
-  user_fk           Int           @id
+  user_fk Int @id
 
-  user          User             @relation(fields: [user_fk], references: [rut], onDelete: Cascade)
+  user User @relation(fields: [user_fk], references: [rut], onDelete: Cascade)
 }
 
 model User {
-  rut           Int           @id
-  password      String
-  name          String?
-  email         String?          @unique
+  rut      Int     @id
+  password String
+  name     String?
+  email    String? @unique
 
-  accounts      Account[]
-  academic    Academic?
-  administrator Administrator? 
+  academic        Academic?
+  administrator   Administrator?
+  director        Department[]
+  course_director Course[]       @relation(name: "course_director")
+  coordinator     Course[]       @relation(name: "coordinator")
 
- 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
- 
-model Account {
-  user_fk            Int
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?  
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
-  user User @relation(fields: [user_fk], references: [rut], onDelete: Cascade)
- 
-  @@id([provider, providerAccountId])
 }

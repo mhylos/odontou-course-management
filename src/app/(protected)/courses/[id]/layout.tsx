@@ -1,33 +1,45 @@
-import TitlePage from "@/components/common/TitlePage";
 import NavigationBar from "@/components/courses/[id]/NavigationBar";
+import { CourseProvider } from "@/app/context/courseProvider";
+import CourseHeader from "@/components/courses/[id]/CourseHeader";
+import { getCourseById } from "@/services/courseServices";
 
-const routes = [
-  { title: "Antecedentes Generales", href: "/courses/1" },
-  { title: "Estudiantes", href: "/courses/1/students" },
-  { title: "Académicos", href: "/courses/1/academics" },
-  { title: "Ingresos Aranceles", href: "/courses/1/incomes" },
-  { title: "Gastos", href: "/courses/1/expenses" },
-  { title: "Distribución", href: "/courses/1/distribution" },
-  { title: "Pago de asignaciones y honorarios", href: "/courses/1/payments" },
-];
-
-export default function CourseLayout({
+export default async function CourseLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ id: string }>;
 }) {
+  const id = (await params).id;
+
+  const routes = [
+    { title: "Antecedentes Generales", href: `/courses/${id}` },
+    { title: "Estudiantes", href: `/courses/${id}/students` },
+    { title: "Académicos", href: `/courses/${id}/academics` },
+    { title: "Ingresos Aranceles", href: `/courses/${id}/incomes` },
+    { title: "Gastos", href: `/courses/${id}/expenses` },
+    { title: "Distribución", href: `/courses/${id}/distribution` },
+    {
+      title: "Pago de asignaciones y honorarios",
+      href: `/courses/${id}/payments`,
+    },
+  ];
+
+  const course = await getCourseById(id);
+
+  if (!course) {
+    return <div>El curso no existe</div>;
+  }
+
   return (
-    <>
-      <TitlePage>
-        Curso Ultrasonografía Maxilofacial: Fundamentos Imagenológicos y
-        Anatómicos
-      </TitlePage>
+    <CourseProvider course={course}>
+      <CourseHeader />
       <div className="flex flex-col overflow-auto gap-2">
         <NavigationBar routes={routes} />
         <div className="flex-1 flex w-full h-full overflow-auto">
           {children}
         </div>
       </div>
-    </>
+    </CourseProvider>
   );
 }

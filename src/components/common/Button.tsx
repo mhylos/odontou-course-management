@@ -3,19 +3,19 @@ import { ButtonHTMLAttributes } from "react";
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
   children?: React.ReactNode;
-  buttonType?: "delete" | "edit" | "add";
+  buttonActionType?: "delete" | "edit" | "add";
 }
 
 export default function Button(props: ButtonProps) {
   let buttonTypeClassname = "";
   let buttonIcon = "";
-  switch (props.buttonType) {
+  switch (props.buttonActionType) {
     case "delete":
-      buttonTypeClassname = "bg-delete";
+      buttonTypeClassname = "bg-red-400";
       buttonIcon = "icon-[ph--trash]";
       break;
     case "edit":
-      buttonTypeClassname = "bg-edit";
+      buttonTypeClassname = "bg-yellow-500";
       buttonIcon = "icon-[ph--pencil]";
       break;
     case "add":
@@ -35,7 +35,7 @@ export default function Button(props: ButtonProps) {
         ` ${props.className} ${buttonTypeClassname}`
       }
     >
-      {props.buttonType && <span className={`${buttonIcon} text-xl`} />}
+      {props.buttonActionType && <span className={`${buttonIcon} text-xl`} />}
       {props.children}
     </button>
   );

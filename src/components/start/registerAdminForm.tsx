@@ -6,10 +6,12 @@ import { registerSchemaType, registerSchema } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Form, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
-import Button from "../Button";
-import Input from "../Input";
+import Input from "@/components/common/Input";
+import Button from "@/components/common/Button";
+import { useRouter } from "next/navigation";
 
 export default function RegisterAdminForm() {
+  const router = useRouter();
   const { control } = useForm<registerSchemaType>({
     resolver: zodResolver(registerSchema),
   });
@@ -20,6 +22,10 @@ export default function RegisterAdminForm() {
       toast(response?.message, {
         type: response?.success ? "success" : "error",
       });
+
+      if (response?.success) {
+        router.push("/");
+      }
     } catch (error) {
       console.error(error);
     }

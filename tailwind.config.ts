@@ -12,12 +12,9 @@ const config: Config = {
       colors: {
         primary: "#004C93",
         secondary: "#0078B6",
-        edit: "#d6a419",
-        delete: "#c55b70",
       },
     },
   },
   plugins: [addDynamicIconSelectors()],
-  
 };
 export default config;

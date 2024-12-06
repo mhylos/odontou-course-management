@@ -17,9 +17,9 @@ const incomes = [
 ];
 
 export default function CourseIncomes() {
-  const EditBtn = () => <Button buttonType="edit" />;
+  const EditBtn = () => <Button buttonActionType="edit" />;
 
-  const removeBtn = () => <Button buttonType="delete" />;
+  const removeBtn = () => <Button buttonActionType="delete" />;
 
   const Actions = () => (
     <div className="flex gap-2">

@@ -2,6 +2,8 @@ import Button from "@/components/common/Button";
 import SearchInput from "@/components/common/SearchInput";
 import Table from "@/components/common/Table/Table";
 import { convertToMoney, dublicateItems } from "@/lib/utils";
+import Link from "next/link";
+import { format } from "rutility";
 
 let students = [
   {
@@ -18,23 +20,19 @@ let students = [
 students = dublicateItems(students, 10);
 
 export default function CourseStudents() {
-  const ViewDetails = () => (
-    <Button>
-      <span className="icon-[mdi--account-details] text-xl"></span>
-    </Button>
+  const ViewDetails = (rut: number) => (
+    <Link
+      href={`students/${rut}`}
+      className="bg-secondary text-white grid place-items-center h-full aspect-square p-2 rounded"
+    >
+      <span className="icon-[mdi--account-details] text-xl" />
+    </Link>
   );
 
-  const EditBtn = () => <Button buttonType="edit" />;
-
-  const removeBtn = () => <Button buttonType="delete" />;
-
-  const Actions = () => (
-    <div className="flex gap-2">
-      {ViewDetails()}
-      {EditBtn()}
-      {removeBtn()}
-    </div>
-  );
+  const Actions = (rut: string) => {
+    const rutFormatted = parseInt(format.notDotDash(rut));
+    return <div className="flex gap-2">{ViewDetails(rutFormatted)}</div>;
+  };
 
   return (
     <div className="flex flex-col gap-2 w-full h-full">
@@ -65,7 +63,7 @@ export default function CourseStudents() {
           student.fechapago,
           `${student.dcto} %`,
           convertToMoney(student.total),
-          Actions(),
+          Actions(student.rut),
         ])}
       />
     </div>

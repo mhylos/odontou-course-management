@@ -2,13 +2,20 @@
 
 import { useEffect } from "react";
 import { logoutAction } from "@/app/actions/auth-actions";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function Logout() {
+  const router = useRouter();
   const handleLogout = async () => {
     try {
-      await logoutAction();
-    } catch (e) {
-      console.error(e);
+      const response = await logoutAction();
+      toast(response.message, { type: response.success ? "success" : "error" });
+      if (response.success) {
+        router.push("/login");
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 

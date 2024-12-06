@@ -1,62 +1,32 @@
+"use client";
+
 import ItemInput from "@/components/courses/[id]/ItemInput";
 import Section from "@/components/courses/[id]/Section";
 import SectionItem from "@/components/courses/[id]/SectionItem";
-import { convertToMoney } from "@/lib/utils";
-
-const courseInfo = {
-  responsables: {
-    departamentoEjecutor: "Dpto Patología y Medicina Oral",
-    directorDepartamento: "Iris Espinoza",
-    directorPrograma: "Sylvia Osorio",
-    coordinadorPrograma: "Andres Rosa",
-  },
-  totalHoras: {
-    directas: 16.6,
-    presenciales: 4,
-    noPresenciales: 16.6,
-    indirectas: 16.6,
-  },
-  datosGenerales: {
-    nombrePrograma:
-      "Curso Ultrasonografía Maxilofacial: Fundamentos Imagenológicos y Anatómicos",
-    objetivoPrograma:
-      "Entregar las bases teóricas de la física de la ultrasonografía y de la anatomía seccional y topográfica del territorio maxilofacial.",
-    comentariosRelevantes: "-",
-    tipoPrograma: "E-Learning",
-    inicio: "2021-08-22",
-    termino: "2021-08-22",
-    valorArancel: 1045000,
-  },
-};
+import { convertToMoney, formatDate } from "@/lib/utils";
+import { useCourse } from "@/app/context/courseProvider";
 
 export default function CourseInfo() {
+  const course = useCourse();
+
   return (
     <div className="grid grid-cols-[1fr_2fr] gap-2 h-full w-full">
       <div className="flex flex-col gap-10 justify-between">
         <Section title={"Responsables"} className="flex flex-col gap-2">
           <SectionItem title={"Departamento Ejecutor"}>
-            <ItemInput
-              isEditing={false}
-              value={courseInfo.responsables.departamentoEjecutor}
-            />
+            <ItemInput isEditing={false} value={course?.department.name} />
           </SectionItem>
           <SectionItem title={"Nombre del Director del Departamento"}>
             <ItemInput
               isEditing={false}
-              value={courseInfo.responsables.directorDepartamento}
+              value={course?.department.director?.name}
             />
           </SectionItem>
           <SectionItem title={"Nombre del Director del Programa"}>
-            <ItemInput
-              isEditing={false}
-              value={courseInfo.responsables.directorPrograma}
-            />
+            <ItemInput isEditing={false} value={course?.course_director.name} />
           </SectionItem>
           <SectionItem title={"Nombre del Coordinador del Programa"}>
-            <ItemInput
-              isEditing={false}
-              value={courseInfo.responsables.coordinadorPrograma}
-            />
+            <ItemInput isEditing={false} value={course?.coordinator.name} />
           </SectionItem>
         </Section>
         <Section
@@ -66,35 +36,35 @@ export default function CourseInfo() {
           <SectionItem title={"Directas"}>
             <ItemInput
               isEditing={false}
-              value={courseInfo.totalHoras.directas.toString()}
+              value={course?.direct_hours.toString()}
             />
           </SectionItem>
           <SectionItem title={"Presenciales"}>
             <ItemInput
               isEditing={false}
-              value={courseInfo.totalHoras.presenciales.toString()}
+              value={course?.inperson_hours.toString()}
             />
           </SectionItem>
           <SectionItem title={"No Presenciales"}>
             <ItemInput
               isEditing={false}
-              value={courseInfo.totalHoras.noPresenciales.toString()}
+              value={course?.online_hours.toString()}
             />
           </SectionItem>
           <SectionItem title={"Indirectas"}>
             <ItemInput
               isEditing={false}
-              value={courseInfo.totalHoras.indirectas.toString()}
+              value={course?.indirect_hours.toString()}
             />
           </SectionItem>
           <div className="col-span-2 text-right text-xl font-light">
             <span className="block">Total</span>
             <span className="text-2xl border-b-2 border-secondary">
               {(
-                courseInfo.totalHoras.directas +
-                courseInfo.totalHoras.presenciales +
-                courseInfo.totalHoras.noPresenciales +
-                courseInfo.totalHoras.indirectas
+                (course?.direct_hours ?? 0) +
+                (course?.inperson_hours ?? 0) +
+                (course?.online_hours ?? 0) +
+                (course?.indirect_hours ?? 0)
               ).toFixed(1)}
             </span>
           </div>
@@ -106,42 +76,35 @@ export default function CourseInfo() {
         className="row-span-2 flex flex-col gap-2"
       >
         <SectionItem title={"Nombre del programa"}>
-          <ItemInput
-            isEditing={false}
-            value={courseInfo.datosGenerales.nombrePrograma}
-          />
+          <ItemInput isEditing={false} value={course?.name} />
         </SectionItem>
         <SectionItem title={"Objetivo del programa"}>
-          <ItemInput
-            isEditing={false}
-            value={courseInfo.datosGenerales.objetivoPrograma}
-          />
+          <ItemInput isEditing={false} value={course?.objective} />
         </SectionItem>
         <SectionItem title={"Comentarios Relevantes"}>
           <ItemInput
             isEditing={false}
-            value={courseInfo.datosGenerales.comentariosRelevantes}
+            value={
+              course?.additional_comments ? course?.additional_comments : "-"
+            }
             className=""
           />
         </SectionItem>
         <SectionItem title={"Tipo de Programa"}>
-          <ItemInput
-            isEditing={false}
-            value={courseInfo.datosGenerales.tipoPrograma}
-          />
+          <ItemInput isEditing={false} value={course?.program.name} />
         </SectionItem>
 
         <div className="flex">
           <SectionItem title={"Inicio"}>
             <ItemInput
               isEditing={false}
-              value={courseInfo.datosGenerales.inicio}
+              value={formatDate(course?.date_from ?? "")}
             />
           </SectionItem>
           <SectionItem title={"Termino"}>
             <ItemInput
               isEditing={false}
-              value={courseInfo.datosGenerales.termino}
+              value={formatDate(course?.date_to ?? "")}
             />
           </SectionItem>
         </div>
@@ -149,7 +112,7 @@ export default function CourseInfo() {
         <SectionItem title={"Valor del arancel"}>
           <ItemInput
             isEditing={false}
-            value={convertToMoney(courseInfo.datosGenerales.valorArancel)}
+            value={convertToMoney(course?.enroll_value ?? 0)}
           />
         </SectionItem>
       </Section>

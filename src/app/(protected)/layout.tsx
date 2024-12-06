@@ -26,6 +26,14 @@ export default async function RootLayout({ children, modal }: RootLayoutProps) {
             title: "Cursos",
             href: "/courses",
           },
+          {
+            title: "Académicos",
+            href: "/academics",
+          },
+          {
+            title: "Estudiantes",
+            href: "/students",
+          },
         ]}
       />
       {modal}

@@ -6,7 +6,6 @@ import { AuthError } from "next-auth";
 import { isValidRut, format } from "rutility";
 import bcrypt from "bcryptjs";
 import db from "@/lib/prisma";
-import { redirect } from "next/navigation";
 
 export async function createAdminAction(values: registerSchemaType) {
   try {
@@ -39,13 +38,14 @@ export async function createAdminAction(values: registerSchemaType) {
     await signIn("credentials", {
       rut: data.rut,
       password: data.password,
-      redirectTo: "/",
+      redirect: false,
     });
+
+    return { success: true, message: "Administrador creado exitosamente" };
   } catch (error) {
     console.error(error);
     return { success: false, message: "Error inesperado" };
   }
-  redirect("/");
 }
 
 export async function loginAction(values: loginSchemaType) {
@@ -67,8 +67,13 @@ export async function loginAction(values: loginSchemaType) {
 
 export async function logoutAction() {
   try {
-    await signOut({ redirectTo: "/login" });
-  } catch (e) {
-    throw e;
+    await signOut({ redirect: false });
+
+    return { success: true, message: "Se ha cerrado sesión" };
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return { success: false, message: error.cause?.err?.message };
+    }
+    return { success: false, message: "Error inesperado" };
   }
 }

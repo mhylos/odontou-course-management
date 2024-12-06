@@ -1,17 +1,8 @@
-import prisma from "@/lib/prisma"
+import prisma from "@/lib/prisma";
 
-export const dynamic = 'force-static'
+export const dynamic = "force-static";
 
-type ProgramResponse = {
-    id: number
-    name: string
-}
-
-type ProgramRequest = {
-    name: string
-}
-
-export async function GET(request: Request){
-    const programs = prisma.program.findMany()
-    return programs
+export async function GET() {
+  const programs = await prisma.program.findMany();
+  return Response.json(programs);
 }

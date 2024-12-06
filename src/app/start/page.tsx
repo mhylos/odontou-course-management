@@ -1,4 +1,4 @@
-import RegisterAdminForm from "@/components/common/start/registerAdminForm";
+import RegisterAdminForm from "@/components/start/registerAdminForm";
 import Image from "next/image";
 
 export default function Start() {

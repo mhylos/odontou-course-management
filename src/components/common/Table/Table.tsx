@@ -2,6 +2,7 @@ interface TableProps {
   headers: string[];
   rows: Cell[][];
   className?: string;
+  isFetching?: boolean;
 }
 
 type Cell = string | number | JSX.Element;
@@ -9,16 +10,21 @@ type Cell = string | number | JSX.Element;
 interface RowProps {
   currentRow: number;
   row: Cell[];
+  isLoading?: boolean;
 }
 
-function Row({ row, currentRow }: RowProps) {
+function Row({ row, currentRow, isLoading = false }: RowProps) {
   return (
     <tr className="odd:bg-white even:bg-gray-50 border-b">
       <th
         scope="row"
         className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
       >
-        {currentRow}
+        {isLoading ? (
+          <span className="icon-[line-md--loading-loop]" />
+        ) : (
+          currentRow
+        )}
       </th>
       {row.map((cell) => (
         <td className="px-6 py-4" key={cell.toString()}>
@@ -29,7 +35,12 @@ function Row({ row, currentRow }: RowProps) {
   );
 }
 
-export default function Table({ headers, rows, className = "" }: TableProps) {
+export default function Table({
+  headers,
+  rows,
+  className = "",
+  isFetching = false,
+}: TableProps) {
   return (
     <div
       className={`relative overflow-auto shadow-md rounded ${className}`.trimEnd()}
@@ -48,13 +59,23 @@ export default function Table({ headers, rows, className = "" }: TableProps) {
           </tr>
         </thead>
         <tbody className="overflow-auto">
-          {rows.map((row, index) => (
-            <Row
-              row={row}
-              currentRow={index + 1}
-              key={row.toString() + index}
-            />
-          ))}
+          {isFetching &&
+            Array.from({ length: 10 }, (_, index) => (
+              <Row
+                row={Array.from({ length: headers.length }, () => "")}
+                currentRow={index + 1}
+                key={index}
+                isLoading={isFetching}
+              />
+            ))}
+          {!isFetching &&
+            rows.map((row, index) => (
+              <Row
+                row={row}
+                currentRow={index + 1}
+                key={row.toString() + index}
+              />
+            ))}
         </tbody>
       </table>
     </div>
