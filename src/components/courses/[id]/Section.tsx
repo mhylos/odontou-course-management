@@ -22,7 +22,7 @@ export default function Section({
       </h3>
       <div
         className={(
-          "px-5 border-2 border-secondary pt-6 pb-6 rounded h-[calc(100%-1rem)] w-full " +
+          "px-5 border-2 border-secondary pt-6 pb-6 rounded h-[calc(100%-1rem)] w-full flex flex-col gap-2 " +
           className
         ).trimEnd()}
       >
