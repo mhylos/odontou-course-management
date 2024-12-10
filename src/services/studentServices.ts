@@ -18,7 +18,6 @@ export async function addStudentToCourse(
   enroll: EnrollCreate
 ) {
   const session = await auth();
-  let response;
   if (
     (await prisma.student.findUnique({
       where: {
@@ -26,7 +25,7 @@ export async function addStudentToCourse(
       },
     })) === null
   ) {
-    response = await prisma.student.create({
+    await prisma.student.create({
       data: {
         ...student,
         enrolled: {
@@ -43,7 +42,7 @@ export async function addStudentToCourse(
       },
     });
   } else {
-    response = await prisma.enrolled.create({
+    await prisma.enrolled.create({
       data: {
         ...enroll,
         student: {

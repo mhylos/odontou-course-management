@@ -2,29 +2,25 @@
 
 import Table from "@/components/common/Table/Table";
 import TableDropdown from "@/components/courses/[id]/Subsection";
-import { convertToMoney, dublicateItems } from "@/lib/utils";
-import { useState } from "react";
-
-const academicsFouch = dublicateItems(
-  [
-    {
-      name: "Sylvia Osorio Muñoz",
-      department: "Dpto. patología y medicina oral",
-      hierarchy: "Profesor Asistente",
-      dedicationHrs: 0,
-      contractHrs: 22,
-      fee: 0,
-      otherProgramsHrs: 0,
-    },
-  ],
-  10
-);
-
-const invitedAcademics = [];
+import { convertToMoney } from "@/lib/utils";
+import {
+  getAcademicsByCourse,
+  getAcademicsByCourseResponse,
+} from "@/services/courseServices";
+import { useEffect, useState } from "react";
 
 export default function CourseAcademics() {
   const [academicMenuOpen, setAcademicMenuOpen] = useState(true);
   const [invitedMenuOpen, setInvitedMenuOpen] = useState(false);
+  const [academics, setAcademics] =
+    useState<Awaited<getAcademicsByCourseResponse>>();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setAcademics(await getAcademicsByCourse());
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="flex flex-col gap-2 w-full h-full">
@@ -44,8 +40,10 @@ export default function CourseAcademics() {
             "Cuota",
             "Hrs. en otro programas",
           ]}
-          rows={academicsFouch.map((academic) => [
-            academic.name,
+          rows={academics?.academicsFouch.map((academic) => [
+            <span className="capitalize" key={academic.name}>
+              {academic.name.toLowerCase()}
+            </span>,
             academic.department,
             academic.hierarchy,
             academic.dedicationHrs,
@@ -69,15 +67,7 @@ export default function CourseAcademics() {
             "Correo electrónico",
             "Hrs. en otro programas",
           ]}
-          rows={invitedAcademics.map((academic) => [
-            academic.name,
-            academic.department,
-            academic.hierarchy,
-            academic.dedicationHrs,
-            academic.contractHrs,
-            convertToMoney(academic.fee),
-            academic.otherProgramsHrs,
-          ])}
+          rows={academics?.invitedAcademics.map(() => [])}
         />
       </TableDropdown>
     </div>

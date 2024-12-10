@@ -20,7 +20,6 @@ export interface EnrollFormProps {
 
 export default function EnrollForm({
   disabled = false,
-  enrollDetails,
   enrollValue,
   form,
 }: EnrollFormProps) {

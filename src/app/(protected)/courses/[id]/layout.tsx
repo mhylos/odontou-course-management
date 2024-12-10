@@ -20,7 +20,7 @@ export default async function CourseLayout({
     { title: "Académicos", href: `/courses/${id}/academics` },
     { title: "Ingresos Aranceles", href: `/courses/${id}/incomes` },
     { title: "Gastos", href: `/courses/${id}/expenses` },
-    { title: "Distribución", href: `/courses/${id}/distribution` },
+    // { title: "Distribución", href: `/courses/${id}/distribution` },
     {
       title: "Pago de asignaciones y honorarios",
       href: `/courses/${id}/payments`,

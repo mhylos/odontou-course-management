@@ -20,12 +20,14 @@ export default async function Home() {
         <div className="flex-1 overflow-auto">
           <Table
             headers={["Fecha", "Usuario", "Acción", "Descripción"]}
-            rows={Array.from({ length: 20 }, () => [
-              "2021-10-10",
-              "Admin",
-              "Acción",
-              "Descripción",
-            ])}
+            rows={[
+              [
+                "2021-09-01",
+                "Admin",
+                "Creación",
+                "Se ha creado un nuevo curso",
+              ],
+            ]}
           />
         </div>
       </div>

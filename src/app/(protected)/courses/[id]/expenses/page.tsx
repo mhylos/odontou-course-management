@@ -5,17 +5,33 @@ import { convertToMoney } from "@/lib/utils";
 
 const expenses = [
   {
-    concept: "Arancel",
-    unit_value: 1045000,
-    quantity: 1,
-    value: 1045000,
+    concept: "Lápiz",
+    unit_value: 500,
+    quantity: 4,
+  },
+  {
+    concept: "Bolsa",
+    unit_value: 500,
+    quantity: 4,
+  },
+  {
+    concept: "Libreta",
+    unit_value: 1700,
+    quantity: 4,
+  },
+  {
+    concept: "Diploma",
+    unit_value: 500,
+    quantity: 4,
   },
 ];
 
 export default function CourseExpenses() {
-  const EditBtn = () => <Button buttonActionType="edit" />;
+  const EditBtn = () => <Button buttonActionType="edit" className="w-max" />;
 
-  const removeBtn = () => <Button buttonActionType="delete" />;
+  const removeBtn = () => (
+    <Button buttonActionType="delete" className="w-max" />
+  );
 
   const Actions = () => (
     <div className="flex gap-2">
@@ -40,11 +56,14 @@ export default function CourseExpenses() {
         <Section title="Total">
           <span className="text-4xl font-light">
             {convertToMoney(
-              expenses.reduce((acc, { value }) => acc + value, 0)
+              expenses.reduce(
+                (acc, item) => acc + item.unit_value * item.quantity,
+                0
+              )
             )}
           </span>
         </Section>
-        <Button buttonType="add">Agregar</Button>
+        <Button buttonActionType="add">Agregar</Button>
       </div>
     </div>
   );

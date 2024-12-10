@@ -5,7 +5,7 @@ export const dynamic = "force-static";
 
 export async function GET() {
   const courses = prisma.course.findMany();
-  return courses;
+  return Response.json(courses);
 }
 
 export async function POST(request: Request) {
