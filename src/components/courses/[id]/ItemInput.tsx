@@ -1,3 +1,5 @@
+import Input from "@/components/common/Input";
+
 interface ItemInputProps {
   isEditing: boolean;
   value?: string | null;
@@ -14,8 +16,7 @@ export default function ItemInput({
   if (isEditing) {
     return (
       <div className={("min-w-32 " + className).trimEnd()}>
-        <input type="text" value={value ?? ""} />
-        <button>Save</button>
+        <Input />
       </div>
     );
   } else {

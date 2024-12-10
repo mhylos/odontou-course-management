@@ -65,3 +65,19 @@ export type Student = {
   name: string;
   email: string;
 };
+
+export type Enroll = {
+  student_fk: Student["rut"];
+  course_fk: Course["id"];
+  status: boolean;
+  payment_type: string;
+  discount: number;
+  ticket_num: number | null;
+  payment_date: Date | null;
+  total: number;
+  observation: string;
+
+  student: Student;
+};
+
+export type EnrollCreate = Omit<Enroll, "student_fk" | "course_fk" | "student">;

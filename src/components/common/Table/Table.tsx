@@ -1,11 +1,11 @@
 interface TableProps {
   headers: string[];
-  rows: Cell[][];
+  rows: Cell[][] | undefined;
   className?: string;
   isFetching?: boolean;
 }
 
-type Cell = string | number | JSX.Element;
+type Cell = string | number | JSX.Element | undefined | boolean | null;
 
 interface RowProps {
   currentRow: number;
@@ -15,7 +15,7 @@ interface RowProps {
 
 function Row({ row, currentRow, isLoading = false }: RowProps) {
   return (
-    <tr className="odd:bg-white even:bg-gray-50 border-b">
+    <tr className="odd:bg-white even:bg-gray-50 border-b h-16">
       <th
         scope="row"
         className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
@@ -26,8 +26,8 @@ function Row({ row, currentRow, isLoading = false }: RowProps) {
           currentRow
         )}
       </th>
-      {row.map((cell) => (
-        <td className="px-6 py-4" key={cell.toString()}>
+      {row.map((cell, index) => (
+        <td className="px-6 py-4" key={index}>
           {cell}
         </td>
       ))}
@@ -69,7 +69,7 @@ export default function Table({
               />
             ))}
           {!isFetching &&
-            rows.map((row, index) => (
+            rows?.map((row, index) => (
               <Row
                 row={row}
                 currentRow={index + 1}

@@ -6,7 +6,7 @@ import { registerSchemaType, registerSchema } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Form, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
-import Input from "@/components/common/Input";
+import Input from "@/components/common/FloatingInput";
 import Button from "@/components/common/Button";
 import { useRouter } from "next/navigation";
 

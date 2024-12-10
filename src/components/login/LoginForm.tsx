@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, Form, useForm } from "react-hook-form";
 import { loginSchemaType, loginSchema } from "@/lib/zod";
 import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
+import Input from "@/components/common/FloatingInput";
 import { runFormatter } from "@/lib/utils";
 import { loginAction } from "@/app/actions/auth-actions";
 import { toast } from "react-toastify";

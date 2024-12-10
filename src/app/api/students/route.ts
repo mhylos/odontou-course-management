@@ -1,8 +1,9 @@
 import { Student } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { getAllStudents } from "@/services/studentServices";
 
 export async function GET() {
-  const students = await prisma.student.findMany();
+  const students = await getAllStudents();
   return Response.json(students);
 }
 

@@ -5,9 +5,11 @@ import { getCourseById } from "@/services/courseServices";
 
 export default async function CourseLayout({
   children,
+  courseModal,
   params,
 }: {
   children: React.ReactNode;
+  courseModal: React.ReactNode;
   params: Promise<{ id: string }>;
 }) {
   const id = (await params).id;
@@ -33,6 +35,7 @@ export default async function CourseLayout({
 
   return (
     <CourseProvider course={course}>
+      {courseModal}
       <CourseHeader />
       <div className="flex flex-col overflow-auto gap-2">
         <NavigationBar routes={routes} />

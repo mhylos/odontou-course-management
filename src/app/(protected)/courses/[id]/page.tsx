@@ -7,12 +7,12 @@ import { convertToMoney, formatDate } from "@/lib/utils";
 import { useCourse } from "@/app/context/courseProvider";
 
 export default function CourseInfo() {
-  const course = useCourse();
+  const { course } = useCourse();
 
   return (
     <div className="grid grid-cols-[1fr_2fr] gap-2 h-full w-full">
-      <div className="flex flex-col gap-10 justify-between">
-        <Section title={"Responsables"} className="flex flex-col gap-2">
+      <div className="grid grid-rows-2 grid-cols-1 justify-between">
+        <Section title={"Responsables"}>
           <SectionItem title={"Departamento Ejecutor"}>
             <ItemInput isEditing={false} value={course?.department.name} />
           </SectionItem>
@@ -71,10 +71,7 @@ export default function CourseInfo() {
         </Section>
       </div>
 
-      <Section
-        title={"Datos generales"}
-        className="row-span-2 flex flex-col gap-2"
-      >
+      <Section title={"Datos generales"} className="row-span-2">
         <SectionItem title={"Nombre del programa"}>
           <ItemInput isEditing={false} value={course?.name} />
         </SectionItem>

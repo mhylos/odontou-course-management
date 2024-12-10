@@ -1,25 +1,21 @@
-import Button from "@/components/common/Button";
+"use client";
+
+import { useCourse } from "@/app/context/courseProvider";
 import SearchInput from "@/components/common/SearchInput";
 import Table from "@/components/common/Table/Table";
-import { convertToMoney, dublicateItems } from "@/lib/utils";
+import { convertToMoney, formatDate } from "@/lib/utils";
+import { removeEnrollByRut } from "@/services/studentServices";
 import Link from "next/link";
-import { format } from "rutility";
-
-let students = [
-  {
-    name: "Paula",
-    rut: "11.111.111-1",
-    status: "Matriculado",
-    nboleta: 1233213,
-    fechapago: "11/11/2024",
-    dcto: 10,
-    total: 940000,
-  },
-];
-
-students = dublicateItems(students, 10);
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { format, calculateDv } from "rutility";
 
 export default function CourseStudents() {
+  const [rowChanging, setRowChanging] = useState<number>();
+  const { course } = useCourse();
+
+  if (!course) return;
+
   const ViewDetails = (rut: number) => (
     <Link
       href={`students/${rut}`}
@@ -29,20 +25,57 @@ export default function CourseStudents() {
     </Link>
   );
 
-  const Actions = (rut: string) => {
-    const rutFormatted = parseInt(format.notDotDash(rut));
-    return <div className="flex gap-2">{ViewDetails(rutFormatted)}</div>;
+  const removeStudent = (rut: number) => {
+    const handleRemove = async () => {
+      setRowChanging(rut);
+      const response = await removeEnrollByRut(rut, course.id);
+      if (response) {
+        toast.success("Estudiante eliminado con éxito");
+        course.enrolled = course.enrolled.filter(
+          (enroll) => enroll.student.rut !== rut
+        );
+      } else {
+        toast.error("Error al eliminar estudiante");
+      }
+      setRowChanging(undefined);
+    };
+
+    return (
+      <button
+        onClick={handleRemove}
+        className="bg-red-400 text-white grid place-items-center h-full aspect-square p-2 rounded"
+      >
+        <span className="icon-[mdi--account-remove-outline] text-xl"></span>
+      </button>
+    );
+  };
+
+  const Actions = (rut: number) => {
+    if (rowChanging === rut) {
+      return <span className="icon-[line-md--loading-loop] text-2xl" />;
+    }
+    return (
+      <div className="flex gap-2">
+        {ViewDetails(rut)}
+        {removeStudent(rut)}
+      </div>
+    );
   };
 
   return (
     <div className="flex flex-col gap-2 w-full h-full">
       <div className="flex gap-2">
         <SearchInput label={"Buscar"} className="flex-1" />
-        <Button className="max-w-max aspect-square group">
-          <span className="icon-[ph--student] text-2xl group-hover:icon-[ph--student-fill]" />
-
-          <span className="icon-[ph--plus] text-xs align-top group-hover:icon-[ph--plus-bold]" />
-        </Button>
+        <Link
+          href={"students/add"}
+          className="group bg-primary text-white rounded place-items-center flex flex-col justify-center px-2"
+        >
+          <div>
+            <span className="icon-[ph--student] text-2xl group-hover:icon-[ph--student-fill]" />
+            <span className="icon-[ph--plus] text-xs align-top group-hover:icon-[ph--plus-bold]" />
+          </div>
+          <span className="col-span-2 text-xs">(Agregar estudiante)</span>
+        </Link>
       </div>
       <Table
         headers={[
@@ -55,15 +88,17 @@ export default function CourseStudents() {
           "Total",
           "Acciones",
         ]}
-        rows={students.map((student) => [
-          student.name,
-          student.rut,
-          student.status,
-          student.nboleta,
-          student.fechapago,
-          `${student.dcto} %`,
-          convertToMoney(student.total),
-          Actions(student.rut),
+        rows={course?.enrolled.map((enroll) => [
+          enroll.student.name,
+          format.dotDash(
+            enroll.student.rut.toString() + calculateDv(enroll.student.rut)
+          ),
+          enroll.status ? "Matriculado" : "No matriculado",
+          enroll.ticket_num,
+          formatDate(enroll.payment_date ?? ""),
+          `${enroll.discount} %`,
+          convertToMoney(enroll.total),
+          Actions(enroll.student.rut),
         ])}
       />
     </div>

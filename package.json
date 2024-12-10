@@ -21,6 +21,7 @@
     "react-toastify": "^10.0.6",
     "rutility": "^1.0.18",
     "swr": "^2.2.5",
+    "use-debounce": "^10.0.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {

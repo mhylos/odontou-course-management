@@ -57,14 +57,16 @@ model Student {
 model Enrolled {
   student_fk   Int
   course_fk    Int
-  paid         Boolean
+  status       Boolean   @default(false)
   payment_type String
-  discount     Int
-  ticket_num   Int
-  payment_date DateTime
+  discount     Int       @default(0)
+  ticket_num   Int?
+  payment_date DateTime?
+  total        Int
+  observation  String
 
-  student Student @relation(fields: [student_fk], references: [rut])
-  course  Course  @relation(fields: [course_fk], references: [id])
+  student Student @relation(fields: [student_fk], references: [rut], onDelete: Cascade)
+  course  Course  @relation(fields: [course_fk], references: [id], onDelete: Cascade)
 
   @@id([student_fk, course_fk])
 }
@@ -140,7 +142,18 @@ model User {
   director        Department[]
   course_director Course[]       @relation(name: "course_director")
   coordinator     Course[]       @relation(name: "coordinator")
+  logger          Logger[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Logger {
+  id          Int      @id @default(autoincrement())
+  user_fk     Int
+  action      String
+  description String
+  timestamp   DateTime
+
+  user User @relation(fields: [user_fk], references: [rut])
 }
