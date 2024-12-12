@@ -80,4 +80,6 @@ export type Enroll = {
   student: Student;
 };
 
+export type AdminCreate = {} & UserCreate;
+
 export type EnrollCreate = Omit<Enroll, "student_fk" | "course_fk" | "student">;
