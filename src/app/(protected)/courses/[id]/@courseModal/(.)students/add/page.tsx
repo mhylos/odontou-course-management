@@ -7,6 +7,7 @@ import ModalHeader from "@/components/common/Modal/ModalHeader";
 import EnrollForm from "@/components/courses/[id]/EnrollForm";
 import StudentForm from "@/components/courses/[id]/StudentForm";
 import { Student } from "@/lib/definitions";
+import { runToNumber } from "@/lib/utils";
 import {
   enrollSchema,
   enrollSchemaType,
@@ -94,7 +95,10 @@ export default function AddStudent() {
 
     const response = await addStudentToCourse(
       course.id,
-      studentValues,
+      {
+        ...studentValues,
+        rut: runToNumber(studentValues.rut),
+      },
       enrollValues
     );
 

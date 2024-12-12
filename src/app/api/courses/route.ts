@@ -1,10 +1,11 @@
 import { CourseCreate } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { getAllCourses } from "@/services/courseServices";
 
 export const dynamic = "force-static";
 
 export async function GET() {
-  const courses = prisma.course.findMany();
+  const courses = await getAllCourses();
   return Response.json(courses);
 }
 

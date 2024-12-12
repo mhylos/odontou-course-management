@@ -1,7 +1,15 @@
-import RegisterAdminForm from "@/components/start/registerAdminForm";
-import Image from "next/image";
+"use server";
 
-export default function Start() {
+import RegisterAdminForm from "@/components/start/registerAdminForm";
+import { checkStarted } from "@/services/userServices";
+import Image from "next/image";
+import { redirect } from "next/navigation";
+
+export default async function Start() {
+  if (await checkStarted()) {
+    redirect("/");
+  }
+
   return (
     <main className="flex flex-col justify-center items-center w-full h-full">
       <Image

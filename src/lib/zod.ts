@@ -1,5 +1,4 @@
 import { boolean, object, string, z, number, date } from "zod";
-import { runToNumber } from "./utils";
 import { format } from "rutility";
 
 export const loginSchema = object({
@@ -30,7 +29,7 @@ export const studentSchema = object({
   rut: string({ required_error: "El RUT es requerido" })
     .min(9, "El RUT debe tener al menos 9 caracteres")
     .max(12, "El RUT debe tener a lo más 12 caracteres")
-    .transform((val) => runToNumber(format.dotDash(val))),
+    .transform((val) => format.dotDash(val)),
   name: string({ required_error: "El nombre es requerido" }),
   email: string({ required_error: "El email es requerido" }).email(
     "El email no es válido"

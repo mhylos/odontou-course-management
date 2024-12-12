@@ -9,6 +9,7 @@ interface DropdownProps {
   clearable?: boolean;
   disabled?: boolean;
   onChange: (option: Option) => void;
+  onRemove?: () => void;
 }
 
 interface Option {
@@ -30,6 +31,7 @@ export default function Dropdown({
   disabled,
   clearable = false,
   onChange,
+  onRemove = () => {},
 }: DropdownProps) {
   const [selectedOption, setSelectedOption] = useState<Option>(
     selected || DEFAULT_OPTION
@@ -63,6 +65,7 @@ export default function Dropdown({
   ) => {
     e.stopPropagation();
     setSelectedOption(DEFAULT_OPTION);
+    onRemove();
   };
 
   return (
