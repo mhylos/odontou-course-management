@@ -10,9 +10,7 @@ export default async function Home() {
 
   return (
     <>
-      <TitlePage>
-        Panel de gestión de pagos y cobros {session?.user?.id}
-      </TitlePage>
+      <TitlePage>Panel de gestión de pagos y cobros</TitlePage>
       <div className="flex flex-col gap-2 overflow-auto">
         <SubtitlePage className="bg-secondary text-white p-2 rounded">
           Últimas operaciones

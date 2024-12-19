@@ -4,11 +4,12 @@ import { Student } from "@/lib/definitions";
 import Section from "./Section";
 import SectionItem from "./SectionItem";
 import { useState } from "react";
-import { runFormatter } from "@/lib/utils";
+import { capitalize, runFormatter } from "@/lib/utils";
 import { isStudentEnrolled } from "@/services/courseServices";
 import Dropdown from "@/components/common/Dropdown";
 import { studentSchemaType } from "@/lib/zod";
 import { Controller, UseFormReturn } from "react-hook-form";
+import { Genres } from "@prisma/client";
 
 interface StudentFormProps {
   student?: Partial<Student>;
@@ -17,8 +18,8 @@ interface StudentFormProps {
 }
 
 const genreOptions = [
-  { value: "M", name: "Masculino" },
-  { value: "F", name: "Femenino" },
+  { value: Genres.masculino, name: capitalize(Genres.masculino) },
+  { value: Genres.femenino, name: capitalize(Genres.femenino) },
 ];
 
 export default function StudentForm({

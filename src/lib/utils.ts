@@ -1,4 +1,4 @@
-import { format } from "rutility";
+import { format, calculateDv } from "rutility";
 
 export function runFormatter(run: string) {
   const cleanedRun: string = run.replace(/[^0-9kK]/g, "").slice(0, 9);
@@ -11,6 +11,14 @@ export function runFormatter(run: string) {
 
 export function runToNumber(run: string) {
   return parseInt(format.notDotDash(run));
+}
+
+export function restoreRun(run: number) {
+  return format.dot(run.toString() + "-" + calculateDv(run.toString()));
+}
+
+export function capitalize(string: string) {
+  return string[0].toUpperCase() + string.slice(1).toLowerCase();
 }
 
 export function convertToMoney(value: number) {

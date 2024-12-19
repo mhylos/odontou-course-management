@@ -1,56 +1,52 @@
-"use client";
-
-import Dropdown from "@/components/common/Dropdown";
-import SearchInput from "@/components/common/SearchInput";
 import TitlePage from "@/components/common/TitlePage";
-import { CourseList } from "@/components/courses/CourseList";
+import CourseList from "@/components/courses/CourseList";
+import CoursePreview from "@/components/courses/CoursePreview";
+import SearchCourses from "@/components/courses/SearchCourses";
 import Link from "next/link";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { Suspense } from "react";
 
-export default function Courses() {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
+interface CoursesProps {
+  searchParams?: Promise<{ name?: string; payment: string }>;
+}
 
-  function handleSearch(type: string, term: string) {
-    const params = new URLSearchParams(searchParams);
-    if (term) {
-      params.set(type, term);
-    } else {
-      params.delete(type);
-    }
-    replace(`${pathname}?${params.toString()}`);
-  }
+async function Courses({ searchParams }: CoursesProps) {
+  const filters = await searchParams;
 
   return (
+    <Suspense
+      key={(filters?.name ?? "") + (filters?.payment ?? "")}
+      fallback={
+        <>
+          {Array.from({ length: 10 }).map((_, i) => (
+            <CoursePreview key={i} />
+          ))}
+        </>
+      }
+    >
+      <CourseList filters={filters} />
+    </Suspense>
+  );
+}
+
+export default function CoursesPage({ searchParams }: CoursesProps) {
+  return (
     <>
-      <div className="grid grid-cols-[1fr_10rem] grid-rows-2">
+      <div className="grid grid-cols-[1fr_10rem] grid-rows-[1fr_auto] gap-2">
         <TitlePage className="col-span-2 text-ellipsis overflow-hidden">
           Cursos
         </TitlePage>
-        <div className="grid grid-cols-[2fr_1fr] gap-2 pe-2">
-          <SearchInput label={"Buscar por nombre"} value={""} />
-          <Dropdown
-            label="Filtrar pagos"
-            options={[
-              { value: 1, name: "Completos" },
-              { value: 0, name: "Pendientes" },
-            ]}
-            clearable={true}
-            onChange={(value) =>
-              handleSearch("payments", value.value.toString())
-            }
-            onRemove={() => handleSearch("payments", "")}
-          />
-        </div>
+        <SearchCourses />
         <Link
           href="courses/create"
-          className="bg-primary hover:brightness-90 text-white py-2 px-4 rounded grid place-items-center"
+          className="bg-primary hover:brightness-90 text-white rounded grid place-items-center"
         >
           Crear curso
         </Link>
       </div>
-      <CourseList />
+
+      <ul className="grid grid-cols-3 gap-2 h-full overflow-y-auto pe-3">
+        <Courses searchParams={searchParams} />
+      </ul>
     </>
   );
 }

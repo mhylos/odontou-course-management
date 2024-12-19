@@ -2,22 +2,23 @@ import { forwardRef, InputHTMLAttributes } from "react";
 import { FieldError } from "react-hook-form";
 
 interface InputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "ref"> {
+  extends Omit<InputHTMLAttributes<HTMLTextAreaElement>, "ref"> {
   label: string;
   errors?: FieldError;
   isTextArea?: boolean;
 }
 
-const FloatingInput = forwardRef(function FloatingInput(
+const FloatingTextarea = forwardRef(function FloatingTextarea(
   props: InputProps,
-  ref: React.ForwardedRef<HTMLInputElement>
+  ref: React.ForwardedRef<HTMLTextAreaElement>
 ) {
   return (
     <div className="relative z-0">
-      <input
+      <textarea
         id={`floating_${props.label}`}
         className="block py-2.5 px-0 w-full text-sm bg-transparent rounded-md border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-primary peer"
         placeholder=" "
+        rows={1}
         {...props}
         ref={ref}
       />
@@ -32,4 +33,4 @@ const FloatingInput = forwardRef(function FloatingInput(
   );
 });
 
-export default FloatingInput;
+export default FloatingTextarea;

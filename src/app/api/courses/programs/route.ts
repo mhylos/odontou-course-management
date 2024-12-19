@@ -1,8 +1,7 @@
-import prisma from "@/lib/prisma";
-
-export const dynamic = "force-static";
+import { getAllPrograms } from "@/services/courseServices";
+import { NextResponse } from "next/server";
 
 export async function GET() {
-  const programs = await prisma.program.findMany();
-  return Response.json(programs);
+  const programs = await getAllPrograms();
+  return NextResponse.json(programs);
 }

@@ -1,3 +1,6 @@
+import { Genres, Prisma } from "@prisma/client";
+import prisma from "./prisma";
+
 export type User = {
   rut: number;
   name: string;
@@ -7,11 +10,6 @@ export type User = {
 export type UserCreate = {
   password: string;
 } & User;
-
-export type AcademicCreate = {
-  department_fk: number;
-  isFOUCH: boolean;
-} & UserCreate;
 
 export type DepartmentCreate = {
   name: string;
@@ -61,16 +59,48 @@ export type Department = {
 
 export type Student = {
   rut: number;
-  genre: string;
+  genre: Genres;
   name: string;
   email: string;
 };
 
+export type PaymentType = {
+  id: number;
+  name: string;
+};
+
+export type StudentCreateBody = Prisma.Args<
+  typeof prisma.student,
+  "create"
+>["data"];
+
+export type PaymentTypeCreateBody = Prisma.Args<
+  typeof prisma.paymentTypes,
+  "create"
+>["data"];
+
+export type LoggerCreateBody = Prisma.Args<
+  typeof prisma.logger,
+  "create"
+>["data"];
+
+export type EnrollCreateBody = Prisma.Args<
+  typeof prisma.enrolled,
+  "create"
+>["data"];
+
+export type AcademicCreateBody = Prisma.Args<
+  typeof prisma.academic,
+  "create"
+>["data"];
+
+export type UserCreateBody = Prisma.Args<typeof prisma.user, "create">["data"];
+
 export type Enroll = {
   student_fk: Student["rut"];
   course_fk: Course["id"];
+  payment_type_fk: PaymentType["id"];
   status: boolean;
-  payment_type: string;
   discount: number;
   ticket_num: number | null;
   payment_date: Date | null;

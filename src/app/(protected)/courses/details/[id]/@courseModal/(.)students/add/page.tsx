@@ -7,7 +7,6 @@ import ModalHeader from "@/components/common/Modal/ModalHeader";
 import EnrollForm from "@/components/courses/[id]/EnrollForm";
 import StudentForm from "@/components/courses/[id]/StudentForm";
 import { Student } from "@/lib/definitions";
-import { runToNumber } from "@/lib/utils";
 import {
   enrollSchema,
   enrollSchemaType,
@@ -22,7 +21,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 export default function AddStudent() {
-  const { course, addStudentToCourse: addStudentToContext } = useCourse();
+  const { course } = useCourse();
   const router = useRouter();
   const studentForm = useForm<studentSchemaType>({
     resolver: zodResolver(studentSchema),
@@ -31,7 +30,6 @@ export default function AddStudent() {
     resolver: zodResolver(enrollSchema),
     defaultValues: {
       status: false,
-      payment_date: new Date(),
       discount: 0,
       total: course?.enroll_value,
     },
@@ -41,30 +39,6 @@ export default function AddStudent() {
 
   if (!course) {
     return null;
-  }
-
-  let enrollDetails = course.enrolled.find(
-    (enroll) => enroll.student_fk === student?.rut
-  );
-
-  if (!enrollDetails) {
-    enrollDetails = {
-      student_fk: student?.rut || -1,
-      course_fk: course.id,
-      status: false,
-      ticket_num: 0,
-      payment_date: new Date(),
-      payment_type: "",
-      observation: "",
-      discount: 0,
-      total: 0,
-      student: {
-        rut: student?.rut || -1,
-        genre: student?.genre || "",
-        name: student?.name || "",
-        email: student?.email || "",
-      },
-    };
   }
 
   const validateEnroll = async () => {
@@ -79,7 +53,7 @@ export default function AddStudent() {
     } else if (!enrollForm.formState.isValid) {
       const error = Object.values(enrollForm.formState.errors)[0];
       toast.error(error?.message);
-      console.log(enrollForm.getValues());
+      console.log(enrollForm.formState.errors);
 
       setIsLoading(false);
       return false;
@@ -93,16 +67,9 @@ export default function AddStudent() {
     const studentValues = studentSchema.parse(studentForm.getValues());
     const enrollValues = enrollSchema.parse(enrollForm.getValues());
 
-    const response = await addStudentToCourse(
-      course.id,
-      {
-        ...studentValues,
-        rut: runToNumber(studentValues.rut),
-      },
-      enrollValues
-    );
+    await addStudentToCourse(course.id, studentValues, enrollValues);
 
-    addStudentToContext(response);
+    // addEnrollToContext(response);
     toast.success("Estudiante guardado");
     closeModal();
   };

@@ -32,7 +32,7 @@ export default function Button(props: ButtonProps) {
       {...props}
       className={
         `hover:brightness-90 text-white py-2 px-4 rounded w-full disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-gray-500 disabled:border-gray-300 hover:disabled:brightness-100` +
-        ` ${props.className} ${buttonTypeClassname}`
+        ` ${buttonTypeClassname} ${props.className}`
       }
     >
       {props.buttonActionType && <span className={`${buttonIcon} text-xl`} />}

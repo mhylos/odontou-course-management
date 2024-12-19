@@ -1,8 +1,9 @@
 "use server";
 
 import { auth } from "@/auth";
-import { EnrollCreate, Student } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { runToNumber } from "@/lib/utils";
+import { enrollSchemaType, studentSchemaType } from "@/lib/zod";
 
 export async function getAllStudents() {
   const students = await prisma.student.findMany({
@@ -14,27 +15,33 @@ export async function getAllStudents() {
 
 export async function addStudentToCourse(
   courseId: number,
-  student: Student,
-  enroll: EnrollCreate
+  student: studentSchemaType,
+  enroll: enrollSchemaType
 ) {
   const session = await auth();
+  const rut = runToNumber(student.rut);
+  const { payment_type_fk, ...enrollData } = enroll;
+
   if (
     (await prisma.student.findUnique({
       where: {
-        rut: student.rut,
+        rut: rut,
       },
     })) === null
   ) {
     await prisma.student.create({
       data: {
         ...student,
+        rut: rut,
         enrolled: {
-          connectOrCreate: {
-            create: { ...enroll, course_fk: courseId },
-            where: {
-              student_fk_course_fk: {
-                student_fk: student.rut,
-                course_fk: courseId,
+          create: {
+            ...enrollData,
+            payment: payment_type_fk
+              ? { connect: { id: payment_type_fk } }
+              : undefined,
+            course: {
+              connect: {
+                id: courseId,
               },
             },
           },
@@ -44,10 +51,13 @@ export async function addStudentToCourse(
   } else {
     await prisma.enrolled.create({
       data: {
-        ...enroll,
+        ...enrollData,
+        payment: payment_type_fk
+          ? { connect: { id: payment_type_fk } }
+          : undefined,
         student: {
           connect: {
-            rut: student.rut,
+            rut: rut,
           },
         },
         course: {
@@ -60,8 +70,8 @@ export async function addStudentToCourse(
   }
 
   const newEnrolled = {
-    student: student,
-    student_fk: student.rut,
+    student: { ...student, rut: rut },
+    student_fk: rut,
     course_fk: courseId,
     ...enroll,
   };
@@ -69,13 +79,18 @@ export async function addStudentToCourse(
   if (session?.user?.id) {
     await prisma.logger.create({
       data: {
-        user_fk: parseInt(session.user.id),
         action: "Creación",
         description: `El estudiante ${student.rut} fue inscrito en el curso ${courseId}`,
         timestamp: new Date(),
+        user: {
+          connect: {
+            id: session.user.id,
+          },
+        },
       },
     });
   }
+
   return newEnrolled;
 }
 

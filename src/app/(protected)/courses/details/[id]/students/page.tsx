@@ -95,7 +95,7 @@ export default function CourseStudents() {
           ),
           enroll.status ? "Matriculado" : "No matriculado",
           enroll.ticket_num,
-          formatDate(enroll.payment_date ?? ""),
+          enroll.payment_date ? formatDate(enroll.payment_date) : "Sin pago",
           `${enroll.discount} %`,
           convertToMoney(enroll.total),
           Actions(enroll.student.rut),

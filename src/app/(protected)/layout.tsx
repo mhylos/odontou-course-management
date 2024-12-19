@@ -15,7 +15,7 @@ export default async function RootLayout({ children, modal }: RootLayoutProps) {
   }
 
   return (
-    <div className="grid grid-cols-[20rem_1fr] h-screen">
+    <div className="grid grid-cols-[auto_1fr] h-screen">
       <Sidebar
         routes={[
           {

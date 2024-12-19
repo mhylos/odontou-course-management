@@ -2,6 +2,24 @@
 
 import prisma from "@/lib/prisma";
 import { format } from "rutility";
+import { Option } from "@/components/common/Dropdown";
+import { createCourseSchemaType } from "@/lib/zod";
+import { revalidatePath } from "next/cache";
+
+export async function createCourse(data: createCourseSchemaType) {
+  try {
+    await prisma.course.create({
+      data: {
+        ...data,
+      },
+    });
+    revalidatePath("/courses");
+    return { message: "Curso creado con éxito", success: true };
+  } catch (error) {
+    console.error(error);
+    return { message: "Error inesperado", success: false };
+  }
+}
 
 export async function getCourseById(id: string) {
   const course = await prisma.course.findUnique({
@@ -84,70 +102,112 @@ export async function isStudentEnrolled(courseId: number, rut: string) {
   return student;
 }
 
-export async function getAcademicsByCourse() {
-  const academicsFouch = [
-    {
-      name: "SYLVIA OSORIO MUÑOZ",
-      department: "Dpto. Patología y Medicina Oral",
-      hierarchy: "Profesor Asistente",
-      dedicationHrs: 0,
-      contractHrs: 44,
-      fee: 0,
-      otherProgramsHrs: 0,
+export async function getAcademicsByCourse(courseId: number) {
+  const academics = await prisma.manages.findMany({
+    where: {
+      course_fk: courseId,
     },
-    {
-      name: "ANDRÉS IGNACIO ROSA VALENCIA",
-      department: "ICOD",
-      hierarchy: "Profesor Asistente",
-      dedicationHrs: 0,
-      contractHrs: 33,
-      fee: 0,
-      otherProgramsHrs: 0,
+    omit: {
+      course_fk: true,
+      academic_fk: true,
+      hierarchy_type_fk: true,
     },
-    {
-      name: "ARNOLDO HERNÁNDEZ CALDERA",
-      department: "ICOD",
-      hierarchy: "Profesor Asistente",
-      dedicationHrs: 0,
-      contractHrs: 11,
-      fee: 0,
-      otherProgramsHrs: 0,
+    include: {
+      academic: {
+        select: { isFOUCH: true },
+        include: {
+          department: { select: { name: true } },
+          user: { select: { name: true, rut: true, email: true } },
+        },
+      },
+      hierarchy_type: { select: { name: true } },
     },
-    {
-      name: "JORGE LEMUS ESPINOZA",
-      department: "ICOD",
-      hierarchy: "Profesor Asistente",
-      dedicationHrs: 0,
-      contractHrs: 0,
-      fee: 0,
-      otherProgramsHrs: 0,
-    },
-    {
-      name: "MAURICIO SANDOVAL TOBAR",
-      department: "ICOD",
-      hierarchy: "Instructor",
-      dedicationHrs: 0,
-      contractHrs: 17,
-      fee: 0,
-      otherProgramsHrs: 0,
-    },
-    {
-      name: "RODRIGO HERNÁNDEZ QUEZADA",
-      department: "ICOD",
-      hierarchy: "Ayudante",
-      dedicationHrs: 0,
-      contractHrs: 6,
-      fee: 0,
-      otherProgramsHrs: 0,
-    },
-  ];
+  });
+  const invitedAcademics = [];
+  const academicsFouch = [];
 
-  return { academicsFouch, invitedAcademics: [] };
+  for (const academic of academics) {
+    if (academic.academic.isFOUCH) {
+      academicsFouch.push(academic);
+    } else {
+      invitedAcademics.push(academic);
+    }
+  }
+
+  return { academicsFouch, invitedAcademics };
 }
 
+export async function getAllPaymentTypes() {
+  const paymentTypes = await prisma.paymentTypes.findMany();
+
+  return paymentTypes;
+}
+
+export async function getAllPrograms() {
+  const programs = await prisma.program.findMany();
+
+  return programs;
+}
+
+export async function getDepartments(name?: string) {
+  const departments = await prisma.department.findMany({
+    where: {
+      name: {
+        contains: name,
+        mode: "insensitive",
+      },
+    },
+  });
+
+  return departments;
+}
+
+export async function getDepartmentsOptions(name?: string) {
+  const departments = await prisma.department.findMany({
+    where: {
+      name: {
+        contains: name,
+        mode: "insensitive",
+      },
+    },
+  });
+
+  const options: Option[] = departments.map((department) => ({
+    name: department.name,
+    value: department.id,
+  }));
+
+  return options;
+}
+
+export async function getProgramsOptions() {
+  const programs = await prisma.program.findMany();
+
+  const options: Option[] = programs.map((program) => ({
+    name: program.name,
+    value: program.id,
+  }));
+
+  return options;
+}
+
+export async function getPaymentOptions() {
+  const paymentTypes = await prisma.paymentTypes.findMany();
+
+  const options: Option[] = paymentTypes.map((paymentType) => ({
+    name: paymentType.name,
+    value: paymentType.id,
+  }));
+
+  return options;
+}
+
+export type getDepartmentsResponse = ReturnType<typeof getDepartments>;
+export type getAllProgramsResponse = ReturnType<typeof getAllPrograms>;
 export type getAcademicsByCourseResponse = ReturnType<
   typeof getAcademicsByCourse
 >;
 export type isStudentEnrolledResponse = ReturnType<typeof isStudentEnrolled>;
 export type getAllCoursesResponse = ReturnType<typeof getAllCourses>;
 export type getCourseByIdResponse = ReturnType<typeof getCourseById>;
+export type getAllPaymentTypesResponse = ReturnType<typeof getAllPaymentTypes>;

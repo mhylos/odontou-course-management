@@ -15,15 +15,15 @@ export default async function CourseLayout({
   const id = (await params).id;
 
   const routes = [
-    { title: "Antecedentes Generales", href: `/courses/${id}` },
-    { title: "Estudiantes", href: `/courses/${id}/students` },
-    { title: "Académicos", href: `/courses/${id}/academics` },
-    { title: "Ingresos Aranceles", href: `/courses/${id}/incomes` },
-    { title: "Gastos", href: `/courses/${id}/expenses` },
+    { title: "Antecedentes Generales", href: `/courses/details/${id}` },
+    { title: "Estudiantes", href: `/courses/details/${id}/students` },
+    { title: "Académicos", href: `/courses/details/${id}/academics` },
+    { title: "Ingresos Aranceles", href: `/courses/details/${id}/incomes` },
+    { title: "Gastos", href: `/courses/details/${id}/expenses` },
     // { title: "Distribución", href: `/courses/${id}/distribution` },
     {
       title: "Pago de asignaciones y honorarios",
-      href: `/courses/${id}/payments`,
+      href: `/courses/details/${id}/payments`,
     },
   ];
 

@@ -47,4 +47,9 @@ export default {
       },
     }),
   ],
+  callbacks: {
+    authorized: async ({ auth }) => {
+      return !!auth;
+    },
+  },
 } satisfies NextAuthConfig;

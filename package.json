@@ -14,6 +14,7 @@
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
+    "framer-motion": "^11.15.0",
     "next": "14.2.15",
     "next-auth": "5.0.0-beta.25",
     "react": "^18",
@@ -23,7 +24,8 @@
     "rutility": "^1.0.18",
     "swr": "^2.2.5",
     "use-debounce": "^10.0.4",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.270",

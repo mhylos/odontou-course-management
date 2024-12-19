@@ -1,5 +1,7 @@
 import { DepartmentCreate } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { getDepartments } from "@/services/courseServices";
+import { NextRequest } from "next/server";
 
 export async function POST(request: Request) {
   const body: DepartmentCreate = await request.json();
@@ -14,7 +16,8 @@ export async function POST(request: Request) {
   return Response.json(department);
 }
 
-export async function GET() {
-  const departments = await prisma.department.findMany();
+export async function GET(req: NextRequest) {
+  const filter = req.nextUrl.searchParams.get("name");
+  const departments = await getDepartments(filter ?? "");
   return Response.json(departments);
 }

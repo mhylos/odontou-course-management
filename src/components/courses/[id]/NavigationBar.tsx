@@ -17,7 +17,7 @@ const INACTIVE_CLASS = "border-gray-100 text-sm h-max";
 export default function NavigationBar({ routes }: NavigationBarProps) {
   const pathname = usePathname();
   const splitPath = pathname.split("/");
-  const currentSectionPath = splitPath[3] ?? splitPath[2];
+  const currentSectionPath = splitPath[4] ?? splitPath[3];
 
   return (
     <div className="w-full h-14 border-b-4 border-primary flex justify-between items-end">

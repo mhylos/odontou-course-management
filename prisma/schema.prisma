@@ -25,11 +25,10 @@ model Course {
   inperson_hours      Float
   online_hours        Float
   name                String
-  objective           String
-  additional_comments String
+  objective           String   @db.Text
+  additional_comments String?  @db.Text
   date_from           DateTime
   date_to             DateTime
-  hour_value          Int
 
   department_fk      Int
   program_fk         Int
@@ -46,28 +45,41 @@ model Course {
   manages  Manages[]
 }
 
+enum Genres {
+  femenino
+  masculino
+}
+
 model Student {
-  rut   Int    @id
-  genre String
+  rut   Int     @id
+  genre Genres?
   name  String
   email String
 
   enrolled Enrolled[]
 }
 
-model Enrolled {
-  student_fk   Int
-  course_fk    Int
-  status       Boolean   @default(false)
-  payment_type String
-  discount     Int       @default(0)
-  ticket_num   Int?
-  payment_date DateTime?
-  total        Int
-  observation  String
+model PaymentTypes {
+  id   Int    @id @default(autoincrement())
+  name String
 
-  student Student @relation(fields: [student_fk], references: [rut], onDelete: Cascade)
-  course  Course  @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+  enrolled Enrolled[]
+}
+
+model Enrolled {
+  student_fk      Int
+  course_fk       Int
+  payment_type_fk Int?
+  status          Boolean   @default(false)
+  discount        Int       @default(0)
+  ticket_num      Int?
+  payment_date    DateTime?
+  total           Int
+  observation     String
+
+  student Student       @relation(fields: [student_fk], references: [rut], onDelete: Cascade)
+  course  Course        @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+  payment PaymentTypes? @relation(fields: [payment_type_fk], references: [id])
 
   @@id([student_fk, course_fk])
 }
@@ -100,17 +112,25 @@ model Department {
   academic Academic[]
 }
 
-model Manages {
-  academic_fk     Int
-  course_fk       Int
-  dedicated_hours Int
-  contract_hours  Int
-  hierarchy_type  String
-  percentage      Int
-  paid            Int
+model hierarchyTypes {
+  id   Int    @id @default(autoincrement())
+  name String
 
-  academic Academic @relation(fields: [academic_fk], references: [user_fk])
-  course   Course   @relation(fields: [course_fk], references: [id])
+  manages Manages[]
+}
+
+model Manages {
+  academic_fk       Int
+  course_fk         Int
+  hierarchy_type_fk Int
+  dedicated_hours   Int
+  contract_hours    Int
+  percentage        Int
+  paid              Int
+
+  academic       Academic       @relation(fields: [academic_fk], references: [user_fk])
+  course         Course         @relation(fields: [course_fk], references: [id])
+  hierarchy_type hierarchyTypes @relation(fields: [hierarchy_type_fk], references: [id])
 
   @@id([academic_fk, course_fk])
 }
@@ -133,10 +153,13 @@ model Administrator {
 }
 
 model User {
-  rut      Int     @id
-  password String
-  name     String?
-  email    String? @unique
+  id            String    @id @default(cuid())
+  rut           Int       @unique
+  password      String
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
 
   academic        Academic?
   administrator   Administrator?
@@ -145,16 +168,60 @@ model User {
   coordinator     Course[]       @relation(name: "coordinator")
   logger          Logger[]
 
+  //authjs 
+  accounts Account[]
+  sessions Session[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Logger {
   id          Int      @id @default(autoincrement())
-  user_fk     Int
+  user_fk     String
   action      String
   description String
   timestamp   DateTime
 
-  user User @relation(fields: [user_fk], references: [rut])
+  user User @relation(fields: [user_fk], references: [id])
+}
+
+// AUTH.JS
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
 }

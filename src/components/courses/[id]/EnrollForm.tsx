@@ -5,6 +5,7 @@ import SectionItem from "@/components/courses/[id]/SectionItem";
 import { Enroll } from "@/lib/definitions";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { enrollSchemaType } from "@/lib/zod";
+import FetchDropdown from "@/components/common/FetchDropdown";
 
 const enrolledOptions = [
   { value: 0, name: "No matriculado" },
@@ -61,17 +62,10 @@ export default function EnrollForm({
       </div>
       <div className="w-full grid grid-cols-3 gap-2">
         <SectionItem title="Fecha de pago">
-          <Controller
-            render={({ field: { onChange, value } }) => (
-              <Input
-                value={value ? value.toISOString().split("T")[0] : ""}
-                disabled={disabled}
-                onChange={(e) => onChange(new Date(e.currentTarget.value))}
-                type="date"
-              />
-            )}
-            name="payment_date"
-            control={form.control}
+          <Input
+            disabled={disabled}
+            type="date"
+            {...form.register("payment_date")}
           />
         </SectionItem>
         <SectionItem title="Descuento">
@@ -124,16 +118,13 @@ export default function EnrollForm({
       </div>
       <div className="w-full grid grid-cols-2 gap-2">
         <SectionItem title="Método de pago">
-          <Controller
-            render={({ field: { onChange, value } }) => (
-              <Input
-                value={value ?? ""}
-                disabled={disabled}
-                onChange={onChange}
-              />
-            )}
-            name="payment_type"
+          <FetchDropdown
+            name="payment_type_fk"
+            label="Tipo"
             control={form.control}
+            fetchUrl="/api/courses/payment-types/options"
+            disabled={disabled}
+            clearable
           />
         </SectionItem>
         <SectionItem title="Observación">
