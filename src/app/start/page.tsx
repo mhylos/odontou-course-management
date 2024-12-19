@@ -1,14 +1,14 @@
 "use server";
 
 import RegisterAdminForm from "@/components/start/registerAdminForm";
-import { checkStarted } from "@/services/userServices";
+// import { checkStarted } from "@/services/userServices";
 import Image from "next/image";
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
 
 export default async function Start() {
-  if (await checkStarted()) {
-    redirect("/");
-  }
+  // if (await checkStarted()) {
+  //   redirect("/");
+  // }
 
   return (
     <main className="flex flex-col justify-center items-center w-full h-full">
