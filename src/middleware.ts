@@ -10,7 +10,8 @@ export const config = {
 };
 
 export default auth((req) => {
-  if (!req.auth && req.nextUrl.pathname !== "/login") {
+  const unprotectedRoutes = ["/login", "/logout", "/start"];
+  if (!req.auth && !unprotectedRoutes.includes(req.nextUrl.pathname)) {
     const newUrl = new URL("/login", req.nextUrl.origin);
     return Response.redirect(newUrl);
   }
