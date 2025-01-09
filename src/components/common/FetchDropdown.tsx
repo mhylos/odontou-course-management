@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useSWR from "swr";
 import Dropdown, { DropdownProps, Option } from "@/components/common/Dropdown";
 import { fetcher } from "@/lib/utils";
@@ -6,11 +6,11 @@ import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { useDebouncedCallback } from "use-debounce";
 
 interface FetchDropdownProps<T extends FieldValues>
-  extends Omit<DropdownProps, "options" | "onChange"> {
+  extends Partial<DropdownProps> {
   name: Path<T>;
-  label: string;
-  control: Control<T>;
+  control?: Control<T>;
   fetchUrl: string;
+  selectedValue?: Option["value"];
 }
 
 export default function FetchDropdown<T extends FieldValues>(
@@ -28,19 +28,25 @@ export default function FetchDropdown<T extends FieldValues>(
 
   return (
     <Controller
-      render={({ field: { value, onChange } }) => (
+      render={({ field: { onChange } }) => (
         <Dropdown
           {...props}
+          id={props.name}
           label={props.label}
-          options={options?.map((option) => ({
-            name: option.name,
-            value: option.value,
-          }))}
-          selected={options?.find((option) => option.value == value)}
+          options={options}
+          selected={options?.find(
+            (option) => option.value == props.selectedValue
+          )}
           isLoading={isLoading}
-          onChange={(option) => onChange(option.value)}
+          onChange={(option) => {
+            props.onChange?.(option);
+            onChange(option.value);
+          }}
           onSearch={handleSearch}
-          onRemove={() => setFilter("")}
+          onRemove={() => {
+            props.onRemove?.();
+            setFilter("");
+          }}
         />
       )}
       name={props.name}

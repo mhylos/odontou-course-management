@@ -1,29 +1,45 @@
-import Input from "@/components/common/Input";
+"use client";
 
-interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  className?: string;
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import FloatingInput, {
+  FloatingInputProps,
+} from "@/components/common/FloatingInput";
+import { useDebouncedCallback } from "use-debounce";
+
+interface SearchInputProps extends FloatingInputProps {
+  queryName: string;
 }
 
 export default function SearchInput({
-  label,
-  id,
+  queryName,
   className,
+  ...props
 }: SearchInputProps) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
+  function handleSearch(term: string) {
+    const params = new URLSearchParams(searchParams);
+    if (term) {
+      params.set(queryName, term);
+    } else {
+      params.delete(queryName);
+    }
+    replace(`${pathname}?${params.toString()}`);
+  }
+
+  const handleInput = useDebouncedCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const term = e.target.value;
+      handleSearch(term);
+    },
+    500
+  );
+
   return (
-    <fieldset className={className}>
-      <label htmlFor={id} className="mb-2 text-md text-gray-900 ">
-        {label}
-      </label>
-      <div className="relative">
-        <Input type="search" id={id} className="w-full" />
-        <button
-          type="submit"
-          className="text-white absolute end-2.5 top-0 bottom-0 my-1 bg-primary hover:bg-primary/90 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded w-10  grid place-items-center"
-        >
-          <span className="icon-[ic--round-search] text-white text-xl" />
-        </button>
-      </div>
-    </fieldset>
+    <div className={className}>
+      <FloatingInput {...props} onChange={handleInput} />
+    </div>
   );
 }

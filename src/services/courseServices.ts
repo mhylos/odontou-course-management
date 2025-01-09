@@ -5,16 +5,235 @@ import { format } from "rutility";
 import { Option } from "@/components/common/Dropdown";
 import { createCourseSchemaType } from "@/lib/zod";
 import { revalidatePath } from "next/cache";
+import {
+  DEFAULT_COORDINATOR_PERCENTAGE,
+  DEFAULT_DIRECTOR_PERCENTAGE,
+  DISTRIBUTION_EXTERNAL_PERCENTAGE,
+  DISTRIBUTION_INTERNAL_PERCENTAGE,
+  DISTRIBUTION_TYPE_TOTAL,
+  OVERHEAD_PERCENTAGE,
+} from "@/lib/constants";
+import { FunctionTypes, MultiplierTypes, MultiplyWith } from "@prisma/client";
+import Decimal from "decimal.js";
 
 export async function createCourse(data: createCourseSchemaType) {
   try {
+    const program = await prisma.program.findUnique({
+      where: {
+        id: data.program_fk,
+      },
+    });
+
+    const isElearning = program?.name === "E-Learning";
+
+    const isExternal =
+      program?.name === "Presencial externo" ||
+      program?.name === "Semi-Presencial externo";
+
+    const distributionPercentage = isExternal
+      ? DISTRIBUTION_EXTERNAL_PERCENTAGE
+      : DISTRIBUTION_INTERNAL_PERCENTAGE;
+
     await prisma.course.create({
       data: {
         ...data,
+        incomes: {
+          create: [
+            {
+              name: "Ingresos arancel",
+              amount: 0,
+              order: 0,
+            },
+            {
+              name: "Otros ingresos afectos a I.V.A",
+              amount: 0,
+              order: 1,
+            },
+            {
+              name: "Otros ingresos no afectos a I.V.A",
+              amount: 0,
+              order: 2,
+            },
+            {
+              name: "Otros",
+              amount: 0,
+              order: 3,
+            },
+          ],
+        },
+        expenses: {
+          createMany: {
+            data: [
+              {
+                name: "Overhead Universidad",
+                multiplier: OVERHEAD_PERCENTAGE,
+                type: MultiplierTypes.percentage,
+                multiply: MultiplyWith.enroll_value,
+              },
+              ...(isElearning
+                ? [
+                    {
+                      name: "Pago plataforma",
+                      multiplier: 1,
+                      type: MultiplierTypes.unit_cost,
+                      multiply: MultiplyWith.students,
+                    },
+                  ]
+                : []),
+            ],
+          },
+        },
+        distribution: {
+          createMany: {
+            data: [
+              {
+                name: "Departamento",
+                percentage: new Decimal(100).minus(DISTRIBUTION_TYPE_TOTAL),
+              },
+              {
+                name: "Honorarios académicos",
+                percentage: distributionPercentage,
+              },
+              {
+                name: "Facultad",
+                percentage: new Decimal(DISTRIBUTION_TYPE_TOTAL).minus(
+                  distributionPercentage
+                ),
+              },
+            ],
+          },
+        },
+        honorarium: {
+          createMany: {
+            data: [
+              {
+                academic_fk: data.course_director_fk,
+                function: FunctionTypes.director,
+                hours: 0,
+                percentage: DEFAULT_DIRECTOR_PERCENTAGE,
+              },
+              {
+                academic_fk: data.coordinator_fk,
+                function: FunctionTypes.coordinator,
+                hours: 0,
+                percentage: DEFAULT_COORDINATOR_PERCENTAGE,
+              },
+            ],
+          },
+        },
       },
     });
-    revalidatePath("/courses");
-    return { message: "Curso creado con éxito", success: true };
+    revalidatePath("/cursos");
+    return { message: "Curso creado", success: true };
+  } catch (error) {
+    console.error(error);
+    return { message: "Error inesperado", success: false };
+  }
+}
+
+export async function updateCourse(id: number, data: createCourseSchemaType) {
+  try {
+    const program = await prisma.program.findUnique({
+      where: {
+        id: data.program_fk,
+      },
+    });
+
+    const isElearning = program?.name === "E-Learning";
+    const isExternal =
+      program?.name === "Presencial externo" ||
+      program?.name === "Semi-Presencial externo";
+
+    const distributionPercentage = isExternal
+      ? DISTRIBUTION_EXTERNAL_PERCENTAGE
+      : DISTRIBUTION_INTERNAL_PERCENTAGE;
+
+    await prisma.course.update({
+      where: {
+        id,
+      },
+      data: {
+        ...data,
+        honorarium: {
+          updateMany: [
+            {
+              where: {
+                function: FunctionTypes.director,
+              },
+              data: {
+                academic_fk: data.course_director_fk,
+              },
+            },
+            {
+              where: {
+                function: FunctionTypes.coordinator,
+              },
+              data: {
+                academic_fk: data.coordinator_fk,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const eLearningExists = await prisma.expenses.findFirst({
+      where: {
+        course_fk: id,
+        name: "Pago plataforma",
+      },
+    });
+
+    if (isElearning) {
+      if (!eLearningExists) {
+        await prisma.expenses.create({
+          data: {
+            course_fk: id,
+            name: "Pago plataforma",
+            multiplier: 1,
+            type: MultiplierTypes.unit_cost,
+            multiply: MultiplyWith.students,
+          },
+        });
+      }
+    } else {
+      if (eLearningExists) {
+        await prisma.expenses.delete({
+          where: {
+            id: eLearningExists.id,
+          },
+        });
+      }
+    }
+
+    await prisma.distribution.update({
+      where: {
+        name_course_fk: {
+          course_fk: id,
+          name: "Honorarios académicos",
+        },
+      },
+      data: {
+        percentage: distributionPercentage,
+      },
+    });
+
+    await prisma.distribution.update({
+      where: {
+        name_course_fk: {
+          course_fk: id,
+          name: "Facultad",
+        },
+      },
+      data: {
+        percentage: new Decimal(DISTRIBUTION_TYPE_TOTAL).minus(
+          distributionPercentage
+        ),
+      },
+    });
+
+    revalidatePath("/cursos");
+    return { message: "Curso actualizado", success: true };
   } catch (error) {
     console.error(error);
     return { message: "Error inesperado", success: false };
@@ -41,15 +260,6 @@ export async function getCourseById(id: string) {
       },
       course_director: { omit: { createdAt: true, updatedAt: true } },
       coordinator: { omit: { createdAt: true, updatedAt: true } },
-      enrolled: {
-        omit: {
-          student_fk: true,
-          course_fk: true,
-        },
-        include: {
-          student: true,
-        },
-      },
     },
   });
 
@@ -57,16 +267,56 @@ export async function getCourseById(id: string) {
     return null;
   }
 
-  return course;
+  return {
+    ...course,
+    direct_hours: course.direct_hours.toString(),
+    inperson_hours: course.inperson_hours.toString(),
+    online_hours: course.online_hours.toString(),
+    indirect_hours: course.indirect_hours.toString(),
+  };
 }
 
-export async function getAllCourses(name?: string) {
-  const courses = await prisma.course.findMany({
+export async function getStudentsEnrolled(courseId: number, filter?: string) {
+  const students = await prisma.enrolled.findMany({
     where: {
-      name: {
-        contains: name,
+      course_fk: courseId,
+      student: {
+        name: {
+          contains: filter,
+          mode: "insensitive",
+        },
       },
     },
+    include: {
+      student: {
+        select: { name: true, rut: true },
+      },
+    },
+  });
+
+  return students;
+}
+
+export async function getAllCourses(
+  name?: string,
+  payment?: string,
+  year?: number
+) {
+  const where: any = {
+    name: {
+      contains: name,
+    },
+  };
+
+  if (year) {
+    where.date_from = {
+      gte: new Date(year, 0, 1),
+      lt: new Date(year + 1, 0, 1),
+    };
+  }
+
+  const courses = await prisma.course.findMany({
+    where,
     omit: {
       program_fk: true,
       department_fk: true,
@@ -75,6 +325,9 @@ export async function getAllCourses(name?: string) {
     },
     include: {
       program: { select: { name: true } },
+    },
+    orderBy: {
+      date_from: "desc",
     },
   });
 
@@ -103,7 +356,7 @@ export async function isStudentEnrolled(courseId: number, rut: string) {
 }
 
 export async function getAcademicsByCourse(courseId: number) {
-  const academics = await prisma.manages.findMany({
+  const academics = await prisma.participation.findMany({
     where: {
       course_fk: courseId,
     },
@@ -114,8 +367,9 @@ export async function getAcademicsByCourse(courseId: number) {
     },
     include: {
       academic: {
-        select: { isFOUCH: true },
-        include: {
+        select: {
+          phone: true,
+          isFOUCH: true,
           department: { select: { name: true } },
           user: { select: { name: true, rut: true, email: true } },
         },
@@ -149,37 +403,6 @@ export async function getAllPrograms() {
   return programs;
 }
 
-export async function getDepartments(name?: string) {
-  const departments = await prisma.department.findMany({
-    where: {
-      name: {
-        contains: name,
-        mode: "insensitive",
-      },
-    },
-  });
-
-  return departments;
-}
-
-export async function getDepartmentsOptions(name?: string) {
-  const departments = await prisma.department.findMany({
-    where: {
-      name: {
-        contains: name,
-        mode: "insensitive",
-      },
-    },
-  });
-
-  const options: Option[] = departments.map((department) => ({
-    name: department.name,
-    value: department.id,
-  }));
-
-  return options;
-}
-
 export async function getProgramsOptions() {
   const programs = await prisma.program.findMany();
 
@@ -202,7 +425,69 @@ export async function getPaymentOptions() {
   return options;
 }
 
-export type getDepartmentsResponse = ReturnType<typeof getDepartments>;
+export async function getIncomesValues(courseId: number) {
+  const data = await prisma.course.findUnique({
+    where: {
+      id: courseId,
+    },
+    select: {
+      _count: {
+        select: {
+          enrolled: true,
+        },
+      },
+      enroll_value: true,
+    },
+  });
+
+  if (!data) {
+    return null;
+  }
+
+  return { enrollValue: data.enroll_value, students: data._count.enrolled };
+}
+
+export async function getResponsibles(courseId: number) {
+  const persons = await prisma.course.findUnique({
+    where: {
+      id: courseId,
+    },
+    select: {
+      course_director: {
+        select: {
+          academic: {
+            select: {
+              user: {
+                select: {
+                  name: true,
+                  rut: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      coordinator: {
+        select: {
+          academic: {
+            select: {
+              user: {
+                select: {
+                  name: true,
+                  rut: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return persons;
+}
+
+export type getResponsiblesResponse = ReturnType<typeof getResponsibles>;
 export type getAllProgramsResponse = ReturnType<typeof getAllPrograms>;
 export type getAcademicsByCourseResponse = ReturnType<
   typeof getAcademicsByCourse

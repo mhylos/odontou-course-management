@@ -1,5 +1,6 @@
-import { Genres, Prisma } from "@prisma/client";
+import { Genres, Income, Prisma } from "@prisma/client";
 import prisma from "./prisma";
+import { Optional } from "./utils";
 
 export type User = {
   rut: number;
@@ -94,6 +95,11 @@ export type AcademicCreateBody = Prisma.Args<
   "create"
 >["data"];
 
+export type ExpensesCreateBody = Prisma.Args<
+  typeof prisma.expenses,
+  "create"
+>["data"];
+
 export type UserCreateBody = Prisma.Args<typeof prisma.user, "create">["data"];
 
 export type Enroll = {
@@ -109,6 +115,11 @@ export type Enroll = {
 
   student: Student;
 };
+
+export type IncomeUpdateBody = Optional<
+  Omit<Income, "course_fk" | "editable">,
+  "amount" | "comment"
+>;
 
 export type AdminCreate = {} & UserCreate;
 

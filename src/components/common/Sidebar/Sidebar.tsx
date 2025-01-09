@@ -26,7 +26,7 @@ export default function Sidebar({ routes }: SidebarProps) {
   return (
     <aside
       id="logo-sidebar"
-      className={`z-40 h-full border-r-2 border-solid border-primary grid transition-[width] ${
+      className={`z-10 h-full border-r-2 border-solid border-primary grid transition-[width] ${
         isOpen
           ? "w-[20rem] grid-rows-[200px_1fr]"
           : "w-[3rem] grid-rows-[200px_1fr]"

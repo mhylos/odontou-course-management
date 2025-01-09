@@ -1,4 +1,4 @@
-import { getDepartmentsOptions } from "@/services/courseServices";
+import { getDepartmentsOptions } from "@/services/departmentServices";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {

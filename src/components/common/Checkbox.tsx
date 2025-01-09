@@ -11,10 +11,9 @@ const Checkbox = forwardRef(function Checkbox(
 ) {
   return (
     <>
-      <div className="flex">
+      <div className={`flex ${props.className ?? ""}`}>
         <div className="flex items-center h-5">
           <input
-            id="helper-checkbox"
             aria-describedby="helper-checkbox-text"
             type="checkbox"
             className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
@@ -24,8 +23,10 @@ const Checkbox = forwardRef(function Checkbox(
         </div>
         <div className="ms-2 text-sm">
           <label
-            htmlFor="helper-checkbox"
-            className="font-medium text-gray-900"
+            className={`font-medium text-gray-900 ${
+              props.disabled ? "text-gray-300" : ""
+            }`}
+            htmlFor={props.id}
           >
             {props.label}
           </label>

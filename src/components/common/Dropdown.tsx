@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 export interface DropdownProps {
+  id: string;
   label?: string;
   options?: Option[];
   selected?: Option;
@@ -14,10 +15,12 @@ export interface DropdownProps {
   className?: string;
   onSearch?: (search: string) => void;
   create?: () => void;
+  error?: string;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
 export interface Option {
-  name: string;
+  name: number | string | boolean;
   value: number | string | boolean | object;
 }
 
@@ -27,6 +30,7 @@ const INACTIVE_CLASSNAMES =
   "transition ease-in duration-75 transform opacity-0 scale-95 invisible";
 
 export default function Dropdown({
+  id,
   label,
   options,
   selected,
@@ -38,6 +42,8 @@ export default function Dropdown({
   className = "",
   onSearch,
   create,
+  error,
+  inputProps,
 }: DropdownProps) {
   const [optionsList, setOptionsList] = useState<Option[]>(options || []);
 
@@ -52,6 +58,7 @@ export default function Dropdown({
     setOptionsList(options || []);
     if (selected) {
       setSelectedOption(selected);
+      setSearch(selected.name.toString());
     }
   }, [selected, options]);
 
@@ -60,7 +67,7 @@ export default function Dropdown({
     option: Option
   ) => {
     e.stopPropagation();
-    setSearch(undefined);
+    setSearch(option.name.toString());
     setSelectedOption(option);
     onChange(option);
     setIsOpen(false);
@@ -71,38 +78,46 @@ export default function Dropdown({
   ) => {
     e.stopPropagation();
     setSelectedOption(undefined);
+    setSearch(undefined);
     onRemove();
   };
 
   return (
-    <div className={`relative inline-block text-left ${className}`.trimEnd()}>
+    <div
+      className={`relative inline-block text-left ${
+        label ? "mt-4" : ""
+      } ${className}`.trimEnd()}
+    >
       <div
-        className={`outline-none flex justify-between w-full p-2.5 ps-2 text-sm text-gray-900 border border-gray-300 rounded bg-gray-50 focus:ring-blue-500 focus:border-blue-500  group ${
-          disabled
-            ? "pointer-events-none bg-gray-100 cursor-not-allowed border-gray-300 "
-            : "cursor-pointer"
-        }`}
+        className={`outline-none flex justify-between w-full h-11 px-2 text-sm text-gray-900 border  rounded bg-gray-50 focus:ring-blue-500 focus:border-blue-500 place-items-center group ${
+          disabled ? "disable" : "cursor-pointer"
+        } ${error ? "border-red-500" : "border-gray-300"}`}
         id="menu-button"
         aria-disabled={disabled || isLoading}
         onFocus={() => setIsOpen(true)}
         onBlur={() => isClosable && setIsOpen(false)}
         tabIndex={0}
       >
-        <span
-          className={
-            "absolute text-sm text-gray-500 duration-300 transform origin-[0] pointer-events-none " +
-            (!selectedOption && !search
-              ? "scale-100 translate-y-0"
-              : "scale-75 -translate-y-8 group-focus:text-primary start-0")
-          }
-        >
-          {label}
-        </span>
+        {label && (
+          <span
+            className={
+              "absolute text-sm text-gray-500 duration-300 transform origin-[0] pointer-events-none " +
+              (!selectedOption && !search
+                ? "scale-100 translate-y-0"
+                : "scale-75 -translate-y-8 group-focus:text-primary start-0")
+            }
+          >
+            {label}
+          </span>
+        )}
         {!!onSearch ? (
           <input
-            value={search || selectedOption?.name}
+            {...inputProps}
+            id={id}
+            value={search ?? ""}
             onChange={(e) => {
-              if (e.currentTarget.value === "" && selectedOption) {
+              inputProps?.onChange?.(e);
+              if (e.currentTarget.value === "") {
                 setSelectedOption(undefined);
               }
               onSearch(e.currentTarget.value);
@@ -110,6 +125,7 @@ export default function Dropdown({
             }}
             onInput={(e) => setSearch(e.currentTarget.value)}
             className="w-full bg-transparent outline-none"
+            autoComplete="off"
           />
         ) : (
           <span className="text-sm text-gray-900">
@@ -176,6 +192,7 @@ export default function Dropdown({
           </span>
         )}
       </div>
+      {error && <span className="text-xs text-red-500">{error}</span>}
     </div>
   );
 }

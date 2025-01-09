@@ -24,15 +24,15 @@ export default async function RootLayout({ children, modal }: RootLayoutProps) {
           },
           {
             title: "Cursos",
-            href: "/courses",
+            href: "/cursos",
           },
           {
             title: "Académicos",
-            href: "/academics",
+            href: "/academicos",
           },
           {
             title: "Estudiantes",
-            href: "/students",
+            href: "/estudiantes",
           },
         ]}
       />

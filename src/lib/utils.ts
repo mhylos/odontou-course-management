@@ -34,19 +34,42 @@ export function dublicateItems<T>(arr: Array<T>, numberOfRepetitions: number) {
   );
 }
 
-export function formatDate(date: string | Date): string {
+export function formatDate(date: string | Date) {
   try {
     const formatDate = new Date(date);
 
-    const day = String(formatDate.getDate()).padStart(2, "0");
-    const month = String(formatDate.getMonth() + 1).padStart(2, "0");
-    const year = formatDate.getFullYear();
-
-    return `${day}-${month}-${year}`;
+    return formatDate
+      .toISOString()
+      .replace(/T.*/, "")
+      .split("-")
+      .reverse()
+      .join("-");
   } catch (e) {
-    return "No definido" + e;
+    return "";
   }
+}
+
+export function checkFileExtension(file: File, extensions: string[]) {
+  if (!file) return;
+  return extensions.includes(file.name.split(".").pop() || "");
+}
+
+export function isPercentage(value: string) {
+  return value.trimEnd().endsWith("%");
+}
+
+export function adjustNumber(value: number, length: number) {
+  const desiredLength = length;
+  const currentLength = value.toString().length;
+
+  if (currentLength < desiredLength) {
+    const multiplier = Math.pow(10, desiredLength - currentLength);
+    return value * multiplier;
+  }
+  return value; // If the length is already sufficient, do nothing
 }
 
 export const fetcher = (url: string | Request | URL) =>
   fetch(url).then((r) => r.json());
+
+export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;

@@ -1,6 +1,6 @@
 import { DepartmentCreate } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
-import { getDepartments } from "@/services/courseServices";
+import { getDepartments } from "@/services/departmentServices";
 import { NextRequest } from "next/server";
 
 export async function POST(request: Request) {

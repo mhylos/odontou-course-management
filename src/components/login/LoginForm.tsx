@@ -9,14 +9,17 @@ import { runFormatter } from "@/lib/utils";
 import { loginAction } from "@/app/actions/auth-actions";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function LoginForm() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const { control } = useForm<loginSchemaType>({
     resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = async (data: loginSchemaType) => {
+    setIsLoading(true);
     try {
       const response = await loginAction(data);
       toast(response.message, { type: response.success ? "success" : "error" });
@@ -24,6 +27,7 @@ export default function LoginForm() {
     } catch (error) {
       console.error(error);
     }
+    setIsLoading(false);
   };
 
   return (
@@ -39,6 +43,7 @@ export default function LoginForm() {
               label="RUT"
               errors={error}
               value={value || ""}
+              disabled={isLoading}
               onChange={(value) => {
                 const formatted = runFormatter(value.currentTarget.value);
                 onChange(formatted);
@@ -54,6 +59,7 @@ export default function LoginForm() {
               label="Contraseña"
               type="password"
               errors={error}
+              disabled={isLoading}
               onChange={onChange}
             />
           )}
@@ -61,7 +67,13 @@ export default function LoginForm() {
           control={control}
         />
       </fieldset>
-      <Button>Iniciar Sesión</Button>
+      <Button disabled={isLoading}>
+        {isLoading ? (
+          <span className="icon-[line-md--loading-loop]" />
+        ) : (
+          "Iniciar Sesión"
+        )}
+      </Button>
     </Form>
   );
 }

@@ -12,18 +12,19 @@ generator client {
 datasource db {
   // provider = "postgresql"
   // url      = env("POSTGRES_PRISMA_URL")
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  // directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
 model Course {
   id                  Int      @id @default(autoincrement())
   enroll_value        Int
-  direct_hours        Float
-  indirect_hours      Float
-  inperson_hours      Float
-  online_hours        Float
+  direct_hours        Decimal  @db.Decimal(5, 2)
+  indirect_hours      Decimal  @db.Decimal(5, 2)
+  inperson_hours      Decimal  @db.Decimal(5, 2)
+  online_hours        Decimal  @db.Decimal(5, 2)
   name                String
   objective           String   @db.Text
   additional_comments String?  @db.Text
@@ -40,9 +41,38 @@ model Course {
   course_director User       @relation(fields: [course_director_fk], references: [rut], name: "course_director")
   coordinator     User       @relation(fields: [coordinator_fk], references: [rut], name: "coordinator")
 
-  expenses Expenses[]
-  enrolled Enrolled[]
-  manages  Manages[]
+  expenses     Expenses[]
+  enrolled     Enrolled[]
+  manages      Participation[]
+  incomes      Income[]
+  distribution Distribution[]
+  honorarium   Honorarium[]
+}
+
+model Distribution {
+  id         Int      @id @default(autoincrement())
+  course_fk  Int
+  name       String
+  percentage Decimal  @db.Decimal(6, 3)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  course Course @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+
+  @@unique([name, course_fk])
+}
+
+model Income {
+  id        Int     @id @default(autoincrement())
+  name      String
+  course_fk Int
+  amount    Int
+  comment   String? @db.Text
+  order     Int     @default(0)
+
+  course Course @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+
+  @@unique([name, course_fk])
 }
 
 enum Genres {
@@ -66,33 +96,68 @@ model PaymentTypes {
   enrolled Enrolled[]
 }
 
+model Refund {
+  id          Int      @id @default(autoincrement())
+  enrolled_fk Int
+  refund_date DateTime
+  amount      Int
+  observation String
+
+  enrolled Enrolled @relation(fields: [enrolled_fk], references: [id])
+}
+
+enum EnrollTypes {
+  convenio
+  autofinanciado
+  becado
+}
+
 model Enrolled {
+  id              Int         @unique @default(autoincrement())
   student_fk      Int
   course_fk       Int
   payment_type_fk Int?
-  status          Boolean   @default(false)
-  discount        Int       @default(0)
+  status          Boolean     @default(false)
+  discount        Int         @default(0)
   ticket_num      Int?
   payment_date    DateTime?
   total           Int
   observation     String
+  installments    Int?        @default(1)
+  paid            Int?        @default(0)
+  file            String?
+  enroll_type     EnrollTypes @default(autofinanciado)
 
   student Student       @relation(fields: [student_fk], references: [rut], onDelete: Cascade)
   course  Course        @relation(fields: [course_fk], references: [id], onDelete: Cascade)
-  payment PaymentTypes? @relation(fields: [payment_type_fk], references: [id])
+  payment PaymentTypes? @relation(fields: [payment_type_fk], references: [id], onDelete: SetDefault)
+  refunds Refund[]
 
   @@id([student_fk, course_fk])
 }
 
+enum MultiplierTypes {
+  percentage
+  unit_cost
+}
+
+enum MultiplyWith {
+  students
+  enroll_value
+}
+
 model Expenses {
+  id         Int             @id @default(autoincrement())
   course_fk  Int
   name       String
-  unit_value Int
-  quantity   Int
+  type       MultiplierTypes
+  multiplier Decimal         @db.Decimal(10, 2)
+  multiply   MultiplyWith
+  created_at DateTime        @default(now())
 
-  course Course @relation(fields: [course_fk], references: [id])
+  course Course @relation(fields: [course_fk], references: [id], onDelete: Cascade)
 
-  @@id(name: "expenses_id", [name, course_fk])
+  @@unique([name, course_fk])
 }
 
 model Program {
@@ -106,31 +171,66 @@ model Department {
   name        String
   director_fk Int?
 
-  director User? @relation(fields: [director_fk], references: [rut])
+  director User? @relation(fields: [director_fk], references: [rut], onDelete: SetNull)
 
   courses  Course[]
   academic Academic[]
 }
 
-model hierarchyTypes {
+model HierarchyTypes {
   id   Int    @id @default(autoincrement())
   name String
 
-  manages Manages[]
+  manages Participation[]
 }
 
-model Manages {
+enum FunctionTypes {
+  director
+  coordinator
+  dictante
+  tutor
+}
+
+model HonorariumPayment {
+  id            Int      @id @default(autoincrement())
+  honorarium_fk Int
+  payment_date  DateTime
+  amount        Int
+  observation   String
+
+  honorarium Honorarium @relation(fields: [honorarium_fk], references: [id])
+}
+
+model Honorarium {
+  id               Int           @unique @default(autoincrement())
+  course_fk        Int
+  academic_fk      Int
+  participation_fk Int?
+  hours            Int
+  function         FunctionTypes
+  percentage       Decimal       @default(0) @db.Decimal(6, 3)
+
+  honorarium_payment HonorariumPayment[]
+
+  participation Participation? @relation(fields: [participation_fk], references: [id], onDelete: SetNull)
+  course        Course         @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+  academic      Academic       @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
+
+  @@id([course_fk, academic_fk, function])
+}
+
+model Participation {
+  id                Int  @unique @default(autoincrement())
   academic_fk       Int
   course_fk         Int
   hierarchy_type_fk Int
-  dedicated_hours   Int
-  contract_hours    Int
-  percentage        Int
-  paid              Int
+  dedicated_hours   Int?
+  contract_hours    Int?
 
-  academic       Academic       @relation(fields: [academic_fk], references: [user_fk])
-  course         Course         @relation(fields: [course_fk], references: [id])
-  hierarchy_type hierarchyTypes @relation(fields: [hierarchy_type_fk], references: [id])
+  academic       Academic       @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
+  course         Course         @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+  hierarchy_type HierarchyTypes @relation(fields: [hierarchy_type_fk], references: [id], onDelete: Restrict)
+  honorarium     Honorarium[]
 
   @@id([academic_fk, course_fk])
 }
@@ -139,11 +239,13 @@ model Academic {
   user_fk       Int     @id
   department_fk Int
   isFOUCH       Boolean
+  phone         Int?
 
   department Department @relation(fields: [department_fk], references: [id])
   user       User       @relation(fields: [user_fk], references: [rut])
 
-  manages Manages[]
+  manages    Participation[]
+  Honorarium Honorarium[]
 }
 
 model Administrator {
