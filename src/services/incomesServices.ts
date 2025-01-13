@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { incomesSchemaType } from "@/lib/zod";
+import { IncomesSchemaType } from "@/lib/zod";
 import { revalidatePath } from "next/cache";
 
 export async function recalculateFee(courseId: number) {
@@ -35,7 +35,7 @@ export async function getCourseIncomes(courseId: number) {
   return incomes;
 }
 
-export async function updateIncomes(data: incomesSchemaType, courseId: number) {
+export async function updateIncomes(data: IncomesSchemaType, courseId: number) {
   try {
     await Promise.all(
       data.incomes.map((income) => {

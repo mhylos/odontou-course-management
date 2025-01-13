@@ -5,7 +5,8 @@ import {
   EnrollTypes,
   MultiplierTypes,
   MultiplyWith,
-  FunctionTypes,
+  AcademicFunctions,
+  ResponsibleFunctions,
 } from "@prisma/client";
 import { FILE_EXTENSIONS } from "./constants";
 import { checkFileExtension } from "./utils";
@@ -209,39 +210,48 @@ export const distributionsSchema = object({
   distributions: z.array(distributionSchema),
 });
 
-export const honorariumSchema = object({
+export const responsibleHonorariumSchema = object({
+  id: number(),
+  academic_name: string(),
+  function: nativeEnum(ResponsibleFunctions),
+  percentage: string({ required_error: "Las horas son requeridas" }),
+});
+
+export const academicHonorariumSchema = object({
   id: number().optional(),
   academic_fk: number({ required_error: "El académico es requerido" }),
-  function: nativeEnum(FunctionTypes),
-  percentage: string({ required_error: "El porcentaje es requerido" }),
-  hours: number({ required_error: "Las horas son requeridas" }),
+  academic_name: string(),
+  function: nativeEnum(AcademicFunctions),
+  hours: string({ required_error: "Las horas son requeridas" }),
 });
 
 export const honorariumsSchema = object({
-  director_percentage: string({ required_error: "El porcentaje es requerido" }),
-  coordinator_percentage: string({
-    required_error: "El porcentaje es requerido",
-  }),
-  honorariums: z.array(honorariumSchema),
+  responsiblesHonorariums: z.array(responsibleHonorariumSchema),
+  academicsHonorariums: z.array(academicHonorariumSchema),
 });
 
-export type honorariumSchemaType = z.infer<typeof honorariumSchema>;
-export type honorariumsSchemaType = z.infer<typeof honorariumsSchema>;
-export type distributionSchemaType = z.infer<typeof distributionSchema>;
-export type distributionsSchemaType = z.infer<typeof distributionsSchema>;
-export type incomeSchemaType = z.infer<typeof incomeSchema>;
-export type incomesSchemaType = z.infer<typeof incomesSchema>;
-export type expenseSchemaType = z.infer<typeof expenseSchema>;
-export type expensesSchemaType = z.infer<typeof expensesSchema>;
-export type academicParticipationSchemaType = z.infer<
+export type AcademicHonorariumSchemaType = z.infer<
+  typeof academicHonorariumSchema
+>;
+export type ResponsibleHonorariumSchemaType = z.infer<
+  typeof responsibleHonorariumSchema
+>;
+export type HonorariumsSchemaType = z.infer<typeof honorariumsSchema>;
+export type DistributionSchemaType = z.infer<typeof distributionSchema>;
+export type DistributionsSchemaType = z.infer<typeof distributionsSchema>;
+export type IncomeSchemaType = z.infer<typeof incomeSchema>;
+export type IncomesSchemaType = z.infer<typeof incomesSchema>;
+export type ExpenseSchemaType = z.infer<typeof expenseSchema>;
+export type ExpensesSchemaType = z.infer<typeof expensesSchema>;
+export type AcademicParticipationSchemaType = z.infer<
   typeof academicParticipationSchema
 >;
-export type searchCourseSchemaType = z.infer<typeof searchCourseSchema>;
-export type createDepartmentSchemaType = z.infer<typeof createDepartmentSchema>;
-export type createAcademicSchemaType = z.infer<typeof createAcademicSchema>;
-export type createCourseSchemaType = z.infer<typeof createCourseSchema>;
-export type studentSchemaType = z.infer<typeof studentSchema>;
-export type enrollSchemaType = z.infer<typeof enrollSchema>;
-export type studentEnrollSchemaType = z.infer<typeof studentEnrollSchema>;
-export type loginSchemaType = z.infer<typeof loginSchema>;
-export type registerSchemaType = z.infer<typeof registerSchema>;
+export type SearchCourseSchemaType = z.infer<typeof searchCourseSchema>;
+export type CreateDepartmentSchemaType = z.infer<typeof createDepartmentSchema>;
+export type CreateAcademicSchemaType = z.infer<typeof createAcademicSchema>;
+export type CreateCourseSchemaType = z.infer<typeof createCourseSchema>;
+export type StudentSchemaType = z.infer<typeof studentSchema>;
+export type EnrollSchemaType = z.infer<typeof enrollSchema>;
+export type StudentEnrollSchemaType = z.infer<typeof studentEnrollSchema>;
+export type LoginSchemaType = z.infer<typeof loginSchema>;
+export type RegisterSchemaType = z.infer<typeof registerSchema>;

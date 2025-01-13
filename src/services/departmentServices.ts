@@ -1,11 +1,11 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { createDepartmentSchemaType } from "@/lib/zod";
+import { CreateDepartmentSchemaType } from "@/lib/zod";
 import { revalidatePath } from "next/cache";
 import { Option } from "@/components/common/Dropdown";
 
-export async function createDepartment(data: createDepartmentSchemaType) {
+export async function createDepartment(data: CreateDepartmentSchemaType) {
   try {
     if (data.name === "") {
       return { message: "El nombre es obligatorio", success: false };

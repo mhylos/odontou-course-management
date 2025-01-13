@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { adjustNumber, runToNumber } from "@/lib/utils";
-import { enrollSchemaType, studentSchemaType } from "@/lib/zod";
+import { EnrollSchemaType, StudentSchemaType } from "@/lib/zod";
 import { mkdir, stat, writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { join } from "path";
@@ -24,10 +24,10 @@ export async function upsertStudentEnroll(
 ) {
   const student = JSON.parse(
     formData.get("student") as string
-  ) as studentSchemaType;
+  ) as StudentSchemaType;
   const enroll = JSON.parse(
     formData.get("enroll") as string
-  ) as enrollSchemaType;
+  ) as EnrollSchemaType;
   const file = formData.get("file") as File;
   const rut = runToNumber(student.rut);
   const { payment_type_fk, ...enrollData } = enroll;
@@ -45,8 +45,6 @@ export async function upsertStudentEnroll(
       await writeFile(`${uploadDir}/${filename}`, buffer);
     }
   }
-
-  console.log(enrollData);
 
   const foundStudent = await prisma.student.findUnique({
     where: {

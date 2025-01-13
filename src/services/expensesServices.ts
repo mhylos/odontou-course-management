@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { expenseSchemaType, expensesSchemaType } from "@/lib/zod";
+import { ExpenseSchemaType, ExpensesSchemaType } from "@/lib/zod";
 import Decimal from "decimal.js";
 import { revalidatePath } from "next/cache";
 
@@ -35,12 +35,12 @@ export async function deleteExpense(expenseId: number) {
 }
 
 export async function createOrUpdateExpenses(
-  data: expensesSchemaType,
+  data: ExpensesSchemaType,
   courseId: number
 ) {
   try {
-    const updatedExpenses: expensesSchemaType["expenses"] = [];
-    const newExpenses: expensesSchemaType["expenses"] = [];
+    const updatedExpenses: ExpensesSchemaType["expenses"] = [];
+    const newExpenses: ExpensesSchemaType["expenses"] = [];
 
     data.expenses.map((expense) => {
       if (!expense.id) {
@@ -50,7 +50,6 @@ export async function createOrUpdateExpenses(
       }
     });
 
-    console.log("update:", updatedExpenses, "new:", newExpenses);
     await Promise.all(
       updatedExpenses.map((expense) => {
         if (!expense) return;

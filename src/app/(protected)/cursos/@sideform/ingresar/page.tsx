@@ -1,4 +1,4 @@
-import CreateCourseForm from "@/components/Forms/CourseForm";
+import CreateCourseForm from "@/components/forms/CourseForm";
 import RightSidebar from "@/components/common/RightSidebar";
 
 export default function CreateCourse() {

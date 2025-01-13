@@ -1,6 +1,6 @@
-import CourseForm from "@/components/Forms/CourseForm";
+import CourseForm from "@/components/forms/CourseForm";
 import RightSidebar from "@/components/common/RightSidebar";
-import { createCourseSchemaType } from "@/lib/zod";
+import { CreateCourseSchemaType } from "@/lib/zod";
 import { getCourseById } from "@/services/courseServices";
 
 export default async function EditCourse({
@@ -15,7 +15,7 @@ export default async function EditCourse({
     return <div>El curso no existe</div>;
   }
 
-  const values: createCourseSchemaType = {
+  const values: CreateCourseSchemaType = {
     additional_comments: course.additional_comments ?? "",
     coordinator_fk: course.coordinator.rut,
     course_director_fk: course.course_director.rut,

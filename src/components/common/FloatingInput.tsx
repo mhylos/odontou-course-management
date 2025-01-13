@@ -1,5 +1,4 @@
 import { forwardRef, InputHTMLAttributes } from "react";
-import { FieldError } from "react-hook-form";
 
 export interface FloatingInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "ref"> {
@@ -19,6 +18,7 @@ const FloatingInput = forwardRef(function FloatingInput(
           error ? "border-red-500" : "border-gray-300"
         }`}
         placeholder=" "
+        autoComplete="off"
         {...props}
         ref={ref}
       />

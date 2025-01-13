@@ -1,6 +1,6 @@
 import EnrollModal from "@/components/cursos/detalles/[id]/estudiantes/EnrollModal";
 import { restoreRun } from "@/lib/utils";
-import { enrollSchemaType, studentSchemaType } from "@/lib/zod";
+import { EnrollSchemaType, StudentSchemaType } from "@/lib/zod";
 import { getCourseById } from "@/services/courseServices";
 import { getEnroll } from "@/services/studentServices";
 
@@ -19,7 +19,7 @@ export default async function StudentDetails({ params }: StudentDetailsProps) {
 
   const enroll = await getEnroll(parseInt(rut), parseInt(id));
 
-  const values: { student: studentSchemaType; enroll: enrollSchemaType } = {
+  const values: { student: StudentSchemaType; enroll: EnrollSchemaType } = {
     student: {
       rut: restoreRun(parseInt(rut)),
       email: enroll?.student.email ?? "",

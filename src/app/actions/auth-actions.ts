@@ -1,13 +1,13 @@
 "use server";
 
-import { loginSchemaType, registerSchemaType, registerSchema } from "@/lib/zod";
+import { LoginSchemaType, RegisterSchemaType, registerSchema } from "@/lib/zod";
 import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 import { isValidRut, format } from "rutility";
 import bcrypt from "bcryptjs";
 import db from "@/lib/prisma";
 
-export async function createAdminAction(values: registerSchemaType) {
+export async function createAdminAction(values: RegisterSchemaType) {
   try {
     const { data, success } = registerSchema.safeParse(values);
 
@@ -48,7 +48,7 @@ export async function createAdminAction(values: registerSchemaType) {
   }
 }
 
-export async function loginAction(values: loginSchemaType) {
+export async function loginAction(values: LoginSchemaType) {
   try {
     await signIn("credentials", {
       rut: values.rut,

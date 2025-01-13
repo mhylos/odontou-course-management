@@ -13,9 +13,9 @@ import {
   useWatch,
 } from "react-hook-form";
 import {
-  expenseSchemaType,
+  ExpenseSchemaType,
   expensesSchema,
-  expensesSchemaType,
+  ExpensesSchemaType,
 } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import RadioButton from "@/components/common/RadioButton";
@@ -43,8 +43,8 @@ function Total({
   control,
   calculateTotal,
 }: {
-  control: Control<expensesSchemaType>;
-  calculateTotal: (expense: Partial<expenseSchemaType>) => number;
+  control: Control<ExpensesSchemaType>;
+  calculateTotal: (expense: Partial<ExpenseSchemaType>) => number;
 }) {
   const { expenses } = useWatch({ control });
   if (!expenses) return null;
@@ -63,9 +63,9 @@ function RowTotal({
   index,
   calculateTotal,
 }: {
-  control: Control<expensesSchemaType>;
+  control: Control<ExpensesSchemaType>;
   index: number;
-  calculateTotal: (expense: Partial<expenseSchemaType>) => number;
+  calculateTotal: (expense: Partial<ExpenseSchemaType>) => number;
 }) {
   const expense = useWatch({
     control,
@@ -88,7 +88,7 @@ export default function ExpensesTable({
     formState: { isSubmitting, isDirty },
     control,
     setValue,
-  } = useForm<expensesSchemaType>({
+  } = useForm<ExpensesSchemaType>({
     resolver: zodResolver(expensesSchema),
     defaultValues: {
       expenses: expenses.map((expense) => ({
@@ -107,7 +107,7 @@ export default function ExpensesTable({
     name: "expenses",
   });
 
-  const onSubmit: SubmitHandler<expensesSchemaType> = (data) => {
+  const onSubmit: SubmitHandler<ExpensesSchemaType> = (data) => {
     return new Promise(async (resolve) => {
       try {
         const response = await createOrUpdateExpenses(data, courseId);
@@ -133,7 +133,7 @@ export default function ExpensesTable({
     });
   };
 
-  const onErrors: SubmitErrorHandler<expensesSchemaType> = () => {
+  const onErrors: SubmitErrorHandler<ExpensesSchemaType> = () => {
     toast.error("Error en un campo", {
       toastId: "error",
     });
@@ -158,7 +158,7 @@ export default function ExpensesTable({
     setRowLoading(undefined);
   };
 
-  const calculateTotal = (expense: Partial<expenseSchemaType>) => {
+  const calculateTotal = (expense: Partial<ExpenseSchemaType>) => {
     if (!expense.multiplier || !expense.multiply) return 0;
     const cleanMultiplier = Number(expense.multiplier.replace(/[^0-9.]/g, ""));
     return (

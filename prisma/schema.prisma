@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 // prettier-ignore
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["omitApi"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -184,10 +183,13 @@ model HierarchyTypes {
   manages Participation[]
 }
 
-enum FunctionTypes {
+enum ResponsibleFunctions {
   director
   coordinator
-  dictante
+}
+
+enum AcademicFunctions {
+  instructor
   tutor
 }
 
@@ -201,22 +203,43 @@ model HonorariumPayment {
   honorarium Honorarium @relation(fields: [honorarium_fk], references: [id])
 }
 
+model ResponsibleHonorarium {
+  id            Int                  @id @default(autoincrement())
+  honorarium_fk Int
+  percentage    Decimal              @default(0) @db.Decimal(6, 3)
+  function      ResponsibleFunctions
+
+  honorarium Honorarium @relation(fields: [honorarium_fk], references: [id])
+
+  @@unique([honorarium_fk, function])
+}
+
+model AcademicHonorarium {
+  id               Int               @id @default(autoincrement())
+  honorarium_fk    Int
+  participation_fk Int
+  hours            Decimal           @default(0) @db.Decimal(5, 2)
+  function         AcademicFunctions
+
+  honorarium    Honorarium    @relation(fields: [honorarium_fk], references: [id])
+  participation Participation @relation(fields: [participation_fk], references: [id])
+
+  @@unique([honorarium_fk, participation_fk, function])
+}
+
 model Honorarium {
-  id               Int           @unique @default(autoincrement())
-  course_fk        Int
-  academic_fk      Int
-  participation_fk Int?
-  hours            Int
-  function         FunctionTypes
-  percentage       Decimal       @default(0) @db.Decimal(6, 3)
+  id          Int @unique @default(autoincrement())
+  course_fk   Int
+  academic_fk Int
 
   honorarium_payment HonorariumPayment[]
 
-  participation Participation? @relation(fields: [participation_fk], references: [id], onDelete: SetNull)
-  course        Course         @relation(fields: [course_fk], references: [id], onDelete: Cascade)
-  academic      Academic       @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
+  course                 Course                  @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+  academic               Academic                @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
+  responsible_honorarium ResponsibleHonorarium[]
+  academic_honorarium    AcademicHonorarium[]
 
-  @@id([course_fk, academic_fk, function])
+  @@id([course_fk, academic_fk])
 }
 
 model Participation {
@@ -227,10 +250,10 @@ model Participation {
   dedicated_hours   Int?
   contract_hours    Int?
 
-  academic       Academic       @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
-  course         Course         @relation(fields: [course_fk], references: [id], onDelete: Cascade)
-  hierarchy_type HierarchyTypes @relation(fields: [hierarchy_type_fk], references: [id], onDelete: Restrict)
-  honorarium     Honorarium[]
+  academic            Academic             @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
+  course              Course               @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+  hierarchy_type      HierarchyTypes       @relation(fields: [hierarchy_type_fk], references: [id], onDelete: Restrict)
+  academic_honorarium AcademicHonorarium[]
 
   @@id([academic_fk, course_fk])
 }

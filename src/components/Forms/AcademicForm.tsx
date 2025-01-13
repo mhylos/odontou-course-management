@@ -1,10 +1,10 @@
-import { createAcademicSchema, createAcademicSchemaType } from "@/lib/zod";
+import { createAcademicSchema, CreateAcademicSchemaType } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, Form, SubmitErrorHandler, useForm } from "react-hook-form";
 import Button from "@/components/common/Button";
 import FetchDropdown from "@/components/common/FetchDropdown";
 import FloatingInput from "@/components/common/FloatingInput";
-import FormFieldset from "@/components/Forms/FormFieldset";
+import FormFieldset from "@/components/forms/FormFieldset";
 import Checkbox from "@/components/common/Checkbox";
 import { runFormatter } from "@/lib/utils";
 import { createAcademic } from "@/services/academicsServices";
@@ -19,11 +19,11 @@ export default function AcademicForm({
   className,
   onClose,
 }: AcademicFormProps) {
-  const form = useForm<createAcademicSchemaType>({
+  const form = useForm<CreateAcademicSchemaType>({
     resolver: zodResolver(createAcademicSchema),
   });
 
-  const onSubmit = async (data: createAcademicSchemaType) => {
+  const onSubmit = async (data: CreateAcademicSchemaType) => {
     try {
       const response = await createAcademic(data);
       toast(response.message, { type: response.success ? "success" : "error" });

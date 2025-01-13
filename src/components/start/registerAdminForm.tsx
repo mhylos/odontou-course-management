@@ -2,7 +2,7 @@
 
 import { createAdminAction } from "@/app/actions/auth-actions";
 import { runFormatter } from "@/lib/utils";
-import { registerSchemaType, registerSchema } from "@/lib/zod";
+import { RegisterSchemaType, registerSchema } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Form, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -12,11 +12,11 @@ import { useRouter } from "next/navigation";
 
 export default function RegisterAdminForm() {
   const router = useRouter();
-  const { control } = useForm<registerSchemaType>({
+  const { control } = useForm<RegisterSchemaType>({
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = async (data: registerSchemaType) => {
+  const onSubmit = async (data: RegisterSchemaType) => {
     try {
       const response = await createAdminAction(data);
       toast(response?.message, {

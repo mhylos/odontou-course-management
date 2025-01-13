@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, Form, useForm } from "react-hook-form";
-import { loginSchemaType, loginSchema } from "@/lib/zod";
+import { LoginSchemaType, loginSchema } from "@/lib/zod";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/FloatingInput";
 import { runFormatter } from "@/lib/utils";
@@ -14,11 +14,11 @@ import { useState } from "react";
 export default function LoginForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const { control } = useForm<loginSchemaType>({
+  const { control } = useForm<LoginSchemaType>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: loginSchemaType) => {
+  const onSubmit = async (data: LoginSchemaType) => {
     setIsLoading(true);
     try {
       const response = await loginAction(data);

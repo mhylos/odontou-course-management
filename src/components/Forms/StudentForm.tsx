@@ -6,13 +6,13 @@ import { useState } from "react";
 import { capitalize, runFormatter } from "@/lib/utils";
 import { isStudentEnrolled } from "@/services/courseServices";
 import Dropdown from "@/components/common/Dropdown";
-import { studentSchemaType } from "@/lib/zod";
+import { StudentSchemaType } from "@/lib/zod";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { Genres } from "@prisma/client";
 
 interface StudentFormProps {
   courseId: number;
-  form: UseFormReturn<studentSchemaType>;
+  form: UseFormReturn<StudentSchemaType>;
   disableRut?: boolean;
 }
 

@@ -14,7 +14,7 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
-import { incomesSchema, incomesSchemaType } from "@/lib/zod";
+import { incomesSchema, IncomesSchemaType } from "@/lib/zod";
 import { toast } from "react-toastify";
 import Input from "@/components/common/Input";
 import Section from "../Section";
@@ -27,7 +27,7 @@ interface IncomesTableProps {
   courseId: number;
 }
 
-function Total({ control }: { control: Control<incomesSchemaType> }) {
+function Total({ control }: { control: Control<IncomesSchemaType> }) {
   const incomes = useWatch({ control, name: "incomes" });
 
   return (
@@ -48,7 +48,7 @@ export default function IncomesTable({ data, courseId }: IncomesTableProps) {
     reset,
     formState: { isDirty, isSubmitting },
     control,
-  } = useForm<incomesSchemaType>({
+  } = useForm<IncomesSchemaType>({
     resolver: zodResolver(incomesSchema),
     defaultValues: { incomes: data },
   });
@@ -58,7 +58,7 @@ export default function IncomesTable({ data, courseId }: IncomesTableProps) {
     name: "incomes",
   });
 
-  const onSubmit: SubmitHandler<incomesSchemaType> = async (data) => {
+  const onSubmit: SubmitHandler<IncomesSchemaType> = async (data) => {
     return new Promise(async () => {
       try {
         const response = await updateIncomes(data, courseId);

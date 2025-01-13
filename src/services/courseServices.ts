@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { format } from "rutility";
 import { Option } from "@/components/common/Dropdown";
-import { createCourseSchemaType } from "@/lib/zod";
+import { CreateCourseSchemaType } from "@/lib/zod";
 import { revalidatePath } from "next/cache";
 import {
   DEFAULT_COORDINATOR_PERCENTAGE,
@@ -13,10 +13,15 @@ import {
   DISTRIBUTION_TYPE_TOTAL,
   OVERHEAD_PERCENTAGE,
 } from "@/lib/constants";
-import { FunctionTypes, MultiplierTypes, MultiplyWith } from "@prisma/client";
+import {
+  MultiplierTypes,
+  MultiplyWith,
+  ResponsibleFunctions,
+} from "@prisma/client";
 import Decimal from "decimal.js";
+import { upsertResponsiblesHonorariums } from "./honorariumServices";
 
-export async function createCourse(data: createCourseSchemaType) {
+export async function createCourse(data: CreateCourseSchemaType) {
   try {
     const program = await prisma.program.findUnique({
       where: {
@@ -34,7 +39,7 @@ export async function createCourse(data: createCourseSchemaType) {
       ? DISTRIBUTION_EXTERNAL_PERCENTAGE
       : DISTRIBUTION_INTERNAL_PERCENTAGE;
 
-    await prisma.course.create({
+    const course = await prisma.course.create({
       data: {
         ...data,
         incomes: {
@@ -103,26 +108,21 @@ export async function createCourse(data: createCourseSchemaType) {
             ],
           },
         },
-        honorarium: {
-          createMany: {
-            data: [
-              {
-                academic_fk: data.course_director_fk,
-                function: FunctionTypes.director,
-                hours: 0,
-                percentage: DEFAULT_DIRECTOR_PERCENTAGE,
-              },
-              {
-                academic_fk: data.coordinator_fk,
-                function: FunctionTypes.coordinator,
-                hours: 0,
-                percentage: DEFAULT_COORDINATOR_PERCENTAGE,
-              },
-            ],
-          },
-        },
       },
     });
+
+    await upsertResponsiblesHonorariums(course.id, {
+      function: ResponsibleFunctions.coordinator,
+      percentage: new Decimal(DEFAULT_COORDINATOR_PERCENTAGE),
+      rut: data.coordinator_fk,
+    });
+
+    await upsertResponsiblesHonorariums(course.id, {
+      function: ResponsibleFunctions.director,
+      percentage: new Decimal(DEFAULT_DIRECTOR_PERCENTAGE),
+      rut: data.course_director_fk,
+    });
+
     revalidatePath("/cursos");
     return { message: "Curso creado", success: true };
   } catch (error) {
@@ -131,7 +131,7 @@ export async function createCourse(data: createCourseSchemaType) {
   }
 }
 
-export async function updateCourse(id: number, data: createCourseSchemaType) {
+export async function updateCourse(id: number, data: CreateCourseSchemaType) {
   try {
     const program = await prisma.program.findUnique({
       where: {
@@ -148,33 +148,14 @@ export async function updateCourse(id: number, data: createCourseSchemaType) {
       ? DISTRIBUTION_EXTERNAL_PERCENTAGE
       : DISTRIBUTION_INTERNAL_PERCENTAGE;
 
-    await prisma.course.update({
-      where: {
-        id,
-      },
-      data: {
-        ...data,
-        honorarium: {
-          updateMany: [
-            {
-              where: {
-                function: FunctionTypes.director,
-              },
-              data: {
-                academic_fk: data.course_director_fk,
-              },
-            },
-            {
-              where: {
-                function: FunctionTypes.coordinator,
-              },
-              data: {
-                academic_fk: data.coordinator_fk,
-              },
-            },
-          ],
-        },
-      },
+    await upsertResponsiblesHonorariums(id, {
+      function: ResponsibleFunctions.coordinator,
+      rut: data.coordinator_fk,
+    });
+
+    await upsertResponsiblesHonorariums(id, {
+      function: ResponsibleFunctions.director,
+      rut: data.course_director_fk,
     });
 
     const eLearningExists = await prisma.expenses.findFirst({
@@ -305,6 +286,7 @@ export async function getAllCourses(
   const where: any = {
     name: {
       contains: name,
+      mode: "insensitive",
     },
   };
 

@@ -89,7 +89,7 @@ export default function Dropdown({
       } ${className}`.trimEnd()}
     >
       <div
-        className={`outline-none flex justify-between w-full h-11 px-2 text-sm text-gray-900 border  rounded bg-gray-50 focus:ring-blue-500 focus:border-blue-500 place-items-center group ${
+        className={`outline-none flex justify-between w-full h-11 px-2 text-sm text-gray-900 border rounded bg-gray-50 focus:ring-blue-500 focus:border-blue-500 place-items-center group ${
           disabled ? "disable" : "cursor-pointer"
         } ${error ? "border-red-500" : "border-gray-300"}`}
         id="menu-button"

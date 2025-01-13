@@ -3,13 +3,13 @@
 import Button from "@/components/common/Button";
 import Modal from "@/components/common/Modal/Modal";
 import ModalHeader from "@/components/common/Modal/ModalHeader";
-import EnrollForm from "@/components/Forms/EnrollForm";
-import StudentForm from "@/components/Forms/StudentForm";
+import EnrollForm from "@/components/forms/EnrollForm";
+import StudentForm from "@/components/forms/StudentForm";
 import {
   enrollSchema,
-  enrollSchemaType,
+  EnrollSchemaType,
   studentSchema,
-  studentSchemaType,
+  StudentSchemaType,
 } from "@/lib/zod";
 import { upsertStudentEnroll } from "@/services/studentServices";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,15 +19,15 @@ import { toast } from "react-toastify";
 
 interface EnrollModalProps {
   course: { id: number; enroll_value: number };
-  values?: { student: studentSchemaType; enroll: enrollSchemaType };
+  values?: { student: StudentSchemaType; enroll: EnrollSchemaType };
 }
 
 export default function EnrollModal({ course, values }: EnrollModalProps) {
-  const studentForm = useForm<studentSchemaType>({
+  const studentForm = useForm<StudentSchemaType>({
     resolver: zodResolver(studentSchema),
     defaultValues: values?.student,
   });
-  const enrollForm = useForm<enrollSchemaType>({
+  const enrollForm = useForm<EnrollSchemaType>({
     resolver: zodResolver(enrollSchema),
     defaultValues: values?.enroll ?? {
       status: false,

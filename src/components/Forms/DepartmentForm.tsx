@@ -1,10 +1,10 @@
-import { createDepartmentSchema, createDepartmentSchemaType } from "@/lib/zod";
+import { createDepartmentSchema, CreateDepartmentSchemaType } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Button from "@/components/common/Button";
 import FetchDropdown from "@/components/common/FetchDropdown";
 import FloatingInput from "@/components/common/FloatingInput";
-import FormFieldset from "@/components/Forms/FormFieldset";
+import FormFieldset from "@/components/forms/FormFieldset";
 import { createDepartment } from "@/services/departmentServices";
 import { toast } from "react-toastify";
 
@@ -17,11 +17,11 @@ export default function DepartmentForm({
   className,
   onClose,
 }: DepartmentFormProps) {
-  const form = useForm<createDepartmentSchemaType>({
+  const form = useForm<CreateDepartmentSchemaType>({
     resolver: zodResolver(createDepartmentSchema),
   });
 
-  const onSubmit = async (data: createDepartmentSchemaType) => {
+  const onSubmit = async (data: CreateDepartmentSchemaType) => {
     try {
       const response = await createDepartment(data);
       toast(response.message, { type: response.success ? "success" : "error" });

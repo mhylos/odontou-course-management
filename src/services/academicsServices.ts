@@ -3,13 +3,15 @@
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import {
-  academicParticipationSchemaType,
-  createAcademicSchemaType,
+  AcademicParticipationSchemaType,
+  CreateAcademicSchemaType,
 } from "@/lib/zod";
 import { restoreRun, runToNumber } from "@/lib/utils";
 import { Option } from "@/components/common/Dropdown";
 import { revalidatePath } from "next/cache";
-import { FunctionTypes } from "@prisma/client";
+import { upsertAcademicsHonorariums } from "./honorariumServices";
+import { AcademicFunctions } from "@prisma/client";
+import Decimal from "decimal.js";
 
 export async function getAcademics() {
   const academics = await prisma.academic.findMany({
@@ -57,7 +59,7 @@ export async function getAcademicsOptions(name?: string) {
   return options;
 }
 
-export async function createAcademic(data: createAcademicSchemaType) {
+export async function createAcademic(data: CreateAcademicSchemaType) {
   const exists = await prisma.user.findUnique({
     where: {
       rut: runToNumber(data.rut),
@@ -107,7 +109,7 @@ export async function getHierarchyOptions() {
 
 export async function upsertAcademicParticipation(
   courseId: number,
-  data: academicParticipationSchemaType
+  data: AcademicParticipationSchemaType
 ) {
   try {
     const participation = await prisma.participation.upsert({
@@ -131,23 +133,11 @@ export async function upsertAcademicParticipation(
       },
     });
 
-    const honorariumExists = await prisma.honorarium.findFirst({
-      where: {
-        participation_fk: participation.id,
-      },
+    await upsertAcademicsHonorariums(courseId, participation.id, {
+      rut: data.academic_fk,
+      hours: new Decimal(0),
+      function: AcademicFunctions.instructor,
     });
-
-    if (!honorariumExists) {
-      await prisma.honorarium.create({
-        data: {
-          participation_fk: participation.id,
-          academic_fk: data.academic_fk,
-          course_fk: courseId,
-          function: FunctionTypes.dictante,
-          hours: 0,
-        },
-      });
-    }
 
     revalidatePath(`/cursos/detalles/${courseId}/academicos`);
     revalidatePath(`/cursos/detalles/${courseId}/pagos`);

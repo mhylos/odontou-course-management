@@ -1,7 +1,7 @@
 import DeleteRowButton from "@/components/common/Table/DeleteRowButton";
 import Table, { Cell, Row } from "@/components/common/Table/Table";
 import Actions from "@/components/cursos/detalles/[id]/academicos/Actions";
-import TableDropdown from "@/components/cursos/detalles/[id]/Subsection";
+import TableDropdown from "@/components/cursos/detalles/[id]/DropdownSection";
 import { restoreRun } from "@/lib/utils";
 import { removeParticipation } from "@/services/academicsServices";
 import { getAcademicsByCourse } from "@/services/courseServices";

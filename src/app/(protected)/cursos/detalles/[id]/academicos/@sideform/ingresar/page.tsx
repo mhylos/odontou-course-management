@@ -1,4 +1,4 @@
-import AcademicParticipationForm from "@/components/Forms/AcademicParticipationForm";
+import AcademicParticipationForm from "@/components/forms/AcademicParticipationForm";
 import RightSidebar from "@/components/common/RightSidebar";
 import { getCourseById } from "@/services/courseServices";
 

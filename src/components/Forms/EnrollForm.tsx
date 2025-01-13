@@ -4,7 +4,7 @@ import Section from "@/components/cursos/detalles/[id]/Section";
 import SectionItem from "@/components/cursos/detalles/[id]/SectionItem";
 import { Enroll } from "@/lib/definitions";
 import { Controller, UseFormReturn } from "react-hook-form";
-import { enrollSchemaType } from "@/lib/zod";
+import { EnrollSchemaType } from "@/lib/zod";
 import FetchDropdown from "@/components/common/FetchDropdown";
 import { FILE_EXTENSIONS } from "@/lib/constants";
 import { capitalize, convertToMoney } from "@/lib/utils";
@@ -27,7 +27,7 @@ export interface EnrollFormProps {
   disabled?: boolean;
   enrollDetails?: Enroll;
   enrollValue: number;
-  form: UseFormReturn<enrollSchemaType>;
+  form: UseFormReturn<EnrollSchemaType>;
 }
 
 export default function EnrollForm({

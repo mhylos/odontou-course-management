@@ -11,7 +11,7 @@ interface NavigationBarProps {
 }
 
 const ACTIVE_CLASS =
-  "bg-primary border-primary text-white text-2xl pointer-events-none";
+  "bg-primary border-primary text-white text-xl pointer-events-none";
 const INACTIVE_CLASS = "border-gray-100 text-sm h-max";
 
 export default function NavigationBar({ routes }: NavigationBarProps) {
@@ -33,10 +33,10 @@ export default function NavigationBar({ routes }: NavigationBarProps) {
                 : INACTIVE_CLASS
             }`}
             onMouseEnter={(e) =>
-              e.currentTarget.classList.add("text-xl", "bg-gray-100")
+              e.currentTarget.classList.add("text-[1.1rem]", "bg-gray-100")
             }
             onMouseLeave={(e) =>
-              e.currentTarget.classList.remove("text-xl", "bg-gray-100")
+              e.currentTarget.classList.remove("text-[1.1rem]", "bg-gray-100")
             }
           >
             {item.title}

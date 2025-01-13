@@ -7,13 +7,13 @@ import { useDebouncedCallback } from "use-debounce";
 import FetchDropdown from "../common/FetchDropdown";
 import { Form, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { searchCourseSchema, searchCourseSchemaType } from "@/lib/zod";
+import { searchCourseSchema, SearchCourseSchemaType } from "@/lib/zod";
 
 export default function SearchCourses() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
-  const form = useForm<searchCourseSchemaType>({
+  const form = useForm<SearchCourseSchemaType>({
     resolver: zodResolver(searchCourseSchema),
   });
 
@@ -43,9 +43,10 @@ export default function SearchCourses() {
     >
       <FloatingInput
         label={"Buscar por nombre"}
-        onChange={(e) => handleInput("name", e.target.value)}
+        onChange={(e) => handleInput("nombre", e.target.value)}
       />
       <Dropdown
+        id="pagos"
         label="Filtrar pagos"
         options={paymentsOptions}
         clearable={true}

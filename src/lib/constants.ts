@@ -1,4 +1,4 @@
-import { FunctionTypes } from "@prisma/client";
+import { AcademicFunctions, ResponsibleFunctions } from "@prisma/client";
 
 export const MAX_FILE_SIZE_MB = 5;
 export const FILE_EXTENSIONS = ["pdf", "doc", "docx", "pdf", "jpg", "jpeg"];
@@ -51,8 +51,8 @@ export const DEFAULT_DIRECTOR_PERCENTAGE = 7;
 export const DEFAULT_COORDINATOR_PERCENTAGE = 5;
 
 export const HONORARIUMS_FUNCTIONS_DICTIONARY = {
-  [FunctionTypes.coordinator]: "Coordinador",
-  [FunctionTypes.director]: "Director",
-  [FunctionTypes.dictante]: "Dictante",
-  [FunctionTypes.tutor]: "Tutor",
+  [ResponsibleFunctions.coordinator]: "Coordinador",
+  [ResponsibleFunctions.director]: "Director",
+  [AcademicFunctions.instructor]: "Dictante",
+  [AcademicFunctions.tutor]: "Tutor",
 };

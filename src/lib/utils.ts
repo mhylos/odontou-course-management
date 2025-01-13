@@ -25,7 +25,7 @@ export function convertToMoney(value: number) {
   return new Intl.NumberFormat("es-CL", {
     style: "currency",
     currency: "CLP",
-  }).format(value);
+  }).format(isFinite(value) ? value : 0);
 }
 
 export function dublicateItems<T>(arr: Array<T>, numberOfRepetitions: number) {

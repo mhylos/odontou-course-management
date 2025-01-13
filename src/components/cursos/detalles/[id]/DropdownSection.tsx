@@ -8,7 +8,7 @@ interface SubsectionProps {
   children: React.ReactNode;
 }
 
-export default function Subsection({ title, children }: SubsectionProps) {
+export default function DropdownSection({ title, children }: SubsectionProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (

@@ -1,25 +1,25 @@
 "use client";
 
-import { createCourseSchema, createCourseSchemaType } from "@/lib/zod";
+import { createCourseSchema, CreateCourseSchemaType } from "@/lib/zod";
 import { Controller, useForm } from "react-hook-form";
 import Button from "@/components/common/Button";
 import FloatingInput from "@/components/common/FloatingInput";
 import FloatingTextarea from "@/components/common/FloatingTextarea";
 import { createCourse, updateCourse } from "@/services/courseServices";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import BackButton from "@/components/common/BackButton";
 import FetchDropdown from "@/components/common/FetchDropdown";
-import FormFieldset from "@/components/Forms/FormFieldset";
+import FormFieldset from "@/components/forms/FormFieldset";
 import { toast } from "react-toastify";
-import DepartmentForm from "./DepartmentForm";
-import AcademicForm from "./AcademicForm";
 import { useSWRConfig } from "swr";
 import Decimal from "decimal.js";
+import AcademicForm from "@/components/forms/AcademicForm";
+import DepartmentForm from "@/components/forms/DepartmentForm";
 
 interface CourseFormProps {
   className?: string;
-  values?: createCourseSchemaType;
+  values?: CreateCourseSchemaType;
   editId?: number; // course id to edit
 }
 
@@ -28,7 +28,7 @@ export default function CourseForm({
   values,
   editId,
 }: CourseFormProps) {
-  const form = useForm<createCourseSchemaType>({
+  const form = useForm<CreateCourseSchemaType>({
     resolver: zodResolver(createCourseSchema),
     defaultValues: {
       enroll_value: 0,
@@ -47,7 +47,7 @@ export default function CourseForm({
     "online_hours",
   ]);
 
-  const onSubmit = async (data: createCourseSchemaType) => {
+  const onSubmit = async (data: CreateCourseSchemaType) => {
     try {
       let response;
       if (editId) {

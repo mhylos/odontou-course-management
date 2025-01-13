@@ -2,42 +2,38 @@
 
 import {
   academicParticipationSchema,
-  academicParticipationSchemaType,
+  AcademicParticipationSchemaType,
 } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, SubmitErrorHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import FloatingInput from "../common/FloatingInput";
 import FetchDropdown from "../common/FetchDropdown";
-import FormFieldset from "./FormFieldset";
+import FormFieldset from "@/components/forms/FormFieldset";
 import Button from "../common/Button";
 import BackButton from "../common/BackButton";
 import { toast } from "react-toastify";
 import { upsertAcademicParticipation } from "@/services/academicsServices";
+import AcademicForm from "@/components/forms/AcademicForm";
+import { useState } from "react";
+import { useSWRConfig } from "swr";
 
 interface AcademicParticipationFormProps {
-  values?: academicParticipationSchemaType;
+  values?: AcademicParticipationSchemaType;
   courseId: number;
 }
-
-// function ErrorToast({ error, message }: { error: string; message?: string }) {
-//   return (
-//     <div className="flex flex-col">
-//       <span className="font-bold">{error}</span>
-//       <p className="text-sm">{message ?? ""}</p>
-//     </div>
-//   );
-// }
 
 export default function AcademicParticipationForm({
   values,
   courseId,
 }: AcademicParticipationFormProps) {
-  const form = useForm<academicParticipationSchemaType>({
+  const form = useForm<AcademicParticipationSchemaType>({
     resolver: zodResolver(academicParticipationSchema),
     defaultValues: { ...values },
   });
+  const [createAcademic, setCreateAcademic] = useState(false);
+  const { mutate } = useSWRConfig();
 
-  const onSubmit = async (data: academicParticipationSchemaType) => {
+  const onSubmit = async (data: AcademicParticipationSchemaType) => {
     try {
       let response = await upsertAcademicParticipation(courseId, data);
       toast(response.message, {
@@ -48,59 +44,59 @@ export default function AcademicParticipationForm({
     }
   };
 
-  // const onError: SubmitErrorHandler<academicParticipationSchemaType> = (
-  //   errors
-  // ) => {
-  //   const error = Object.values(errors).find((error) => error);
-  //   if (error) {
-  //     toast.error(
-  //       <ErrorToast error={"Error en un campo"} message={error.message} />,
-  //       { toastId: "error" }
-  //     );
-  //   }
-  // };
+  const handleFormClose = () => {
+    mutate("/api/academics/options");
+    setCreateAcademic(false);
+  };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <FormFieldset legend="Académico">
-        <FetchDropdown
-          label="Selección del académico"
-          name="academic_fk"
-          control={form.control}
-          fetchUrl="/api/academics/options"
-          selectedValue={values?.academic_fk}
-          disabled={!!values}
-          error={form.formState.errors.academic_fk?.message}
-        />
-      </FormFieldset>
-      <FormFieldset legend="Datos de participación">
-        <FetchDropdown
-          label="Jerarquía académica"
-          name="hierarchy_type_fk"
-          control={form.control}
-          fetchUrl="/api/hierarchy-types/options"
-          selectedValue={values?.hierarchy_type_fk}
-          error={form.formState.errors.hierarchy_type_fk?.message}
-        />
-        <div className="grid grid-cols-2 gap-2">
-          <FloatingInput
-            label="Horas de dedicación"
-            type="number"
-            {...form.register("dedicated_hours")}
+    <>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={createAcademic ? "hidden" : ""}
+      >
+        <FormFieldset legend="Académico">
+          <FetchDropdown
+            label="Selección del académico"
+            name="academic_fk"
+            control={form.control}
+            fetchUrl="/api/academics/options"
+            selectedValue={values?.academic_fk}
+            disabled={!!values}
+            error={form.formState.errors.academic_fk?.message}
+            create={() => setCreateAcademic(true)}
           />
-          <FloatingInput
-            label="Horas de contrato"
-            type="number"
-            {...form.register("contract_hours")}
+        </FormFieldset>
+        <FormFieldset legend="Datos de participación">
+          <FetchDropdown
+            label="Jerarquía académica"
+            name="hierarchy_type_fk"
+            control={form.control}
+            fetchUrl="/api/hierarchy-types/options"
+            selectedValue={values?.hierarchy_type_fk}
+            error={form.formState.errors.hierarchy_type_fk?.message}
           />
+          <div className="grid grid-cols-2 gap-2">
+            <FloatingInput
+              label="Horas de dedicación"
+              type="number"
+              {...form.register("dedicated_hours")}
+            />
+            <FloatingInput
+              label="Horas de contrato"
+              type="number"
+              {...form.register("contract_hours")}
+            />
+          </div>
+        </FormFieldset>
+        <div className="flex gap-2 mt-2">
+          <BackButton>
+            <Button className="!bg-gray-500">Cancelar</Button>
+          </BackButton>
+          <Button type="submit">Guardar</Button>
         </div>
-      </FormFieldset>
-      <div className="flex gap-2 mt-2">
-        <BackButton>
-          <Button className="bg-gray-400">Cancelar</Button>
-        </BackButton>
-        <Button type="submit">Guardar</Button>
-      </div>
-    </form>
+      </form>
+      {createAcademic && <AcademicForm onClose={handleFormClose} />}
+    </>
   );
 }
