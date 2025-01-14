@@ -10,23 +10,38 @@ interface TableProps {
   isFetching?: boolean;
 }
 
-export interface RowProps {
+export interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
   currentRow?: number;
   children?: JSX.Element | JSX.Element[];
   isLoading?: boolean;
+  className?: string;
 }
 
-export interface CellProps {
+export interface CellProps
+  extends React.TdHTMLAttributes<HTMLTableCellElement> {
   children?: JSX.Element | JSX.Element[] | string | number;
 }
 
-export function Cell({ children }: CellProps) {
-  return <td className="px-6 py-4">{children}</td>;
+export function Cell({ children, ...props }: CellProps) {
+  return (
+    <td {...props} className={`px-6 py-4 ${props.className ?? ""}`.trimEnd()}>
+      {children}
+    </td>
+  );
 }
 
-export function Row({ currentRow, children, isLoading = false }: RowProps) {
+export function Row({
+  currentRow,
+  className = "",
+  children,
+  isLoading = false,
+  ...props
+}: RowProps) {
   return (
-    <tr className="odd:bg-white even:bg-gray-50 border-b h-16">
+    <tr
+      {...props}
+      className={`odd:bg-white even:bg-gray-50 border-b h-16 ${className}`.trimEnd()}
+    >
       <th
         scope="row"
         className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"

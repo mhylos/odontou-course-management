@@ -34,78 +34,107 @@ export async function getAcademicsHonorarium(courseId: number) {
 export async function getAcademicsHonorariumsByCourse(
   courseId: number
 ): Promise<AcademicHonorariumSchemaType[]> {
-  const academicsHonorariums = await prisma.academicHonorarium.findMany({
+  const academicsHonorariums = await prisma.honorarium.findMany({
     where: {
-      honorarium: {
-        course_fk: courseId,
-      },
+      course_fk: courseId,
+      academic_honorarium: { some: {} },
     },
     select: {
       id: true,
-      function: true,
-      hours: true,
-      honorarium: {
+      academic: {
         select: {
-          academic: {
+          user: {
             select: {
-              user: {
-                select: {
-                  name: true,
-                  rut: true,
-                },
-              },
+              name: true,
+              rut: true,
             },
           },
+        },
+      },
+      academic_honorarium: {
+        select: {
+          id: true,
+          function: true,
+          hours: true,
         },
       },
     },
   });
 
-  return academicsHonorariums.map((academic) => ({
-    id: academic.id,
-    function: academic.function,
-    academic_fk: academic.honorarium.academic.user.rut,
-    academic_name: academic.honorarium.academic.user.name ?? "",
-    hours: academic.hours.toString(),
+  return academicsHonorariums.map((honorarium) => ({
+    id: honorarium.id,
+    academic_rut: honorarium.academic.user.rut,
+    academic_name: honorarium.academic.user.name ?? "",
+    functions: honorarium.academic_honorarium.map((honorarium) => ({
+      academic_honorarium_id: honorarium.id,
+      function: honorarium.function,
+      hours: honorarium.hours.toString(),
+    })),
   }));
 }
 
 export async function getResponsiblesHonorariumsByCourse(
   courseId: number
 ): Promise<ResponsibleHonorariumSchemaType[]> {
-  const responsibleHonorariums = await prisma.responsibleHonorarium.findMany({
-    where: {
-      honorarium: {
-        course_fk: courseId,
-      },
-    },
+  const responsibles = await prisma.course.findUnique({
+    where: { id: courseId },
     select: {
-      id: true,
-      function: true,
-      percentage: true,
-      honorarium: {
-        select: {
-          academic: {
-            select: {
-              user: {
-                select: {
-                  name: true,
-                  rut: true,
-                },
-              },
-            },
-          },
-        },
-      },
+      coordinator: { select: { rut: true, name: true } },
+      course_director: { select: { rut: true, name: true } },
     },
   });
 
-  return responsibleHonorariums.map((responsible) => ({
-    id: responsible.id,
-    function: responsible.function,
-    academic_name: responsible.honorarium.academic.user.name ?? "",
-    percentage: responsible.percentage.toString(),
-  }));
+  if (!responsibles) return [];
+
+  const getLatestResponsible = async (
+    rut: number,
+    func: ResponsibleFunctions
+  ) => {
+    const responsible = await prisma.responsibleHonorarium.findFirst({
+      where: {
+        honorarium: {
+          course_fk: courseId,
+          academic_fk: rut,
+        },
+        AND: { function: { equals: func } },
+      },
+      select: {
+        honorarium: {
+          select: {
+            academic: {
+              select: { user: { select: { name: true } } },
+            },
+          },
+        },
+        id: true,
+        function: true,
+        percentage: true,
+      },
+    });
+
+    return responsible;
+  };
+
+  const coordinator = await getLatestResponsible(
+    responsibles.coordinator.rut,
+    ResponsibleFunctions.coordinator
+  );
+  const courseDirector = await getLatestResponsible(
+    responsibles.course_director.rut,
+    ResponsibleFunctions.director
+  );
+
+  return [coordinator, courseDirector]
+    .map((responsible) => {
+      if (!responsible) return null;
+      return {
+        id: responsible.id,
+        academic_name: responsible.honorarium.academic.user.name ?? "",
+        function: responsible.function,
+        percentage: responsible.percentage.toString(),
+      };
+    })
+    .filter((responsible) => responsible !== null);
 }
 
 export async function upsertResponsiblesHonorariums(

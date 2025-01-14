@@ -1,6 +1,6 @@
 "use client";
 
-import { convertToMoney } from "@/lib/utils";
+import { convertToMoney, restoreRun } from "@/lib/utils";
 import Section from "@/components/cursos/detalles/[id]/Section";
 import Decimal from "decimal.js";
 import Table, { Cell, Row } from "@/components/common/Table/Table";
@@ -20,6 +20,7 @@ import { HONORARIUMS_FUNCTIONS_DICTIONARY } from "@/lib/constants";
 import Input from "@/components/common/Input";
 import { AcademicFunctions } from "@prisma/client";
 import Dropdown, { Option } from "@/components/common/Dropdown";
+import { Fragment, useState } from "react";
 
 interface HonorariumFormProps {
   totalHonorariums: string;
@@ -48,10 +49,16 @@ function getTotalToDistribute(
 }
 
 function getTotalHours(control: Control<HonorariumsSchemaType>) {
-  const hours = useWatch({ name: "academicsHonorariums", control });
+  const honorariums = useWatch({ name: "academicsHonorariums", control });
 
-  return hours.reduce(
-    (acc, field) => acc.plus(field.hours || 0),
+  return honorariums.reduce(
+    (acc, field) =>
+      acc.plus(
+        field.functions.reduce(
+          (acc, field) => acc.plus(field.hours || 0),
+          new Decimal(0)
+        )
+      ),
     new Decimal(0)
   );
 }
@@ -85,7 +92,13 @@ function TotalToPayToAcademic({
 }) {
   const honorariums = useWatch({ name: "academicsHonorariums", control });
 
-  const honorarium = Decimal.mul(honorariums[index].hours || 0, hourValue);
+  const honorarium = Decimal.mul(
+    honorariums[index].functions.reduce(
+      (acc, field) => acc.plus(field.hours || 0),
+      new Decimal(0)
+    ),
+    hourValue
+  );
 
   return <span>{convertToMoney(honorarium.toNumber())}</span>;
 }
@@ -96,6 +109,27 @@ const academicFunctionsOptions: Option[] = (
   name: HONORARIUMS_FUNCTIONS_DICTIONARY[key],
   value: AcademicFunctions[key],
 }));
+
+function TotalByFunction({
+  control,
+  academicIndex,
+  hourValue,
+  functionIndex,
+}: {
+  control: Control<HonorariumsSchemaType>;
+  academicIndex: number;
+  hourValue: Decimal;
+  functionIndex: number;
+}) {
+  const hours = useWatch({
+    name: `academicsHonorariums.${academicIndex}.functions.${functionIndex}.hours`,
+    control,
+  });
+
+  const total = hourValue.times(hours || 0);
+
+  return <span>{convertToMoney(total.toNumber())}</span>;
+}
 
 export default function HonorariumForm({
   totalHonorariums,
@@ -108,6 +142,8 @@ export default function HonorariumForm({
       responsiblesHonorariums: responsiblesHonorariums,
     },
   });
+
+  const [expandedRow, setExpandedRow] = useState<number[]>([]);
 
   const { fields: academicFields, insert } = useFieldArray({
     control,
@@ -171,7 +207,7 @@ export default function HonorariumForm({
                         />
                       )}
                     />
-                    <span className="absolute right-2 text-gray-400">%</span>
+                    <span className="absolute right-4 text-gray-400">%</span>
                   </div>
                 </Cell>
                 <Cell>
@@ -200,15 +236,21 @@ export default function HonorariumForm({
         </div>
       </Section>
 
-      <Section title="Valor hora" containerClassname="h-full">
+      <Section
+        title="Valor hora"
+        containerClassname="h-full"
+        className="overflow-hidden"
+      >
         <div className="grid grid-cols-3 place-items-center w-max text-center self-center">
           <span className="font-extralight text-sm">Total a distribuir</span>
           <span className="row-span-2 icon-[iconamoon--sign-division-slash-thin] text-4xl" />
           <span className="font-extralight text-sm">Horas totales</span>
-          <span className="text-2xl font-light">
+          <span className="text-2xl font-light overflow-hidden max-w-[5rem]">
             {convertToMoney(totalToDistribute.toNumber())}
           </span>
-          <span className="text-2xl font-light">{totalHours.toString()}</span>
+          <span className="text-2xl font-light max-w-[5rem]">
+            {totalHours.toString()}
+          </span>
         </div>
         <span className="text-4xl font-light">
           {convertToMoney(hourValue.toNumber())}
@@ -220,51 +262,88 @@ export default function HonorariumForm({
           <Table
             headers={[
               { title: "Nombre", width: "25%" },
-              { title: "Horas comprometidas" },
-              { title: "Función", width: "20%" },
-              { title: "Monto a pagar" },
-              { title: "Detalles" },
+              { title: "RUT" },
+              { title: "Monto a pagar total" },
+              { title: "", width: "5%" },
             ]}
             className="h-full"
           >
-            {academicFields.map((field, index) => (
-              <Row currentRow={index + 1} key={field.id}>
-                <Cell>
-                  <span>{field.academic_name}</span>
-                </Cell>
-                <Cell>
-                  <Input {...register(`academicsHonorariums.${index}.hours`)} />
-                </Cell>
-                <Cell>
-                  <Controller
-                    control={control}
-                    name={`academicsHonorariums.${index}.function`}
-                    render={({ field: { value, onChange, name } }) => (
-                      <Dropdown
-                        id={name}
-                        selected={academicFunctionsOptions.find(
-                          (option) => option.value === value
-                        )}
-                        options={academicFunctionsOptions}
-                        onChange={(value) => onChange(value)}
-                        className="w-full"
-                      />
-                    )}
-                  />
-                </Cell>
-                <Cell>
-                  <div className="flex place-items-center gap-1">
+            {academicFields.map((field, i) => (
+              <Fragment key={field.id}>
+                <Row
+                  key={"row" + field.id}
+                  currentRow={i + 1}
+                  className="relative group cursor-pointer"
+                  onClick={() => {
+                    if (expandedRow.includes(i)) {
+                      setExpandedRow((prev) => prev.filter((row) => row !== i));
+                    } else {
+                      setExpandedRow((prev) => [...prev, i]);
+                    }
+                  }}
+                >
+                  <Cell>
+                    <span>{field.academic_name}</span>
+                  </Cell>
+                  <Cell>
+                    <span>{restoreRun(field.academic_rut)}</span>
+                  </Cell>
+                  <Cell>
                     <TotalToPayToAcademic
                       control={control}
-                      index={index}
+                      index={i}
                       hourValue={hourValue}
                     />
-                  </div>
-                </Cell>
-                <Cell>
-                  <span></span>
-                </Cell>
-              </Row>
+                  </Cell>
+                  <Cell>
+                    <span
+                      className={`icon-[ci--chevron-down] text-gray-400 text-xl transition-transform ${
+                        expandedRow.includes(i) ? "rotate-180" : "rotate-0"
+                      }`}
+                    />
+                  </Cell>
+                </Row>
+                <Row className={`${expandedRow.includes(i) ? "" : "hidden"}`}>
+                  <Cell />
+                  <Cell colSpan={3} className="p-2 relative">
+                    <Table
+                      headers={[
+                        { title: "Función" },
+                        { title: "Horas comprometidas" },
+                        { title: "Monto a pagar" },
+                      ]}
+                    >
+                      {field.functions.map((func, j) => (
+                        <Row
+                          key={func.academic_honorarium_id ?? "0" + j}
+                          currentRow={j + 1}
+                        >
+                          <Cell className="py-0">
+                            <span>
+                              {HONORARIUMS_FUNCTIONS_DICTIONARY[func.function]}
+                            </span>
+                          </Cell>
+                          <Cell className="py-0">
+                            <Input
+                              {...register(
+                                `academicsHonorariums.${i}.functions.${j}.hours`
+                              )}
+                            />
+                          </Cell>
+                          <Cell className="!py-0">
+                            <TotalByFunction
+                              control={control}
+                              academicIndex={i}
+                              hourValue={hourValue}
+                              functionIndex={j}
+                            />
+                          </Cell>
+                        </Row>
+                      ))}
+                    </Table>
+                  </Cell>
+                </Row>
+              </Fragment>
             ))}
           </Table>
         </Section>

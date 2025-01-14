@@ -193,14 +193,26 @@ enum AcademicFunctions {
   tutor
 }
 
-model HonorariumPayment {
-  id            Int      @id @default(autoincrement())
-  honorarium_fk Int
-  payment_date  DateTime
-  amount        Int
-  observation   String
+model ResponsiblePayment {
+  id                        Int      @id @default(autoincrement())
+  responsible_honorarium_fk Int
+  payment_date              DateTime
+  next_payment_date         DateTime
+  amount                    Int
+  observation               String
 
-  honorarium Honorarium @relation(fields: [honorarium_fk], references: [id])
+  honorarium ResponsibleHonorarium @relation(fields: [id], references: [id])
+}
+
+model AcademicPayment {
+  id                     Int      @id @default(autoincrement())
+  academic_honorarium_fk Int
+  payment_date           DateTime
+  next_payment_date      DateTime
+  amount                 Int
+  observation            String
+
+  honorarium AcademicHonorarium @relation(fields: [id], references: [id])
 }
 
 model ResponsibleHonorarium {
@@ -209,7 +221,8 @@ model ResponsibleHonorarium {
   percentage    Decimal              @default(0) @db.Decimal(6, 3)
   function      ResponsibleFunctions
 
-  honorarium Honorarium @relation(fields: [honorarium_fk], references: [id])
+  honorarium Honorarium           @relation(fields: [honorarium_fk], references: [id])
+  payment    ResponsiblePayment[]
 
   @@unique([honorarium_fk, function])
 }
@@ -221,8 +234,9 @@ model AcademicHonorarium {
   hours            Decimal           @default(0) @db.Decimal(5, 2)
   function         AcademicFunctions
 
-  honorarium    Honorarium    @relation(fields: [honorarium_fk], references: [id])
-  participation Participation @relation(fields: [participation_fk], references: [id])
+  honorarium    Honorarium        @relation(fields: [honorarium_fk], references: [id])
+  participation Participation     @relation(fields: [participation_fk], references: [id])
+  payment       AcademicPayment[]
 
   @@unique([honorarium_fk, participation_fk, function])
 }
@@ -231,8 +245,6 @@ model Honorarium {
   id          Int @unique @default(autoincrement())
   course_fk   Int
   academic_fk Int
-
-  honorarium_payment HonorariumPayment[]
 
   course                 Course                  @relation(fields: [course_fk], references: [id], onDelete: Cascade)
   academic               Academic                @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)

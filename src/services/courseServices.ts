@@ -213,6 +213,15 @@ export async function updateCourse(id: number, data: CreateCourseSchemaType) {
       },
     });
 
+    await prisma.course.update({
+      where: {
+        id,
+      },
+      data: {
+        ...data,
+      },
+    });
+
     revalidatePath("/cursos");
     return { message: "Curso actualizado", success: true };
   } catch (error) {
