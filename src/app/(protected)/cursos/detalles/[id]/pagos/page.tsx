@@ -21,6 +21,7 @@ export default async function CoursePayments({
       totalHonorariums={academicHonorarium}
       academicsHonorariums={academicsHonorariums}
       responsiblesHonorariums={responsiblesHonorariums}
+      courseId={id}
     />
   );
 }

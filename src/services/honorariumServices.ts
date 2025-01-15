@@ -62,7 +62,7 @@ export async function getAcademicsHonorariumsByCourse(
   });
 
   return academicsHonorariums.map((honorarium) => ({
-    id: honorarium.id,
+    honorarium_id: honorarium.id,
     academic_rut: honorarium.academic.user.rut,
     academic_name: honorarium.academic.user.name ?? "",
     functions: honorarium.academic_honorarium.map((honorarium) => ({
@@ -71,6 +71,57 @@ export async function getAcademicsHonorariumsByCourse(
       hours: honorarium.hours.toString(),
     })),
   }));
+}
+
+export async function updateAcademicsHonorariums(
+  courseId: number,
+  academicsHonorariums: AcademicHonorariumSchemaType[]
+) {
+  const updatedHonorariums = await Promise.all(
+    academicsHonorariums.map(async (honorarium) => {
+      const participation = await prisma.participation.findFirst({
+        where: { academic_fk: honorarium.academic_rut, course_fk: courseId },
+        select: { id: true },
+      });
+
+      honorarium.functions.forEach(async (field) => {
+        if (!participation) {
+          return {
+            success: false,
+            message:
+              "No se encontró la participación del academico: " +
+              honorarium.academic_name,
+          };
+        }
+
+        await prisma.academicHonorarium.upsert({
+          where: {
+            honorarium_fk_participation_fk_function: {
+              honorarium_fk: honorarium.honorarium_id,
+              participation_fk: participation.id,
+              function: field.function,
+            },
+          },
+          update: {
+            hours: field.hours,
+          },
+          create: {
+            participation_fk: participation.id,
+            honorarium_fk: honorarium.honorarium_id,
+            function: field.function,
+            hours: field.hours,
+          },
+        });
+      });
+
+      return {
+        success: true,
+        message: "Honorarios de académicos actualizados",
+      };
+    })
+  );
+
+  return updatedHonorariums;
 }
 
 export async function getResponsiblesHonorariumsByCourse(

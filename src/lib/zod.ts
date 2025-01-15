@@ -218,12 +218,11 @@ export const responsibleHonorariumSchema = object({
 });
 
 export const academicHonorariumSchema = object({
-  id: number().optional(),
+  honorarium_id: number(),
   academic_rut: number({ required_error: "El académico es requerido" }),
   academic_name: string(),
   functions: z.array(
     object({
-      academic_honorarium_id: number().optional(),
       function: nativeEnum(AcademicFunctions),
       hours: string({ required_error: "Las horas son requeridas" }),
     })
