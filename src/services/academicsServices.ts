@@ -6,12 +6,13 @@ import {
   AcademicParticipationSchemaType,
   CreateAcademicSchemaType,
 } from "@/lib/zod";
-import { restoreRun, runToNumber } from "@/lib/utils";
+import { capitalizeAll, restoreRun, runToNumber } from "@/lib/utils";
 import { Option } from "@/components/common/Dropdown";
 import { revalidatePath } from "next/cache";
 import { upsertAcademicsHonorariums } from "./honorariumServices";
-import { AcademicFunctions } from "@prisma/client";
+import { AcademicFunctions, Actions } from "@prisma/client";
 import Decimal from "decimal.js";
+import { registerAction } from "./loggerServices";
 
 export async function getAcademics() {
   const academics = await prisma.academic.findMany({
@@ -33,6 +34,7 @@ export async function getAcademicsOptions(name?: string) {
       user: {
         name: {
           contains: name,
+          mode: "insensitive",
         },
       },
     },
@@ -52,7 +54,10 @@ export async function getAcademicsOptions(name?: string) {
   });
 
   const options: Option[] = academics.map((academic) => ({
-    name: academic.user.name + " - " + restoreRun(academic.user.rut),
+    name:
+      capitalizeAll(academic.user.name?.toLowerCase() ?? "") +
+      " - " +
+      restoreRun(academic.user.rut),
     value: academic.user.rut,
   }));
 
@@ -75,7 +80,7 @@ export async function createAcademic(data: CreateAcademicSchemaType) {
     await prisma.user.create({
       data: {
         rut: runToNumber(data.rut),
-        name: data.name,
+        name: data.name.toLowerCase(),
         email: data.email,
         password: password,
         academic: {
@@ -88,6 +93,10 @@ export async function createAcademic(data: CreateAcademicSchemaType) {
       omit: { password: true },
     });
 
+    registerAction(
+      Actions.create,
+      `Académico **${capitalizeAll(data.name)}** ingresado al sistema`
+    );
     revalidatePath("/api/academics/options");
     return { message: "Académico creado con éxito", success: true };
   } catch (error) {
@@ -131,7 +140,29 @@ export async function upsertAcademicParticipation(
         dedicated_hours: data.dedicated_hours,
         contract_hours: data.contract_hours,
       },
+      select: {
+        created_at: true,
+        updated_at: true,
+        id: true,
+        course: { select: { name: true } },
+      },
     });
+
+    if (participation.created_at === participation.updated_at) {
+      registerAction(
+        Actions.create,
+        `Participación del académico **${restoreRun(
+          data.academic_fk
+        )}** ingresada al curso **${participation.course.name}**`
+      );
+    } else {
+      registerAction(
+        Actions.update,
+        `Participación del académico **${restoreRun(
+          data.academic_fk
+        )}** actualizada en el curso **${participation.course.name}**`
+      );
+    }
 
     await upsertAcademicsHonorariums(courseId, participation.id, {
       rut: data.academic_fk,
@@ -162,15 +193,39 @@ export async function getParticipation(rut: number, courseId: number) {
 
 export async function removeParticipation(rut: number, courseId: number) {
   try {
-    await prisma.participation.delete({
+    const participation = await prisma.participation.delete({
       where: {
         academic_fk_course_fk: {
           academic_fk: rut,
           course_fk: courseId,
         },
       },
+      select: {
+        academic: {
+          select: {
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        course: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
 
+    registerAction(
+      Actions.delete,
+      `Participación del académico ${capitalizeAll(
+        participation.academic.user.name ?? ""
+      )} **RUT: ${restoreRun(rut)}** eliminada del curso **${
+        participation.course.name
+      }**`
+    );
     revalidatePath(`/cursos/detalles/${courseId}/academicos`);
     revalidatePath(`/cursos/detalles/${courseId}/pagos`);
     return { message: "Participación eliminada", success: true };

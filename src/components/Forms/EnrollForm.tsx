@@ -7,10 +7,11 @@ import { Controller, UseFormReturn } from "react-hook-form";
 import { EnrollSchemaType } from "@/lib/zod";
 import FetchDropdown from "@/components/common/FetchDropdown";
 import { FILE_EXTENSIONS } from "@/lib/constants";
-import { capitalize, convertToMoney } from "@/lib/utils";
+import { capitalize, convertToMoney, decimalNumberFormat } from "@/lib/utils";
 import { EnrollTypes } from "@prisma/client";
 import Checkbox from "@/components/common/Checkbox";
 import { useEffect, useState } from "react";
+import Decimal from "decimal.js";
 
 const enrolledOptions = [
   { value: 0, name: "No matriculado" },
@@ -111,19 +112,20 @@ export default function EnrollForm({
                     value={value}
                     error={error?.message}
                     disabled={disabled}
-                    onChange={(value) => {
-                      let n = parseInt(value.currentTarget.value);
-                      if (n > 100 || n < 0) {
+                    onChange={(e) => {
+                      const value = decimalNumberFormat(e.target.value);
+                      const n = new Decimal(!value ? 0 : value);
+
+                      if (n.greaterThan(100)) {
                         return;
                       }
-                      if (isNaN(n)) {
-                        n = 0;
-                      }
+
                       form.setValue(
                         "total",
-                        enrollValue - (n / 100) * enrollValue
+                        enrollValue -
+                          n.dividedBy(100).times(enrollValue).floor().toNumber()
                       );
-                      onChange(n);
+                      onChange(value);
                     }}
                   />
                 )}

@@ -6,6 +6,8 @@ import { AuthError } from "next-auth";
 import { isValidRut, format } from "rutility";
 import bcrypt from "bcryptjs";
 import db from "@/lib/prisma";
+import { registerAction } from "@/services/loggerServices";
+import { Actions } from "@prisma/client";
 
 export async function createAdminAction(values: RegisterSchemaType) {
   try {
@@ -56,6 +58,7 @@ export async function loginAction(values: LoginSchemaType) {
       redirect: false,
     });
 
+    registerAction(Actions.login, "Inicio de sesión");
     return { success: true, message: "Inicio de sesión exitoso" };
   } catch (error) {
     if (error instanceof AuthError) {
@@ -69,6 +72,7 @@ export async function logoutAction() {
   try {
     await signOut({ redirect: false });
 
+    registerAction(Actions.logout, "Cierre de sesión");
     return { success: true, message: "Se ha cerrado sesión" };
   } catch (error) {
     if (error instanceof AuthError) {

@@ -1,12 +1,13 @@
-import { auth } from "@/auth";
 import SubtitlePage from "@/components/common/SubtitlePage";
-import Table from "@/components/common/Table/Table";
+import Table, { Cell, Row } from "@/components/common/Table/Table";
 import TitlePage from "@/components/common/TitlePage";
+import { ACTIONS_DICTIONARY } from "@/lib/constants";
+import { formatDate } from "@/lib/utils";
+import { getLogs } from "@/services/loggerServices";
+import ReactMarkdown from "react-markdown";
 
 export default async function Home() {
-  const session = await auth();
-
-  if (!session?.user) return null;
+  const logs = await getLogs();
 
   return (
     <>
@@ -17,16 +18,26 @@ export default async function Home() {
         </SubtitlePage>
         <div className="flex-1 overflow-auto">
           <Table
-            headers={["Fecha", "Usuario", "Acción", "Descripción"]}
-            rows={[
-              [
-                "2021-09-01",
-                "Admin",
-                "Creación",
-                "Se ha creado un nuevo curso",
-              ],
+            headers={[
+              { title: "Fecha" },
+              { title: "Usuario" },
+              { title: "Acción", width: "15%" },
+              { title: "Descripción", width: "50%" },
             ]}
-          />
+          >
+            {logs.map((log, i) => (
+              <Row key={log.id} currentRow={log.id}>
+                <Cell>{formatDate(log.timestamp)}</Cell>
+                <Cell className="capitalize">
+                  {log.user.name?.toLowerCase() ?? ""}
+                </Cell>
+                <Cell>{ACTIONS_DICTIONARY[log.action]}</Cell>
+                <Cell>
+                  <ReactMarkdown>{log.description}</ReactMarkdown>
+                </Cell>
+              </Row>
+            ))}
+          </Table>
         </div>
       </div>
     </>

@@ -14,12 +14,14 @@ import {
   OVERHEAD_PERCENTAGE,
 } from "@/lib/constants";
 import {
+  Actions,
   MultiplierTypes,
   MultiplyWith,
   ResponsibleFunctions,
 } from "@prisma/client";
 import Decimal from "decimal.js";
 import { upsertResponsiblesHonorariums } from "./honorariumServices";
+import { registerAction } from "./loggerServices";
 
 export async function createCourse(data: CreateCourseSchemaType) {
   try {
@@ -73,7 +75,7 @@ export async function createCourse(data: CreateCourseSchemaType) {
                 name: "Overhead Universidad",
                 multiplier: OVERHEAD_PERCENTAGE,
                 type: MultiplierTypes.percentage,
-                multiply: MultiplyWith.enroll_value,
+                multiply: MultiplyWith.enroll_incomes,
               },
               ...(isElearning
                 ? [
@@ -81,7 +83,7 @@ export async function createCourse(data: CreateCourseSchemaType) {
                       name: "Pago plataforma",
                       multiplier: 1,
                       type: MultiplierTypes.unit_cost,
-                      multiply: MultiplyWith.students,
+                      multiply: MultiplyWith.elearning_incomes,
                     },
                   ]
                 : []),
@@ -124,6 +126,7 @@ export async function createCourse(data: CreateCourseSchemaType) {
     });
 
     revalidatePath("/cursos");
+    registerAction(Actions.create, `Curso **${data.name}** creado`);
     return { message: "Curso creado", success: true };
   } catch (error) {
     console.error(error);
@@ -173,7 +176,7 @@ export async function updateCourse(id: number, data: CreateCourseSchemaType) {
             name: "Pago plataforma",
             multiplier: 1,
             type: MultiplierTypes.unit_cost,
-            multiply: MultiplyWith.students,
+            multiply: MultiplyWith.elearning_incomes,
           },
         });
       }
@@ -223,11 +226,28 @@ export async function updateCourse(id: number, data: CreateCourseSchemaType) {
     });
 
     revalidatePath("/cursos");
+    registerAction(
+      Actions.update,
+      `Los antecedentes generales del curso **${data.name}** fueron actualizados`
+    );
     return { message: "Curso actualizado", success: true };
   } catch (error) {
     console.error(error);
     return { message: "Error inesperado", success: false };
   }
+}
+
+export async function getCourseName(id: number) {
+  const course = await prisma.course.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      name: true,
+    },
+  });
+
+  return course?.name;
 }
 
 export async function getCourseById(id: string) {
@@ -275,6 +295,11 @@ export async function getStudentsEnrolled(courseId: number, filter?: string) {
           contains: filter,
           mode: "insensitive",
         },
+      },
+    },
+    orderBy: {
+      student: {
+        name: "asc",
       },
     },
     include: {

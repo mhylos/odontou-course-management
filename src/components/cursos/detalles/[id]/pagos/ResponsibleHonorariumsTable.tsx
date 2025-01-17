@@ -1,7 +1,8 @@
 import Input from "@/components/common/Input";
+import ActionRowButton from "@/components/common/Table/ActionRowButton";
 import Table, { Row, Cell } from "@/components/common/Table/Table";
 import { HONORARIUMS_FUNCTIONS_DICTIONARY } from "@/lib/constants";
-import { convertToMoney } from "@/lib/utils";
+import { convertToMoney, decimalNumberFormat } from "@/lib/utils";
 import { HonorariumsSchemaType } from "@/lib/zod";
 import Decimal from "decimal.js";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
@@ -9,29 +10,30 @@ import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
 function TotalToPayToResponsible({
   control,
   index,
-  totalToDistribute,
+  totalHonorariums,
 }: {
   control: Control<HonorariumsSchemaType>;
   index: number;
-  totalToDistribute: Decimal;
+  totalHonorariums: Decimal;
 }) {
-  const percentages = useWatch({ name: "responsiblesHonorariums", control });
+  const percentage = useWatch({
+    name: `responsiblesHonorariums.${index}.percentage`,
+    control,
+  });
 
-  const total = new Decimal(percentages[index].percentage || 0)
-    .div(100)
-    .times(totalToDistribute);
+  const total = Decimal.div(percentage, 100).mul(totalHonorariums);
 
   return <span>{convertToMoney(total.toNumber())}</span>;
 }
 
 interface ResponsibleHonorariumTableProps {
   control: Control<HonorariumsSchemaType>;
-  totalToDistribute: Decimal;
+  totalHonorariums: Decimal;
 }
 
 export default function ResponsibleHonorariumTable({
   control,
-  totalToDistribute,
+  totalHonorariums,
 }: ResponsibleHonorariumTableProps) {
   const { fields } = useFieldArray({
     control,
@@ -49,9 +51,9 @@ export default function ResponsibleHonorariumTable({
       ]}
     >
       {fields.map((field, i) => (
-        <Row currentRow={i + 1} key={field.id}>
+        <Row currentRow={i + 1} key={field.honorarium_id}>
           <Cell>
-            <span>{field.academic_name}</span>
+            <span className="capitalize">{field.academic_name}</span>
           </Cell>
           <Cell>{HONORARIUMS_FUNCTIONS_DICTIONARY[field.function]}</Cell>
           <Cell>
@@ -63,13 +65,14 @@ export default function ResponsibleHonorariumTable({
                   <Input
                     value={value || ""}
                     onChange={(e) => {
-                      let value = e.currentTarget.value.replace(/[^0-9.]/g, "");
-                      let n = new Decimal(value || 0);
-                      if (n.greaterThan("100") || n.lessThan("0")) {
+                      const value = decimalNumberFormat(e.target.value);
+                      const n = new Decimal(!value ? 0 : value);
+
+                      if (n.greaterThan(100)) {
                         return;
                       }
 
-                      onChange(value ?? 0);
+                      onChange(value);
                     }}
                   />
                 )}
@@ -81,10 +84,15 @@ export default function ResponsibleHonorariumTable({
             <TotalToPayToResponsible
               control={control}
               index={i}
-              totalToDistribute={totalToDistribute}
+              totalHonorariums={totalHonorariums}
             />
           </Cell>
-          <Cell></Cell>
+
+          <Cell className="flex">
+            <ActionRowButton href={`pagos/${field.honorarium_id}`}>
+              <span className="icon-[ph--receipt] text-xl" />
+            </ActionRowButton>
+          </Cell>
         </Row>
       ))}
     </Table>

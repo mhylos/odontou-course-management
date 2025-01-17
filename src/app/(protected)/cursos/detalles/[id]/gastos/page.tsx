@@ -1,6 +1,9 @@
 import ExpensesTable from "@/components/cursos/detalles/[id]/gastos/ExpensesTable";
 import { getIncomesValues } from "@/services/courseServices";
-import { getCourseExpenses } from "@/services/expensesServices";
+import {
+  getCourseExpenses,
+  getMultiplyValues,
+} from "@/services/expensesServices";
 
 export default async function CourseExpenses({
   params,
@@ -10,17 +13,14 @@ export default async function CourseExpenses({
   const id = (await params).id;
 
   const expenses = await getCourseExpenses(parseInt(id));
-  const incomesValues = await getIncomesValues(parseInt(id));
-  const enrollValue = incomesValues?.enrollValue ?? 0;
-  const students = incomesValues?.students ?? 0;
+  const multiplyValues = await getMultiplyValues(parseInt(id));
 
   return (
     <div className="flex flex-col gap-2 w-full h-full">
       <ExpensesTable
         courseId={parseInt(id)}
         expenses={expenses}
-        studentsQuantity={students}
-        enrollValue={enrollValue}
+        multiplyValues={multiplyValues}
       />
     </div>
   );

@@ -76,6 +76,7 @@ export default function AcademicForm({
           fetchUrl="/api/department/options"
         />
         <Checkbox
+          id="isFOUCH"
           label="Pertenece a la facultad"
           {...form.register("isFOUCH")}
         />

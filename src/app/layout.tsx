@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Slide, ToastContainer } from "react-toastify";
+import { SessionProvider } from "next-auth/react";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 
@@ -15,17 +16,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <body className={"antialiased"}>
-        <ToastContainer
-          hideProgressBar
-          autoClose={2000}
-          pauseOnFocusLoss={false}
-          pauseOnHover={false}
-          transition={Slide}
-        />
-        {children}
-      </body>
-    </html>
+    <SessionProvider>
+      <html lang="es">
+        <body className={"antialiased"}>
+          <ToastContainer
+            hideProgressBar
+            autoClose={2000}
+            pauseOnFocusLoss={false}
+            pauseOnHover={false}
+            transition={Slide}
+          />
+          {children}
+        </body>
+      </html>
+    </SessionProvider>
   );
 }

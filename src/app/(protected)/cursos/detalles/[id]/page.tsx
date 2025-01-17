@@ -41,14 +41,24 @@ export default async function CourseInfo({
           </SectionItem>
           <SectionItem title={"Nombre del Director del Departamento"}>
             <ItemDescription>
-              {course.department.director?.name ?? "-"}
+              <span className="capitalize">
+                {course.department.director?.name?.toLowerCase() ?? "-"}
+              </span>
             </ItemDescription>
           </SectionItem>
           <SectionItem title={"Nombre del Director del Programa"}>
-            <ItemDescription>{course.course_director.name}</ItemDescription>
+            <ItemDescription>
+              <span className="capitalize">
+                {course.course_director.name?.toLowerCase()}
+              </span>
+            </ItemDescription>
           </SectionItem>
           <SectionItem title={"Nombre del Coordinador del Programa"}>
-            <ItemDescription>{course.coordinator.name}</ItemDescription>
+            <ItemDescription>
+              <span className="capitalize">
+                {course.coordinator.name?.toLowerCase()}
+              </span>
+            </ItemDescription>
           </SectionItem>
         </Section>
         <Section

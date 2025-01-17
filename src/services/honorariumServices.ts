@@ -4,11 +4,18 @@ import Decimal from "decimal.js";
 import { getTotalIncomes } from "./incomesServices";
 import { getTotalExpenses } from "./expensesServices";
 import prisma from "@/lib/prisma";
-import { AcademicFunctions, ResponsibleFunctions } from "@prisma/client";
+import {
+  AcademicFunctions,
+  Actions,
+  ResponsibleFunctions,
+} from "@prisma/client";
 import {
   AcademicHonorariumSchemaType,
   ResponsibleHonorariumSchemaType,
 } from "@/lib/zod";
+import { registerAction } from "./loggerServices";
+import { getCourseName } from "./courseServices";
+import { capitalizeAll } from "@/lib/utils";
 
 export async function getAcademicsHonorarium(courseId: number) {
   const totalIncomes = new Decimal(await getTotalIncomes(courseId));
@@ -73,11 +80,39 @@ export async function getAcademicsHonorariumsByCourse(
   }));
 }
 
+export async function updateResponsiblesHonorariums(
+  courseId: number,
+  responsiblesHonorariums: ResponsibleHonorariumSchemaType[]
+) {
+  await Promise.all(
+    responsiblesHonorariums.map(async (honorarium) => {
+      await prisma.responsibleHonorarium.update({
+        where: { id: honorarium.honorarium_id },
+        data: {
+          percentage: honorarium.percentage,
+        },
+      });
+    })
+  );
+
+  const courseName = await getCourseName(courseId);
+
+  registerAction(
+    Actions.update,
+    `Honorarios de administrativos actualizados del curso **${courseName}**`
+  );
+
+  return {
+    success: true,
+    message: "Honorarios de administrativos actualizados",
+  };
+}
+
 export async function updateAcademicsHonorariums(
   courseId: number,
   academicsHonorariums: AcademicHonorariumSchemaType[]
 ) {
-  const updatedHonorariums = await Promise.all(
+  await Promise.all(
     academicsHonorariums.map(async (honorarium) => {
       const participation = await prisma.participation.findFirst({
         where: { academic_fk: honorarium.academic_rut, course_fk: courseId },
@@ -113,15 +148,19 @@ export async function updateAcademicsHonorariums(
           },
         });
       });
-
-      return {
-        success: true,
-        message: "Honorarios de académicos actualizados",
-      };
     })
   );
 
-  return updatedHonorariums;
+  const courseName = await getCourseName(courseId);
+
+  registerAction(
+    Actions.update,
+    `Honorarios de académicos actualizados del curso **${courseName}**`
+  );
+  return {
+    success: true,
+    message: "Honorarios de académicos actualizados",
+  };
 }
 
 export async function getResponsiblesHonorariumsByCourse(
@@ -179,7 +218,7 @@ export async function getResponsiblesHonorariumsByCourse(
     .map((responsible) => {
       if (!responsible) return null;
       return {
-        id: responsible.id,
+        honorarium_id: responsible.id,
         academic_name: responsible.honorarium.academic.user.name ?? "",
         function: responsible.function,
         percentage: responsible.percentage.toString(),
@@ -225,8 +264,24 @@ export async function upsertResponsiblesHonorariums(
       percentage: responsible.percentage,
       function: responsible.function,
     },
+    select: {
+      honorarium: {
+        select: {
+          academic: { select: { user: { select: { name: true } } } },
+          course: { select: { name: true } },
+        },
+      },
+    },
   });
 
+  registerAction(
+    Actions.update,
+    `Honorario de administrativo **${capitalizeAll(
+      updatedHonorarium.honorarium.academic.user.name ?? ""
+    )}** actualizado para el curso de **${
+      updatedHonorarium.honorarium.course.name
+    }**`
+  );
   return updatedHonorarium;
 }
 
@@ -270,8 +325,20 @@ export async function upsertAcademicsHonorariums(
       hours: academic.hours,
       function: academic.function,
     },
+    select: {
+      honorarium: {
+        select: {
+          academic: { select: { user: { select: { name: true } } } },
+          course: { select: { name: true } },
+        },
+      },
+    },
   });
 
+  registerAction(
+    Actions.update,
+    `Honorario de académico **${updatedHonorarium.honorarium.academic.user.name}** actualizado para el curso de **${updatedHonorarium.honorarium.course.name}**`
+  );
   return updatedHonorarium;
 }
 

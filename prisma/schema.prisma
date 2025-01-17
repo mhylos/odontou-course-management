@@ -80,10 +80,12 @@ enum Genres {
 }
 
 model Student {
-  rut   Int     @id
-  genre Genres?
-  name  String
-  email String
+  rut        Int      @id
+  genre      Genres?
+  name       String
+  email      String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   enrolled Enrolled[]
 }
@@ -102,6 +104,9 @@ model Refund {
   amount      Int
   observation String
 
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
   enrolled Enrolled @relation(fields: [enrolled_fk], references: [id])
 }
 
@@ -117,7 +122,7 @@ model Enrolled {
   course_fk       Int
   payment_type_fk Int?
   status          Boolean     @default(false)
-  discount        Int         @default(0)
+  discount        Decimal     @default(0) @db.Decimal(6, 3)
   ticket_num      Int?
   payment_date    DateTime?
   total           Int
@@ -126,6 +131,8 @@ model Enrolled {
   paid            Int?        @default(0)
   file            String?
   enroll_type     EnrollTypes @default(autofinanciado)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
 
   student Student       @relation(fields: [student_fk], references: [rut], onDelete: Cascade)
   course  Course        @relation(fields: [course_fk], references: [id], onDelete: Cascade)
@@ -141,8 +148,9 @@ enum MultiplierTypes {
 }
 
 enum MultiplyWith {
-  students
-  enroll_value
+  students_enrolled
+  enroll_incomes
+  elearning_incomes
 }
 
 model Expenses {
@@ -151,8 +159,10 @@ model Expenses {
   name       String
   type       MultiplierTypes
   multiplier Decimal         @db.Decimal(10, 2)
-  multiply   MultiplyWith
+  multiply   MultiplyWith?
+  amount     Int             @default(0)
   created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
 
   course Course @relation(fields: [course_fk], references: [id], onDelete: Cascade)
 
@@ -166,9 +176,11 @@ model Program {
 }
 
 model Department {
-  id          Int    @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   director_fk Int?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   director User? @relation(fields: [director_fk], references: [rut], onDelete: SetNull)
 
@@ -198,8 +210,11 @@ model ResponsiblePayment {
   responsible_honorarium_fk Int
   payment_date              DateTime
   next_payment_date         DateTime
+  paid                      Boolean  @default(false)
   amount                    Int
   observation               String
+  created_at                DateTime @default(now())
+  updated_at                DateTime @updatedAt
 
   honorarium ResponsibleHonorarium @relation(fields: [id], references: [id])
 }
@@ -209,8 +224,11 @@ model AcademicPayment {
   academic_honorarium_fk Int
   payment_date           DateTime
   next_payment_date      DateTime
+  paid                   Boolean  @default(false)
   amount                 Int
   observation            String
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
 
   honorarium AcademicHonorarium @relation(fields: [id], references: [id])
 }
@@ -220,6 +238,8 @@ model ResponsibleHonorarium {
   honorarium_fk Int
   percentage    Decimal              @default(0) @db.Decimal(6, 3)
   function      ResponsibleFunctions
+  created_at    DateTime             @default(now())
+  updated_at    DateTime             @updatedAt
 
   honorarium Honorarium           @relation(fields: [honorarium_fk], references: [id])
   payment    ResponsiblePayment[]
@@ -233,6 +253,8 @@ model AcademicHonorarium {
   participation_fk Int
   hours            Decimal           @default(0) @db.Decimal(5, 2)
   function         AcademicFunctions
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
 
   honorarium    Honorarium        @relation(fields: [honorarium_fk], references: [id])
   participation Participation     @relation(fields: [participation_fk], references: [id])
@@ -242,9 +264,11 @@ model AcademicHonorarium {
 }
 
 model Honorarium {
-  id          Int @unique @default(autoincrement())
+  id          Int      @unique @default(autoincrement())
   course_fk   Int
   academic_fk Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   course                 Course                  @relation(fields: [course_fk], references: [id], onDelete: Cascade)
   academic               Academic                @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
@@ -255,12 +279,14 @@ model Honorarium {
 }
 
 model Participation {
-  id                Int  @unique @default(autoincrement())
+  id                Int      @unique @default(autoincrement())
   academic_fk       Int
   course_fk         Int
   hierarchy_type_fk Int
   dedicated_hours   Int?
   contract_hours    Int?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
 
   academic            Academic             @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
   course              Course               @relation(fields: [course_fk], references: [id], onDelete: Cascade)
@@ -271,10 +297,12 @@ model Participation {
 }
 
 model Academic {
-  user_fk       Int     @id
+  user_fk       Int      @id
   department_fk Int
   isFOUCH       Boolean
   phone         Int?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 
   department Department @relation(fields: [department_fk], references: [id])
   user       User       @relation(fields: [user_fk], references: [rut])
@@ -284,7 +312,9 @@ model Academic {
 }
 
 model Administrator {
-  user_fk Int @id
+  user_fk    Int      @id
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   user User @relation(fields: [user_fk], references: [rut], onDelete: Cascade)
 }
@@ -313,12 +343,20 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+enum Actions {
+  create
+  update
+  delete
+  login
+  logout
+}
+
 model Logger {
   id          Int      @id @default(autoincrement())
   user_fk     String
-  action      String
-  description String
-  timestamp   DateTime
+  action      Actions
+  description String   @db.Text
+  timestamp   DateTime @default(now())
 
   user User @relation(fields: [user_fk], references: [id])
 }

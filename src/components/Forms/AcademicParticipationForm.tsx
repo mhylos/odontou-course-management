@@ -39,6 +39,9 @@ export default function AcademicParticipationForm({
       toast(response.message, {
         type: response.success ? "success" : "error",
       });
+      if (response.success) {
+        form.reset();
+      }
     } catch (error) {
       console.error(error);
     }

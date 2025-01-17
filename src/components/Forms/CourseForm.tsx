@@ -39,6 +39,7 @@ export default function CourseForm({
     "department" | "director" | "coordinator"
   >();
   const { mutate } = useSWRConfig();
+  const dateFrom = form.watch("date_from");
 
   const hours = form.watch([
     "direct_hours",
@@ -133,7 +134,7 @@ export default function CourseForm({
                   label="Termino"
                   type="date"
                   error={form.formState.errors.date_to?.message}
-                  min={form.getValues("date_from")?.toISOString().split("T")[0]}
+                  min={dateFrom?.toISOString().split("T")[0]}
                   value={value ? value.toISOString().split("T")[0] : ""}
                   onChange={(e) => {
                     onChange(new Date(e.target.value));
@@ -203,13 +204,13 @@ export default function CourseForm({
         <FormFieldset legend={"Horas"}>
           <div className="grid grid-cols-[1fr_1fr_auto] grid-rows-2 gap-2">
             <FloatingInput
-              label="Horas directas"
+              label="Directas"
               {...form.register("direct_hours")}
               autoComplete="off"
               error={form.formState.errors.direct_hours?.message}
             />
             <FloatingInput
-              label="Horas indirectas"
+              label="Indirectas"
               {...form.register("indirect_hours")}
               autoComplete="off"
               error={form.formState.errors.indirect_hours?.message}
@@ -223,13 +224,13 @@ export default function CourseForm({
               <span className="text-xs text-gray-500">Horas totales</span>
             </div>
             <FloatingInput
-              label="Horas presenciales"
+              label="Presenciales"
               {...form.register("inperson_hours")}
               autoComplete="off"
               error={form.formState.errors.inperson_hours?.message}
             />
             <FloatingInput
-              label="Horas online"
+              label="No Presenciales"
               {...form.register("online_hours")}
               autoComplete="off"
               error={form.formState.errors.online_hours?.message}

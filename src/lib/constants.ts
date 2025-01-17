@@ -1,4 +1,8 @@
-import { AcademicFunctions, ResponsibleFunctions } from "@prisma/client";
+import {
+  AcademicFunctions,
+  Actions,
+  ResponsibleFunctions,
+} from "@prisma/client";
 
 export const MAX_FILE_SIZE_MB = 5;
 export const FILE_EXTENSIONS = ["pdf", "doc", "docx", "pdf", "jpg", "jpeg"];
@@ -55,4 +59,12 @@ export const HONORARIUMS_FUNCTIONS_DICTIONARY = {
   [ResponsibleFunctions.director]: "Director",
   [AcademicFunctions.instructor]: "Dictante",
   [AcademicFunctions.tutor]: "Tutor",
+};
+
+export const ACTIONS_DICTIONARY = {
+  [Actions.create]: "Creación",
+  [Actions.update]: "Actualización",
+  [Actions.delete]: "Eliminación",
+  [Actions.login]: "Inicio de sesión",
+  [Actions.logout]: "Cierre de sesión",
 };

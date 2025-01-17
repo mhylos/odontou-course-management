@@ -1,6 +1,7 @@
-import { Genres, Income, Prisma } from "@prisma/client";
+import { Genres, Income, MultiplyWith, Prisma } from "@prisma/client";
 import prisma from "./prisma";
 import { Optional } from "./utils";
+import Decimal from "decimal.js";
 
 export type User = {
   rut: number;
@@ -124,3 +125,12 @@ export type IncomeUpdateBody = Optional<
 export type AdminCreate = {} & UserCreate;
 
 export type EnrollCreate = Omit<Enroll, "student_fk" | "course_fk" | "student">;
+
+export type MultiplyValues = {
+  [key in MultiplyWith]: string;
+};
+
+export enum Roles {
+  ADMIN = "admin",
+  ACADEMIC = "academic",
+}

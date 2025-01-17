@@ -8,12 +8,6 @@ interface RootLayoutProps {
 }
 
 export default async function RootLayout({ children, modal }: RootLayoutProps) {
-  const session = await auth();
-
-  if (!session) {
-    redirect("/login");
-  }
-
   return (
     <div className="grid grid-cols-[auto_1fr] h-screen">
       <Sidebar

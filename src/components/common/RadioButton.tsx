@@ -23,10 +23,11 @@ export default function RadioButton({
       <div className="ms-2 text-sm">
         <label htmlFor={inputProps?.id} className="font-medium text-gray-900">
           {label}
+
+          {description && (
+            <p className="text-xs font-normal text-gray-500 ">{description}</p>
+          )}
         </label>
-        {description && (
-          <p className="text-xs font-normal text-gray-500 ">{description}</p>
-        )}
       </div>
     </div>
   );

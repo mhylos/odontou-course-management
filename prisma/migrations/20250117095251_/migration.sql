@@ -8,10 +8,16 @@ CREATE TYPE "EnrollTypes" AS ENUM ('convenio', 'autofinanciado', 'becado');
 CREATE TYPE "MultiplierTypes" AS ENUM ('percentage', 'unit_cost');
 
 -- CreateEnum
-CREATE TYPE "MultiplyWith" AS ENUM ('students', 'enroll_value');
+CREATE TYPE "MultiplyWith" AS ENUM ('students_enrolled', 'enroll_incomes', 'elearning_incomes');
 
 -- CreateEnum
-CREATE TYPE "FunctionTypes" AS ENUM ('director', 'coordinator', 'dictante', 'tutor');
+CREATE TYPE "ResponsibleFunctions" AS ENUM ('director', 'coordinator');
+
+-- CreateEnum
+CREATE TYPE "AcademicFunctions" AS ENUM ('instructor', 'tutor');
+
+-- CreateEnum
+CREATE TYPE "Actions" AS ENUM ('create', 'update', 'delete', 'login', 'logout');
 
 -- CreateTable
 CREATE TABLE "Course" (
@@ -53,6 +59,7 @@ CREATE TABLE "Income" (
     "course_fk" INTEGER NOT NULL,
     "amount" INTEGER NOT NULL,
     "comment" TEXT,
+    "order" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "Income_pkey" PRIMARY KEY ("id")
 );
@@ -82,6 +89,8 @@ CREATE TABLE "Refund" (
     "refund_date" TIMESTAMP(3) NOT NULL,
     "amount" INTEGER NOT NULL,
     "observation" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Refund_pkey" PRIMARY KEY ("id")
 );
@@ -93,7 +102,7 @@ CREATE TABLE "Enrolled" (
     "course_fk" INTEGER NOT NULL,
     "payment_type_fk" INTEGER,
     "status" BOOLEAN NOT NULL DEFAULT false,
-    "discount" INTEGER NOT NULL DEFAULT 0,
+    "discount" DECIMAL(6,3) NOT NULL DEFAULT 0,
     "ticket_num" INTEGER,
     "payment_date" TIMESTAMP(3),
     "total" INTEGER NOT NULL,
@@ -102,6 +111,8 @@ CREATE TABLE "Enrolled" (
     "paid" INTEGER DEFAULT 0,
     "file" TEXT,
     "enroll_type" "EnrollTypes" NOT NULL DEFAULT 'autofinanciado',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Enrolled_pkey" PRIMARY KEY ("student_fk","course_fk")
 );
@@ -113,8 +124,10 @@ CREATE TABLE "Expenses" (
     "name" TEXT NOT NULL,
     "type" "MultiplierTypes" NOT NULL,
     "multiplier" DECIMAL(10,2) NOT NULL,
-    "multiply" "MultiplyWith" NOT NULL,
+    "multiply" "MultiplyWith",
+    "amount" INTEGER NOT NULL DEFAULT 0,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Expenses_pkey" PRIMARY KEY ("id")
 );
@@ -132,6 +145,8 @@ CREATE TABLE "Department" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "director_fk" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Department_pkey" PRIMARY KEY ("id")
 );
@@ -145,14 +160,58 @@ CREATE TABLE "HierarchyTypes" (
 );
 
 -- CreateTable
-CREATE TABLE "HonorariumPayment" (
+CREATE TABLE "ResponsiblePayment" (
     "id" SERIAL NOT NULL,
-    "honorarium_fk" INTEGER NOT NULL,
+    "responsible_honorarium_fk" INTEGER NOT NULL,
     "payment_date" TIMESTAMP(3) NOT NULL,
+    "next_payment_date" TIMESTAMP(3) NOT NULL,
+    "paid" BOOLEAN NOT NULL DEFAULT false,
     "amount" INTEGER NOT NULL,
     "observation" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "HonorariumPayment_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ResponsiblePayment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AcademicPayment" (
+    "id" SERIAL NOT NULL,
+    "academic_honorarium_fk" INTEGER NOT NULL,
+    "payment_date" TIMESTAMP(3) NOT NULL,
+    "next_payment_date" TIMESTAMP(3) NOT NULL,
+    "paid" BOOLEAN NOT NULL DEFAULT false,
+    "amount" INTEGER NOT NULL,
+    "observation" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "AcademicPayment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ResponsibleHonorarium" (
+    "id" SERIAL NOT NULL,
+    "honorarium_fk" INTEGER NOT NULL,
+    "percentage" DECIMAL(6,3) NOT NULL DEFAULT 0,
+    "function" "ResponsibleFunctions" NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ResponsibleHonorarium_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AcademicHonorarium" (
+    "id" SERIAL NOT NULL,
+    "honorarium_fk" INTEGER NOT NULL,
+    "participation_fk" INTEGER NOT NULL,
+    "hours" DECIMAL(5,2) NOT NULL DEFAULT 0,
+    "function" "AcademicFunctions" NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "AcademicHonorarium_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -160,12 +219,10 @@ CREATE TABLE "Honorarium" (
     "id" SERIAL NOT NULL,
     "course_fk" INTEGER NOT NULL,
     "academic_fk" INTEGER NOT NULL,
-    "participation_fk" INTEGER,
-    "hours" INTEGER NOT NULL,
-    "function" "FunctionTypes" NOT NULL,
-    "percentage" DECIMAL(6,3) NOT NULL DEFAULT 0,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Honorarium_pkey" PRIMARY KEY ("course_fk","academic_fk","function")
+    CONSTRAINT "Honorarium_pkey" PRIMARY KEY ("course_fk","academic_fk")
 );
 
 -- CreateTable
@@ -176,6 +233,8 @@ CREATE TABLE "Participation" (
     "hierarchy_type_fk" INTEGER NOT NULL,
     "dedicated_hours" INTEGER,
     "contract_hours" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Participation_pkey" PRIMARY KEY ("academic_fk","course_fk")
 );
@@ -186,6 +245,8 @@ CREATE TABLE "Academic" (
     "department_fk" INTEGER NOT NULL,
     "isFOUCH" BOOLEAN NOT NULL,
     "phone" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Academic_pkey" PRIMARY KEY ("user_fk")
 );
@@ -193,6 +254,8 @@ CREATE TABLE "Academic" (
 -- CreateTable
 CREATE TABLE "Administrator" (
     "user_fk" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Administrator_pkey" PRIMARY KEY ("user_fk")
 );
@@ -216,9 +279,9 @@ CREATE TABLE "User" (
 CREATE TABLE "Logger" (
     "id" SERIAL NOT NULL,
     "user_fk" TEXT NOT NULL,
-    "action" TEXT NOT NULL,
+    "action" "Actions" NOT NULL,
     "description" TEXT NOT NULL,
-    "timestamp" TIMESTAMP(3) NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Logger_pkey" PRIMARY KEY ("id")
 );
@@ -273,6 +336,12 @@ CREATE UNIQUE INDEX "Enrolled_id_key" ON "Enrolled"("id");
 CREATE UNIQUE INDEX "Expenses_name_course_fk_key" ON "Expenses"("name", "course_fk");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ResponsibleHonorarium_honorarium_fk_function_key" ON "ResponsibleHonorarium"("honorarium_fk", "function");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AcademicHonorarium_honorarium_fk_participation_fk_function_key" ON "AcademicHonorarium"("honorarium_fk", "participation_fk", "function");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Honorarium_id_key" ON "Honorarium"("id");
 
 -- CreateIndex
@@ -324,10 +393,19 @@ ALTER TABLE "Expenses" ADD CONSTRAINT "Expenses_course_fk_fkey" FOREIGN KEY ("co
 ALTER TABLE "Department" ADD CONSTRAINT "Department_director_fk_fkey" FOREIGN KEY ("director_fk") REFERENCES "User"("rut") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "HonorariumPayment" ADD CONSTRAINT "HonorariumPayment_honorarium_fk_fkey" FOREIGN KEY ("honorarium_fk") REFERENCES "Honorarium"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ResponsiblePayment" ADD CONSTRAINT "ResponsiblePayment_id_fkey" FOREIGN KEY ("id") REFERENCES "ResponsibleHonorarium"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Honorarium" ADD CONSTRAINT "Honorarium_participation_fk_fkey" FOREIGN KEY ("participation_fk") REFERENCES "Participation"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "AcademicPayment" ADD CONSTRAINT "AcademicPayment_id_fkey" FOREIGN KEY ("id") REFERENCES "AcademicHonorarium"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ResponsibleHonorarium" ADD CONSTRAINT "ResponsibleHonorarium_honorarium_fk_fkey" FOREIGN KEY ("honorarium_fk") REFERENCES "Honorarium"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AcademicHonorarium" ADD CONSTRAINT "AcademicHonorarium_honorarium_fk_fkey" FOREIGN KEY ("honorarium_fk") REFERENCES "Honorarium"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AcademicHonorarium" ADD CONSTRAINT "AcademicHonorarium_participation_fk_fkey" FOREIGN KEY ("participation_fk") REFERENCES "Participation"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Honorarium" ADD CONSTRAINT "Honorarium_course_fk_fkey" FOREIGN KEY ("course_fk") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,9 +1,13 @@
 "use server";
 
+import { MultiplyValues } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
 import { ExpenseSchemaType, ExpensesSchemaType } from "@/lib/zod";
+import { Actions, MultiplyWith } from "@prisma/client";
 import Decimal from "decimal.js";
 import { revalidatePath } from "next/cache";
+import { registerAction } from "./loggerServices";
+import { getCourseName } from "./courseServices";
 
 export async function getCourseExpenses(courseId: number) {
   const expenses = await prisma.expenses.findMany({
@@ -15,18 +19,27 @@ export async function getCourseExpenses(courseId: number) {
       type: true,
       multiply: true,
       multiplier: true,
+      amount: true,
     },
   });
 
-  return expenses;
+  return expenses.map((expense) => ({
+    ...expense,
+    multiplier: expense.multiplier.toString(),
+  }));
 }
 
 export async function deleteExpense(expenseId: number) {
   try {
-    await prisma.expenses.delete({
+    const expense = await prisma.expenses.delete({
       where: { id: expenseId },
+      select: { name: true, course: { select: { name: true } } },
     });
 
+    registerAction(
+      Actions.delete,
+      `Gasto **${expense.name}** eliminado del curso **${expense.course.name}**`
+    );
     return { success: true, message: "Gasto eliminado" };
   } catch (error) {
     console.error(error);
@@ -39,40 +52,38 @@ export async function createOrUpdateExpenses(
   courseId: number
 ) {
   try {
-    const updatedExpenses: ExpensesSchemaType["expenses"] = [];
-    const newExpenses: ExpensesSchemaType["expenses"] = [];
-
-    data.expenses.map((expense) => {
-      if (!expense.id) {
-        newExpenses.push(expense);
-      } else {
-        updatedExpenses.push(expense);
-      }
-    });
-
-    await Promise.all(
-      updatedExpenses.map((expense) => {
-        if (!expense) return;
-        return prisma.expenses.update({
-          where: { id: expense.id },
-          data: {
+    const expenses = await Promise.all(
+      data.expenses.map((expense) => {
+        return prisma.expenses.upsert({
+          where: {
+            name_course_fk: { name: expense.name, course_fk: courseId },
+          },
+          update: {
+            type: expense.type,
+            multiply: expense.multiply,
+            multiplier: new Decimal(expense.multiplier),
+            amount: expense.amount,
+          },
+          create: {
             name: expense.name,
             type: expense.type,
             multiply: expense.multiply,
             multiplier: parseFloat(expense.multiplier),
+            amount: expense.amount,
+            course_fk: courseId,
           },
         });
       })
     );
-    const expenses = await prisma.expenses.createMany({
-      data: newExpenses.map((expense) => ({
-        ...expense,
-        multiplier: parseFloat(expense.multiplier),
-        course_fk: courseId,
-      })),
-    });
+
+    const courseName = await getCourseName(courseId);
+
+    registerAction(
+      Actions.update,
+      `Gastos del curso **${courseName}** actualizados`
+    );
     const message =
-      expenses.count > 0 ? "Gasto(s) creado(s)" : "Gasto(s) actualizado(s)";
+      expenses.length > 0 ? "Gasto(s) creado(s)" : "Gasto(s) actualizado(s)";
     revalidatePath(`/cursos/detalles/${courseId}/distribucion`);
     return { success: true, message: message };
   } catch (error) {
@@ -81,36 +92,56 @@ export async function createOrUpdateExpenses(
   }
 }
 
-export async function getTotalExpenses(courseId: number) {
-  const expenses = await prisma.expenses.findMany({
-    where: { course_fk: courseId },
-    select: {
-      multiplier: true,
-      multiply: true,
-      type: true,
-      course: {
-        select: { enroll_value: true, _count: { select: { enrolled: true } } },
+export async function getMultiplyValues(courseId: number) {
+  const getEnrollIncome = async () => {
+    return prisma.income.findUnique({
+      where: {
+        name_course_fk: { name: "Ingresos arancel", course_fk: courseId },
       },
-    },
+      select: { amount: true },
+    });
+  };
+
+  const getEnrolledCount = async () => {
+    return prisma.enrolled.count({
+      where: { course_fk: courseId },
+    });
+  };
+
+  const getElearningHours = async () => {
+    return prisma.course.findUnique({
+      where: { id: courseId },
+      select: { online_hours: true },
+    });
+  };
+
+  const values = await Promise.all([
+    getEnrollIncome(),
+    getEnrolledCount(),
+    getElearningHours(),
+  ]);
+
+  const enrollIncome = values[0];
+  const enrolledCount = values[1];
+  const elearningHours = values[2];
+
+  const multiplyValues: MultiplyValues = {
+    elearning_incomes:
+      elearningHours?.online_hours.times(enrolledCount).toString() || "0",
+    enroll_incomes: enrollIncome?.amount.toString() || "0",
+    students_enrolled: enrolledCount.toString() || "0",
+  };
+
+  return multiplyValues;
+}
+
+export async function getTotalExpenses(courseId: number) {
+  const expenses = await prisma.expenses.aggregate({
+    where: { course_fk: courseId },
+    _sum: { amount: true },
   });
 
-  if (expenses.length === 0) {
-    return "0";
-  }
-
-  const enrolledCount = expenses[0].course._count.enrolled;
-  const enrollValue = expenses[0].course.enroll_value;
-
-  return expenses
-    .reduce((acc, expense) => {
-      const value = expense.multiplier
-        .dividedBy(expense.type === "percentage" ? 100 : 1)
-        .times(
-          expense.multiply === "enroll_value" ? enrollValue : enrolledCount
-        );
-      return acc.plus(value.toNumber());
-    }, new Decimal(0))
-    .toString();
+  return expenses._sum.amount || "0";
 }
 
 export type getCourseExpensesResponse = ReturnType<typeof getCourseExpenses>;

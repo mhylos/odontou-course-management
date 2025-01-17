@@ -62,10 +62,9 @@ export const enrollSchema = object({
     })
     .optional()
     .transform((val) => val ?? null),
-  discount: number({ required_error: "El descuento es requerido" })
-    .min(0)
-    .max(100)
-    .default(0),
+  discount: string({ required_error: "El descuento es requerido" }).default(
+    "0"
+  ),
   total: number({ required_error: "El total es requerido" }),
   payment_type_fk: coerce
     .number()
@@ -188,7 +187,8 @@ export const expenseSchema = object({
   multiplier: string({
     required_error: "El multiplicador es requerido",
   }).transform((val) => val.replace(/[^0-9.]/g, "")),
-  multiply: nativeEnum(MultiplyWith),
+  multiply: nativeEnum(MultiplyWith).optional().nullish(),
+  amount: coerce.number().default(0),
 });
 
 export const expensesSchema = object({
@@ -211,7 +211,7 @@ export const distributionsSchema = object({
 });
 
 export const responsibleHonorariumSchema = object({
-  id: number(),
+  honorarium_id: number(),
   academic_name: string(),
   function: nativeEnum(ResponsibleFunctions),
   percentage: string({ required_error: "Las horas son requeridas" }),

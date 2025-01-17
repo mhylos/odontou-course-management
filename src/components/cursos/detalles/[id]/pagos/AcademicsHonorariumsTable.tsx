@@ -1,13 +1,13 @@
-import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
 import Table, { Row, Cell } from "@/components/common/Table/Table";
 import { HONORARIUMS_FUNCTIONS_DICTIONARY } from "@/lib/constants";
-import { convertToMoney, restoreRun } from "@/lib/utils";
-import { AcademicHonorariumSchemaType, HonorariumsSchemaType } from "@/lib/zod";
+import { convertToMoney, decimalNumberFormat, restoreRun } from "@/lib/utils";
+import { HonorariumsSchemaType } from "@/lib/zod";
 import { AcademicFunctions } from "@prisma/client";
 import { Fragment, useState } from "react";
 import {
   Control,
+  Controller,
   useFieldArray,
   UseFormRegister,
   useWatch,
@@ -29,10 +29,10 @@ function TotalToPayToAcademic({
   const honorariums = useWatch({ name: "academicsHonorariums", control });
 
   const honorarium = Decimal.mul(
-    honorariums[index].functions.reduce(
-      (acc, field) => acc.plus(field.hours || 0),
-      new Decimal(0)
-    ),
+    honorariums[index].functions.reduce((acc, field) => {
+      const hours = new Decimal(!field.hours ? 0 : field.hours);
+      return acc.plus(hours);
+    }, new Decimal(0)),
     hourValue
   );
 
@@ -55,7 +55,7 @@ function TotalByFunction({
     control,
   });
 
-  const total = hourValue.times(hours || 0);
+  const total = hourValue.times(!hours ? 0 : hours);
 
   return <span>{convertToMoney(total.toNumber())}</span>;
 }
@@ -75,7 +75,6 @@ interface AcademicsHonorariumsTableProps {
 
 export default function AcademicsHonorariumsTable({
   control,
-  register,
   hourValue,
 }: AcademicsHonorariumsTableProps) {
   const [expandedRow, setExpandedRow] = useState<number[]>([]);
@@ -93,13 +92,13 @@ export default function AcademicsHonorariumsTable({
         { title: "Funciones", width: "20%" },
         { title: "Monto a pagar total", width: "10%" },
         { title: "", width: "5%" },
+        { title: "", width: "5%" },
       ]}
       className="h-full overflow-y-scroll"
     >
       {fields.map((field, i) => (
-        <Fragment key={field.id}>
+        <Fragment key={field.honorarium_id}>
           <Row
-            key={"row" + field.id}
             currentRow={i + 1}
             className="relative group cursor-pointer"
             onClick={() => {
@@ -111,14 +110,14 @@ export default function AcademicsHonorariumsTable({
             }}
           >
             <Cell>
-              <span>{field.academic_name}</span>
+              <span className="capitalize">{field.academic_name}</span>
             </Cell>
             <Cell>
               <span>{restoreRun(field.academic_rut)}</span>
             </Cell>
             <Cell className="flex gap-2">
               {field.functions.map((func, func_index) => (
-                <Chip key={func.function + func_index}>
+                <Chip key={field.honorarium_id + func_index + func.function}>
                   {HONORARIUMS_FUNCTIONS_DICTIONARY[func.function]}
                 </Chip>
               ))}
@@ -130,6 +129,18 @@ export default function AcademicsHonorariumsTable({
                 hourValue={hourValue}
               />
             </Cell>
+
+            <Cell className="flex">
+              <ActionRowButton
+                href={`pagos/${field.honorarium_id}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <span className="icon-[ph--receipt] text-xl" />
+              </ActionRowButton>
+            </Cell>
+
             <Cell>
               <span
                 className={`icon-[ci--chevron-down] text-gray-400 text-xl transition-transform ${
@@ -139,27 +150,38 @@ export default function AcademicsHonorariumsTable({
             </Cell>
           </Row>
           <Row className={`${expandedRow.includes(i) ? "" : "hidden"}`}>
+            <Cell />
             <Cell colSpan={5} className="p-2 relative">
               <Table
                 headers={[
                   { title: "Función" },
                   { title: "Horas comprometidas" },
                   { title: "Monto a pagar" },
-                  { title: "Acciones" },
+                  { title: "Último pago" },
                 ]}
                 className="overflow-visible"
               >
                 {field.functions.map((func, j) => (
-                  <Row key={func.function ?? "0" + j} currentRow={j + 1}>
+                  <Row
+                    key={field.honorarium_id + func.function}
+                    currentRow={j + 1}
+                  >
                     <Cell className="py-0">
                       <span>
                         {HONORARIUMS_FUNCTIONS_DICTIONARY[func.function]}
                       </span>
                     </Cell>
                     <Cell className="py-0">
-                      <Input
-                        {...register(
-                          `academicsHonorariums.${i}.functions.${j}.hours`
+                      <Controller
+                        name={`academicsHonorariums.${i}.functions.${j}.hours`}
+                        control={control}
+                        render={({ field: { onChange, ...field } }) => (
+                          <Input
+                            {...field}
+                            onChange={(e) => {
+                              onChange(decimalNumberFormat(e.target.value));
+                            }}
+                          />
                         )}
                       />
                     </Cell>
@@ -171,10 +193,8 @@ export default function AcademicsHonorariumsTable({
                         functionIndex={j}
                       />
                     </Cell>
-                    <Cell className="flex gap-2">
-                      <ActionRowButton className="max-w-max ">
-                        <span className="icon-[ph--book-bookmark] text-xl" />
-                      </ActionRowButton>
+                    <Cell className="!py-0">
+                      <span className="text-xs">-</span>
                     </Cell>
                   </Row>
                 ))}
@@ -216,6 +236,7 @@ export default function AcademicsHonorariumsTable({
                       >
                         <ActionRowButton
                           id="add-row"
+                          type="button"
                           className="max-w-max grid place-items-center"
                           onClick={() => {
                             setAddingFunction(i);

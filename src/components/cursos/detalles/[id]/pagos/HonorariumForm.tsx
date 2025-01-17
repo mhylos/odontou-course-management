@@ -14,7 +14,10 @@ import Button from "@/components/common/Button";
 import AcademicsHonorariumsTable from "./AcademicsHonorariumsTable";
 import ResponsibleHonorariumTable from "./ResponsibleHonorariumsTable";
 import { toast } from "react-toastify";
-import { updateAcademicsHonorariums } from "@/services/honorariumServices";
+import {
+  updateAcademicsHonorariums,
+  updateResponsiblesHonorariums,
+} from "@/services/honorariumServices";
 
 interface HonorariumFormProps {
   totalHonorariums: string;
@@ -25,19 +28,19 @@ interface HonorariumFormProps {
 
 function getTotalToDistribute(
   control: Control<HonorariumsSchemaType>,
-  academicHonorarium: string
+  totalHonorariums: Decimal
 ) {
-  const percentages = useWatch({
+  const responsibles = useWatch({
     name: "responsiblesHonorariums",
     control,
   });
 
-  let totalToDistribute = new Decimal(academicHonorarium);
+  let totalToDistribute = totalHonorariums;
 
-  percentages.forEach((percentage, i) => {
-    const value = new Decimal(percentage.percentage || 0)
+  responsibles.forEach((responsible, i) => {
+    const value = new Decimal(responsible.percentage || 0)
       .div(100)
-      .times(totalToDistribute);
+      .times(totalHonorariums);
     totalToDistribute = totalToDistribute.sub(value);
   });
   return totalToDistribute;
@@ -49,10 +52,9 @@ function getTotalHours(control: Control<HonorariumsSchemaType>) {
   return honorariums.reduce(
     (acc, field) =>
       acc.plus(
-        field.functions.reduce(
-          (acc, field) => acc.plus(field.hours || 0),
-          new Decimal(0)
-        )
+        field.functions.reduce((acc, field) => {
+          return acc.plus(!field.hours ? 0 : field.hours);
+        }, new Decimal(0))
       ),
     new Decimal(0)
   );
@@ -69,8 +71,7 @@ export default function HonorariumForm({
     register,
     reset,
     handleSubmit,
-
-    formState: { isDirty, isSubmitting, isSubmitted },
+    formState: { isDirty, isSubmitting },
   } = useForm<HonorariumsSchemaType>({
     defaultValues: {
       academicsHonorariums: academicsHonorariums,
@@ -78,27 +79,35 @@ export default function HonorariumForm({
     },
   });
 
-  const totalToDistribute = getTotalToDistribute(control, totalHonorariums);
+  const totalToDistribute = getTotalToDistribute(
+    control,
+    new Decimal(totalHonorariums)
+  );
 
   const totalHours = getTotalHours(control);
 
   const hourValue = totalToDistribute.div(totalHours);
 
   const onSubmit = async (data: HonorariumsSchemaType) => {
-    return new Promise(() => {
-      setTimeout(() => {
-        updateAcademicsHonorariums(courseId, data.academicsHonorariums);
-        toast.update("save-changes-toast", {
-          isLoading: false,
-          type: "success",
-          render: "Cambios guardados",
-          autoClose: 1000,
-        });
-      }, 1000);
+    return new Promise(async (resolve) => {
+      await updateAcademicsHonorariums(courseId, data.academicsHonorariums);
+      await updateResponsiblesHonorariums(
+        courseId,
+        data.responsiblesHonorariums
+      );
+      toast.update("save-changes-toast", {
+        isLoading: false,
+        type: "success",
+        render: "Cambios guardados",
+        autoClose: 2000,
+      });
+      reset(data);
+      resolve(true);
     });
   };
 
   useEffect(() => {
+    console.log(isDirty, !isSubmitting);
     if (isDirty && !isSubmitting) {
       toast(
         <div>
@@ -121,12 +130,6 @@ export default function HonorariumForm({
           render: "Guardando cambios...",
         });
       } else toast.dismiss("save-changes-toast");
-      if (isSubmitted) {
-        toast.update("save-changes-toast", {
-          type: "success",
-          render: "Cambios guardados",
-        });
-      }
     }
   }, [isDirty, isSubmitting]);
 
@@ -144,7 +147,7 @@ export default function HonorariumForm({
         >
           <ResponsibleHonorariumTable
             control={control}
-            totalToDistribute={totalToDistribute}
+            totalHonorariums={new Decimal(totalHonorariums)}
           />
         </Section>
       </div>

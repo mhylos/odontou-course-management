@@ -1,14 +1,15 @@
 "use server";
 
-import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
-import { adjustNumber, runToNumber } from "@/lib/utils";
+import { adjustNumber, restoreRun, runToNumber } from "@/lib/utils";
 import { EnrollSchemaType, StudentSchemaType } from "@/lib/zod";
 import { mkdir, stat, writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { join } from "path";
 import { recalculateFee } from "./incomesServices";
 import { Option } from "@/components/common/Dropdown";
+import { registerAction } from "./loggerServices";
+import { Actions } from "@prisma/client";
 
 export async function getAllStudents() {
   const students = await prisma.student.findMany({
@@ -46,6 +47,14 @@ export async function upsertStudentEnroll(
     }
   }
 
+  const course = await prisma.course.findUnique({
+    where: {
+      id: courseId,
+    },
+    select: {
+      name: true,
+    },
+  });
   const foundStudent = await prisma.student.findUnique({
     where: {
       rut: rut,
@@ -55,6 +64,7 @@ export async function upsertStudentEnroll(
     await prisma.student.create({
       data: {
         ...student,
+        name: student.name.toUpperCase(),
         rut: rut,
         enrolled: {
           create: {
@@ -72,8 +82,18 @@ export async function upsertStudentEnroll(
         },
       },
     });
+    await registerAction(
+      Actions.create,
+      `Estudiante **${restoreRun(rut)}** ingresado al sistema`
+    );
+    registerAction(
+      Actions.create,
+      `Inscripción de estudiante **${restoreRun(rut)}** en curso **${
+        course?.name
+      }**`
+    );
   } else {
-    await prisma.enrolled.upsert({
+    const enroll = await prisma.enrolled.upsert({
       where: {
         student_fk_course_fk: {
           student_fk: rut,
@@ -104,12 +124,31 @@ export async function upsertStudentEnroll(
           ? { connect: { id: payment_type_fk } }
           : undefined,
       },
+      select: {
+        updated_at: true,
+        created_at: true,
+      },
     });
+
+    if (enroll.updated_at == enroll.created_at) {
+      registerAction(
+        Actions.create,
+        `Inscripción de estudiante **${restoreRun(rut)}** en curso **${
+          course?.name
+        }**`
+      );
+    } else {
+      registerAction(
+        Actions.update,
+        `Actualización en la inscripción de estudiante **${restoreRun(
+          rut
+        )}** en curso **${course?.name}**`
+      );
+    }
   }
 
-  await recalculateFee(courseId);
-
   revalidatePath(`/cursos/detalles/${courseId}/estudiantes`);
+  await recalculateFee(courseId);
   revalidatePath(`/cursos/detalles/${courseId}/ingresos`);
 
   return { success: true, message: "Estudiante inscrito" };
@@ -132,15 +171,28 @@ export async function getEnroll(rut: number, courseId: number) {
 
 export async function removeEnrollByRut(rut: number, courseId: number) {
   try {
-    await prisma.enrolled.delete({
+    const enroll = await prisma.enrolled.delete({
       where: {
         student_fk_course_fk: {
           student_fk: rut,
           course_fk: courseId,
         },
       },
+      select: {
+        course: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
 
+    registerAction(
+      Actions.delete,
+      `Estudiante **${restoreRun(rut)}** eliminado del curso **${
+        enroll.course.name
+      }**`
+    );
     revalidatePath(`/cursos/detalles/${courseId}/estudiantes`);
     return true;
   } catch (e) {

@@ -31,7 +31,7 @@ export default function EnrollModal({ course, values }: EnrollModalProps) {
     resolver: zodResolver(enrollSchema),
     defaultValues: values?.enroll ?? {
       status: false,
-      discount: 0,
+      discount: "0",
       total: course?.enroll_value,
       installments: 1,
       paid: 0,
@@ -67,6 +67,11 @@ export default function EnrollModal({ course, values }: EnrollModalProps) {
     formData.append("enroll", JSON.stringify(enrollValues.data));
 
     const response = await upsertStudentEnroll(course.id, formData);
+
+    if (response.success) {
+      studentForm.reset();
+      enrollForm.reset();
+    }
 
     toast(response.message, { type: response.success ? "success" : "error" });
     setIsLoading(false);

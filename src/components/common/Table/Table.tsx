@@ -73,12 +73,12 @@ export default function Table({
             <th scope="col" className="px-6 py-3 w-[5%]">
               N°
             </th>
-            {headers.map((header) => (
+            {headers.map((header, i) => (
               <th
                 scope="col"
                 className={`px-6 py-3`}
                 style={{ width: header.width }}
-                key={header.title}
+                key={header.title + i}
               >
                 {header.title}
               </th>

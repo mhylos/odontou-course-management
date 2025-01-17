@@ -21,6 +21,13 @@ export function capitalize(string: string) {
   return string[0].toUpperCase() + string.slice(1).toLowerCase();
 }
 
+export function capitalizeAll(string: string) {
+  return string
+    .split(" ")
+    .map((word) => capitalize(word))
+    .join(" ");
+}
+
 export function convertToMoney(value: number) {
   return new Intl.NumberFormat("es-CL", {
     style: "currency",
@@ -67,6 +74,22 @@ export function adjustNumber(value: number, length: number) {
     return value * multiplier;
   }
   return value; // If the length is already sufficient, do nothing
+}
+
+export function decimalNumberFormat(value: string) {
+  let formatted = value.replace(/[^0-9.]/g, "");
+  if (formatted.split(".").length > 2) {
+    formatted = formatted.replace(/\.+$/, "");
+  }
+  if (formatted.includes(".")) {
+    formatted = formatted.replace(/(\d+\.\d{2}).*/, "$1");
+  }
+
+  if (formatted === ".") {
+    formatted = "0.";
+  }
+
+  return formatted;
 }
 
 export const fetcher = (url: string | Request | URL) =>
