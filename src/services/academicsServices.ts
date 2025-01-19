@@ -55,7 +55,9 @@ export async function getAcademicsOptions(name?: string) {
 
   const options: Option[] = academics.map((academic) => ({
     name:
-      capitalizeAll(academic.user.name?.toLowerCase() ?? "") +
+      capitalizeAll(
+        academic.user.name ? academic.user.name.toLowerCase() : ""
+      ) +
       " - " +
       restoreRun(academic.user.rut),
     value: academic.user.rut,

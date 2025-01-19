@@ -18,7 +18,7 @@ export function restoreRun(run: number) {
 }
 
 export function capitalize(string: string) {
-  return string[0].toUpperCase() + string.slice(1).toLowerCase();
+  return string[0]?.toUpperCase() + string.slice(1).toLowerCase();
 }
 
 export function capitalizeAll(string: string) {
