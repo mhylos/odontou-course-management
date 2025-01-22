@@ -1,7 +1,12 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { adjustNumber, restoreRun, runToNumber } from "@/lib/utils";
+import {
+  adjustNumber,
+  capitalizeAll,
+  restoreRun,
+  runToNumber,
+} from "@/lib/utils";
 import { EnrollSchemaType, StudentSchemaType } from "@/lib/zod";
 import { mkdir, stat, writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
@@ -84,13 +89,15 @@ export async function upsertStudentEnroll(
     });
     await registerAction(
       Actions.create,
-      `Estudiante **${restoreRun(rut)}** ingresado al sistema`
+      `Estudiante **${capitalizeAll(student.name)}**, **RUT: ${restoreRun(
+        rut
+      )}** ingresado al sistema`
     );
     registerAction(
       Actions.create,
-      `Inscripción de estudiante **${restoreRun(rut)}** en curso **${
-        course?.name
-      }**`
+      `Inscripción de estudiante **${capitalizeAll(
+        student.name
+      )}** **RUT: ${restoreRun(rut)}** en curso **${course?.name}**`
     );
   } else {
     const enroll = await prisma.enrolled.upsert({
@@ -166,7 +173,9 @@ export async function getEnroll(rut: number, courseId: number) {
     },
   });
 
-  return enroll;
+  if (!enroll) return null;
+
+  return { ...enroll, discount: enroll.discount.toString() };
 }
 
 export async function removeEnrollByRut(rut: number, courseId: number) {

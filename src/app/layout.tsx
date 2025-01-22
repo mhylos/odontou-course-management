@@ -3,6 +3,7 @@ import { Slide, ToastContainer } from "react-toastify";
 import { SessionProvider } from "next-auth/react";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
+import "react-loading-skeleton/dist/skeleton.css";
 
 export const metadata: Metadata = {
   title: "Gestión de cobros y pagos",
@@ -18,7 +19,7 @@ export default function RootLayout({
   return (
     <SessionProvider>
       <html lang="es">
-        <body className={"antialiased"}>
+        <body className={"antialiased overflow-hidden"}>
           <ToastContainer
             hideProgressBar
             autoClose={2000}

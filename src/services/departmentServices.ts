@@ -1,9 +1,11 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { CreateDepartmentSchemaType } from "@/lib/zod";
+import { CreateDepartmentSchemaType, DepartmentsSchemaType } from "@/lib/zod";
 import { revalidatePath } from "next/cache";
 import { Option } from "@/components/common/Dropdown";
+import { registerAction } from "./loggerServices";
+import { Actions } from "@prisma/client";
 
 export async function createDepartment(data: CreateDepartmentSchemaType) {
   try {
@@ -56,4 +58,26 @@ export async function getDepartmentsOptions(name?: string) {
   }));
 
   return options;
+}
+
+export async function updateDepartments(data: DepartmentsSchemaType) {
+  try {
+    await Promise.all(
+      data.departments.map(async ({ departmentId, ...data }) => {
+        await prisma.department.update({
+          where: {
+            id: departmentId,
+          },
+          data: {
+            ...data,
+          },
+        });
+      })
+    );
+    registerAction(Actions.update, "Departamentos actualizados");
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
 }

@@ -41,7 +41,7 @@ export default function LoginForm() {
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <Input
               label="RUT"
-              errors={error}
+              error={error?.message}
               value={value || ""}
               disabled={isLoading}
               onChange={(value) => {
@@ -58,7 +58,7 @@ export default function LoginForm() {
             <Input
               label="Contraseña"
               type="password"
-              errors={error}
+              error={error?.message}
               disabled={isLoading}
               onChange={onChange}
             />

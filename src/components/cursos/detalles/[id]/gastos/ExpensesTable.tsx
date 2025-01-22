@@ -4,25 +4,17 @@ import { MultiplyWith, MultiplierTypes, Expenses } from "@prisma/client";
 import Input from "@/components/common/Input";
 import Table, { Cell, Row } from "@/components/common/Table/Table";
 import {
-  Control,
   Controller,
   FormProvider,
   SubmitErrorHandler,
   SubmitHandler,
   useFieldArray,
   useForm,
-  UseFormRegister,
-  UseFormSetValue,
-  useWatch,
 } from "react-hook-form";
-import {
-  ExpenseSchemaType,
-  expensesSchema,
-  ExpensesSchemaType,
-} from "@/lib/zod";
+import { expensesSchema, ExpensesSchemaType } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import RadioButton from "@/components/common/RadioButton";
-import { convertToMoney, decimalNumberFormat, isPercentage } from "@/lib/utils";
+import { convertToMoney, isPercentage } from "@/lib/utils";
 import Button from "@/components/common/Button";
 import { toast } from "react-toastify";
 import { useState } from "react";
@@ -150,7 +142,7 @@ export default function ExpensesTable({
                       <Input
                         {...field}
                         onChange={(e) => {
-                          let value = e.target.value;
+                          const value = e.target.value;
                           if (RegExp(/^[0-9]*$/).test(value)) {
                             form.setValue(
                               `expenses.${i}.type`,

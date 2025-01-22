@@ -26,7 +26,7 @@ export default async function CourseDistribution({
         </Section>
         <Section title="Gastos">
           <span className="text-2xl font-light">
-            {convertToMoney(parseInt(totalExpenses))}
+            {convertToMoney(Number(totalExpenses))}
           </span>
         </Section>
         <Section title="Total">

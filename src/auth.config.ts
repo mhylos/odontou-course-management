@@ -59,7 +59,7 @@ export default {
     authorized({ request: { nextUrl }, auth }) {
       const isLoggedIn = !!auth?.user;
       const { pathname } = nextUrl;
-      const role = auth?.user?.role || Roles.ACADEMIC;
+      // const role = auth?.user?.role || Roles.ACADEMIC;
 
       if (pathname.startsWith("/login") && isLoggedIn) {
         return Response.redirect(new URL("/", nextUrl));

@@ -2,12 +2,9 @@
 
 import Button from "../Button";
 
-interface AddBottomRowButtonProps
-  extends React.ComponentPropsWithoutRef<"button"> {}
-
 export default function AddBottomRowButton({
   ...props
-}: AddBottomRowButtonProps) {
+}: React.ComponentPropsWithoutRef<"button">) {
   return (
     <Button
       {...props}

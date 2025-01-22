@@ -25,7 +25,7 @@ export default async function Home() {
               { title: "Descripción", width: "50%" },
             ]}
           >
-            {logs.map((log, i) => (
+            {logs.map((log) => (
               <Row key={log.id} currentRow={log.id}>
                 <Cell>{formatDate(log.timestamp)}</Cell>
                 <Cell className="capitalize">

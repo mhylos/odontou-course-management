@@ -1,8 +1,7 @@
 import Table, { Cell, Row } from "@/components/common/Table/Table";
 import { convertToMoney } from "@/lib/utils";
-import { DistributionSchemaType, DistributionsSchemaType } from "@/lib/zod";
+import { DistributionSchemaType } from "@/lib/zod";
 import Decimal from "decimal.js";
-import { Control, useFieldArray, useForm, useWatch } from "react-hook-form";
 
 interface DistributionTableProps {
   values: DistributionSchemaType[];

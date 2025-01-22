@@ -42,18 +42,14 @@ export function dublicateItems<T>(arr: Array<T>, numberOfRepetitions: number) {
 }
 
 export function formatDate(date: string | Date) {
-  try {
-    const formatDate = new Date(date);
+  const formatDate = new Date(date);
 
-    return formatDate
-      .toISOString()
-      .replace(/T.*/, "")
-      .split("-")
-      .reverse()
-      .join("-");
-  } catch (e) {
-    return "";
-  }
+  return formatDate
+    .toISOString()
+    .replace(/T.*/, "")
+    .split("-")
+    .reverse()
+    .join("-");
 }
 
 export function checkFileExtension(file: File, extensions: string[]) {

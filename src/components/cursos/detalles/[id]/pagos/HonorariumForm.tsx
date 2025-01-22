@@ -1,6 +1,6 @@
 "use client";
 
-import { convertToMoney, restoreRun } from "@/lib/utils";
+import { convertToMoney } from "@/lib/utils";
 import Section from "@/components/cursos/detalles/[id]/Section";
 import Decimal from "decimal.js";
 import { Control, useForm, useWatch } from "react-hook-form";
@@ -26,7 +26,7 @@ interface HonorariumFormProps {
   courseId: number;
 }
 
-function getTotalToDistribute(
+function useTotalToDistribute(
   control: Control<HonorariumsSchemaType>,
   totalHonorariums: Decimal
 ) {
@@ -37,7 +37,7 @@ function getTotalToDistribute(
 
   let totalToDistribute = totalHonorariums;
 
-  responsibles.forEach((responsible, i) => {
+  responsibles.forEach((responsible) => {
     const value = new Decimal(responsible.percentage || 0)
       .div(100)
       .times(totalHonorariums);
@@ -46,7 +46,7 @@ function getTotalToDistribute(
   return totalToDistribute;
 }
 
-function getTotalHours(control: Control<HonorariumsSchemaType>) {
+function useTotalHours(control: Control<HonorariumsSchemaType>) {
   const honorariums = useWatch({ name: "academicsHonorariums", control });
 
   return honorariums.reduce(
@@ -79,12 +79,12 @@ export default function HonorariumForm({
     },
   });
 
-  const totalToDistribute = getTotalToDistribute(
+  const totalToDistribute = useTotalToDistribute(
     control,
     new Decimal(totalHonorariums)
   );
 
-  const totalHours = getTotalHours(control);
+  const totalHours = useTotalHours(control);
 
   const hourValue = totalToDistribute.div(totalHours);
 
@@ -107,7 +107,6 @@ export default function HonorariumForm({
   };
 
   useEffect(() => {
-    console.log(isDirty, !isSubmitting);
     if (isDirty && !isSubmitting) {
       toast(
         <div>
@@ -131,7 +130,7 @@ export default function HonorariumForm({
         });
       } else toast.dismiss("save-changes-toast");
     }
-  }, [isDirty, isSubmitting]);
+  }, [isDirty, isSubmitting, reset]);
 
   return (
     <form

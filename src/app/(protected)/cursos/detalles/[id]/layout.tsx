@@ -6,14 +6,12 @@ import { notFound } from "next/navigation";
 
 interface CourseLayoutProps {
   children: React.ReactNode;
-  courseModal: React.ReactNode;
   sideform: React.ReactNode;
   params: Promise<{ id: string }>;
 }
 
 export default async function CourseLayout({
   children,
-  courseModal,
   sideform,
   params,
 }: CourseLayoutProps) {
@@ -41,7 +39,6 @@ export default async function CourseLayout({
   return (
     <CourseProvider course={course}>
       {sideform}
-      {courseModal}
       <CourseHeader />
       <div className="flex flex-col overflow-auto gap-2">
         <NavigationBar routes={routes} />

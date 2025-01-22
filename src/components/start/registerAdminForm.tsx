@@ -40,7 +40,7 @@ export default function RegisterAdminForm() {
       <fieldset className="flex flex-col gap-10 py-5">
         <Controller
           render={({ field: { onChange }, fieldState: { error } }) => (
-            <Input label="Nombre" errors={error} onChange={onChange} />
+            <Input label="Nombre" error={error?.message} onChange={onChange} />
           )}
           name={"name"}
           control={control}
@@ -49,7 +49,7 @@ export default function RegisterAdminForm() {
           render={({ field: { onChange }, fieldState: { error } }) => (
             <Input
               label="Correo electrónico"
-              errors={error}
+              error={error?.message}
               onChange={onChange}
             />
           )}
@@ -60,7 +60,7 @@ export default function RegisterAdminForm() {
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <Input
               label="RUT"
-              errors={error}
+              error={error?.message}
               value={value || ""}
               onChange={(value) => {
                 const formatted = runFormatter(value.currentTarget.value);
@@ -76,7 +76,7 @@ export default function RegisterAdminForm() {
             <Input
               label="Contraseña"
               type="password"
-              errors={error}
+              error={error?.message}
               onChange={onChange}
             />
           )}

@@ -45,7 +45,7 @@ export default function EnrollForm({
       form.setValue("installments", 1);
       if (form.getValues("paid") > 1) form.setValue("paid", 1);
     }
-  }, [isInstallments]);
+  }, [isInstallments, form]);
 
   return (
     <Section title="Matricula">
@@ -193,7 +193,7 @@ export default function EnrollForm({
           label={"Pago en cuotas"}
           disabled={disabled}
           checked={isInstallments}
-          onChange={(e) => {
+          onChange={() => {
             setInstallments(!isInstallments);
           }}
           className={isInstallments ? "col-span-2" : ""}
@@ -220,7 +220,9 @@ export default function EnrollForm({
                       onChange(n);
                     }}
                     onBlur={(e) => {
-                      parseInt(e.currentTarget.value) < 1 ? onChange(1) : null;
+                      if (parseInt(e.currentTarget.value) < 1) {
+                        onChange(1);
+                      }
                     }}
                   />
                 )}

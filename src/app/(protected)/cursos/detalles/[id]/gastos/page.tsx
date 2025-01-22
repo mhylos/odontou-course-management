@@ -1,5 +1,4 @@
 import ExpensesTable from "@/components/cursos/detalles/[id]/gastos/ExpensesTable";
-import { getIncomesValues } from "@/services/courseServices";
 import {
   getCourseExpenses,
   getMultiplyValues,

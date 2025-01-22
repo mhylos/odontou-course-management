@@ -17,6 +17,7 @@ import {
   Actions,
   MultiplierTypes,
   MultiplyWith,
+  Prisma,
   ResponsibleFunctions,
 } from "@prisma/client";
 import Decimal from "decimal.js";
@@ -317,7 +318,7 @@ export async function getAllCourses(
   payment?: string,
   year?: number
 ) {
-  const where: any = {
+  const where: Prisma.CourseWhereInput = {
     name: {
       contains: name,
       mode: "insensitive",

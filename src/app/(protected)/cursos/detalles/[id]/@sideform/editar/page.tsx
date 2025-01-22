@@ -2,6 +2,7 @@ import CourseForm from "@/components/forms/CourseForm";
 import RightSidebar from "@/components/common/RightSidebar";
 import { CreateCourseSchemaType } from "@/lib/zod";
 import { getCourseById } from "@/services/courseServices";
+import { notFound } from "next/navigation";
 
 export default async function EditCourse({
   params,
@@ -12,23 +13,15 @@ export default async function EditCourse({
   const course = await getCourseById(id);
 
   if (!course) {
-    return <div>El curso no existe</div>;
+    notFound();
   }
 
   const values: CreateCourseSchemaType = {
-    additional_comments: course.additional_comments ?? "",
+    ...course,
+    additional_comments: course.additional_comments || "",
     coordinator_fk: course.coordinator.rut,
     course_director_fk: course.course_director.rut,
     department_fk: course.department.id,
-    date_from: course.date_from,
-    date_to: course.date_to,
-    direct_hours: course.direct_hours,
-    enroll_value: course.enroll_value,
-    indirect_hours: course.indirect_hours,
-    inperson_hours: course.inperson_hours,
-    name: course.name,
-    objective: course.objective,
-    online_hours: course.online_hours,
     program_fk: course.program.id,
   };
 

@@ -1,6 +1,4 @@
-import { auth } from "@/auth";
 import Sidebar from "@/components/common/Sidebar/Sidebar";
-import { redirect } from "next/navigation";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -27,6 +25,10 @@ export default async function RootLayout({ children, modal }: RootLayoutProps) {
           {
             title: "Estudiantes",
             href: "/estudiantes",
+          },
+          {
+            title: "Departamentos",
+            href: "/departamentos",
           },
         ]}
       />

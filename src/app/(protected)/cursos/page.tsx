@@ -12,23 +12,16 @@ interface CoursesProps {
 async function Courses({ searchParams }: CoursesProps) {
   const filters = await searchParams;
 
+  return <CourseList filters={filters} />;
+}
+
+function CourseListSkeleton() {
   return (
-    <Suspense
-      key={
-        (filters?.nombre ?? "") +
-        (filters?.pagos ?? "") +
-        (filters?.fecha ?? "")
-      }
-      fallback={
-        <>
-          {Array.from({ length: 10 }).map((_, i) => (
-            <CoursePreview key={i} />
-          ))}
-        </>
-      }
-    >
-      <CourseList filters={filters} />
-    </Suspense>
+    <>
+      {[...Array(6)].map((_, index) => (
+        <CoursePreview key={index} />
+      ))}
+    </>
   );
 }
 
@@ -39,7 +32,9 @@ export default function CoursesPage({ searchParams }: CoursesProps) {
         <TitlePage className="col-span-2 text-ellipsis overflow-hidden">
           Cursos
         </TitlePage>
-        <SearchCourses />
+        <Suspense fallback={<></>}>
+          <SearchCourses />
+        </Suspense>
         <Link
           href="cursos/ingresar"
           className="bg-primary hover:brightness-90 text-white rounded grid place-items-center"
@@ -49,7 +44,9 @@ export default function CoursesPage({ searchParams }: CoursesProps) {
       </div>
 
       <ul className="grid grid-cols-3 gap-2 h-full overflow-y-auto pe-3">
-        <Courses searchParams={searchParams} />
+        <Suspense fallback={<CourseListSkeleton />}>
+          <Courses searchParams={searchParams} />
+        </Suspense>
       </ul>
     </>
   );

@@ -1,6 +1,6 @@
 import { createAcademicSchema, CreateAcademicSchemaType } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, Form, SubmitErrorHandler, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import Button from "@/components/common/Button";
 import FetchDropdown from "@/components/common/FetchDropdown";
 import FloatingInput from "@/components/common/FloatingInput";

@@ -4,6 +4,7 @@ import { convertToMoney, formatDate } from "@/lib/utils";
 import { getCourseById } from "@/services/courseServices";
 import Decimal from "decimal.js";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 function ItemDescription({ children }: { children: React.ReactNode }) {
   return (
@@ -22,7 +23,7 @@ export default async function CourseInfo({
   const course = await getCourseById(id);
 
   if (!course) {
-    return <div>El curso no existe</div>;
+    notFound();
   }
 
   const total = Decimal.sum(

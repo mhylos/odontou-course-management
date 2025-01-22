@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useSWR from "swr";
 import Dropdown, { DropdownProps, Option } from "@/components/common/Dropdown";
 import { fetcher } from "@/lib/utils";

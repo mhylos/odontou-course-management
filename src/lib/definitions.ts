@@ -1,7 +1,6 @@
 import { Genres, Income, MultiplyWith, Prisma } from "@prisma/client";
 import prisma from "./prisma";
 import { Optional } from "./utils";
-import Decimal from "decimal.js";
 
 export type User = {
   rut: number;

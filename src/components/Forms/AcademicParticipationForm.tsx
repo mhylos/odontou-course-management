@@ -35,7 +35,7 @@ export default function AcademicParticipationForm({
 
   const onSubmit = async (data: AcademicParticipationSchemaType) => {
     try {
-      let response = await upsertAcademicParticipation(courseId, data);
+      const response = await upsertAcademicParticipation(courseId, data);
       toast(response.message, {
         type: response.success ? "success" : "error",
       });

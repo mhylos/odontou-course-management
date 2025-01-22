@@ -93,16 +93,16 @@ export const createCourseSchema = object({
   enroll_value: coerce.number({
     required_error: "El valor de la matrícula es requerido",
   }),
-  direct_hours: coerce.number({
+  direct_hours: string({
     required_error: "Las horas directas son requeridas",
   }),
-  indirect_hours: coerce.number({
+  indirect_hours: string({
     required_error: "Las horas indirectas son requeridas",
   }),
-  inperson_hours: coerce.number({
+  inperson_hours: string({
     required_error: "Las horas presenciales son requeridas",
   }),
-  online_hours: coerce.number({
+  online_hours: string({
     required_error: "Las horas online son requeridas",
   }),
   name: string({ required_error: "El nombre es requerido" }),
@@ -234,6 +234,18 @@ export const honorariumsSchema = object({
   academicsHonorariums: z.array(academicHonorariumSchema),
 });
 
+export const departmentSchema = object({
+  departmentId: number(),
+  name: string(),
+  directorId: number().nullable(),
+});
+
+export const departmentsSchema = object({
+  departments: z.array(departmentSchema),
+});
+
+export type DepartmentsSchemaType = z.infer<typeof departmentsSchema>;
+export type DepartmentSchemaType = z.infer<typeof departmentSchema>;
 export type AcademicHonorariumSchemaType = z.infer<
   typeof academicHonorariumSchema
 >;

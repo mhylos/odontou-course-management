@@ -2,8 +2,8 @@
 
 import { MultiplyValues } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
-import { ExpenseSchemaType, ExpensesSchemaType } from "@/lib/zod";
-import { Actions, MultiplyWith } from "@prisma/client";
+import { ExpensesSchemaType } from "@/lib/zod";
+import { Actions } from "@prisma/client";
 import Decimal from "decimal.js";
 import { revalidatePath } from "next/cache";
 import { registerAction } from "./loggerServices";

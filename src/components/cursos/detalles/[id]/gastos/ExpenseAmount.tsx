@@ -4,7 +4,7 @@ import { decimalNumberFormat, isPercentage } from "@/lib/utils";
 import { ExpensesSchemaType } from "@/lib/zod";
 import Decimal from "decimal.js";
 import { useEffect } from "react";
-import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
 interface ExpenseAmountProps {
   index: number;

@@ -30,7 +30,7 @@ export default async function StudentDetails({ params }: StudentDetailsProps) {
       status: enroll?.status ?? false,
       ticket_num: enroll?.ticket_num ?? null,
       payment_date: enroll?.payment_date ?? null,
-      discount: enroll?.discount ?? 0,
+      discount: enroll?.discount ?? "0",
       payment_type_fk: enroll?.payment_type_fk ?? undefined,
       total: enroll?.total ?? course.enroll_value,
       installments: enroll?.installments ?? 1,

@@ -2,10 +2,9 @@
 
 import Button from "../Button";
 
-interface DeleteRowButtonProps
-  extends React.ComponentPropsWithoutRef<"button"> {}
-
-export default function DeleteRowButton({ ...props }: DeleteRowButtonProps) {
+export default function DeleteRowButton({
+  ...props
+}: React.ComponentPropsWithoutRef<"button">) {
   return (
     <Button
       {...props}
