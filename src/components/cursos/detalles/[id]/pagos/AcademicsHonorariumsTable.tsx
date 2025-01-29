@@ -2,9 +2,9 @@ import Input from "@/components/common/Input";
 import Table, { Row, Cell } from "@/components/common/Table/Table";
 import { HONORARIUMS_FUNCTIONS_DICTIONARY } from "@/lib/constants";
 import { convertToMoney, decimalNumberFormat, restoreRun } from "@/lib/utils";
-import { AcademicHonorariumSchemaType, HonorariumsSchemaType } from "@/lib/zod";
+import { HonorariumsSchemaType } from "@/lib/zod";
 import { AcademicFunctions } from "@prisma/client";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import {
   Control,
   Controller,
@@ -17,6 +17,7 @@ import Decimal from "decimal.js";
 import Chip from "@/components/common/Chip";
 import ActionRowButton from "@/components/common/Table/ActionRowButton";
 import { useHonorariumAmount } from "@/context/HonorariumProvider";
+import { useRouter } from "next/navigation";
 
 function TotalToPayToAcademic({
   control,
@@ -40,37 +41,28 @@ function TotalToPayToAcademic({
   return <span>{convertToMoney(honorarium.toNumber())}</span>;
 }
 
-function TotalByFunction({
+function getTotalByFunction({
   control,
-  field,
   academicIndex,
   hourValue,
   functionIndex,
 }: {
   control: Control<HonorariumsSchemaType>;
-  field: AcademicHonorariumSchemaType;
   academicIndex: number;
   hourValue: Decimal;
   functionIndex: number;
 }) {
-  const { addOrUpdateAcademic } = useHonorariumAmount();
   const hours = useWatch({
     name: `academicsHonorariums.${academicIndex}.functions.${functionIndex}.hours`,
     control,
   });
 
-  const total = hourValue.times(!hours ? 0 : hours);
-  useEffect(() => {
-    const honorarium_id = field.functions[functionIndex].academic_honorarium_id;
-    if (!honorarium_id) return;
-    addOrUpdateAcademic({
-      honorarium_id,
-      rut: field.academic_rut,
-      amount: parseInt(total.toFixed()),
-    });
-  }, [hours, addOrUpdateAcademic, field, functionIndex, total]);
+  const total = useMemo(
+    () => hourValue.times(!hours ? 0 : hours),
+    [hourValue, hours]
+  );
 
-  return <span>{convertToMoney(total.toNumber())}</span>;
+  return total.toNumber();
 }
 
 const academicFunctionsOptions: Option[] = (
@@ -96,6 +88,8 @@ export default function AcademicsHonorariumsTable({
     control,
     name: "academicsHonorariums",
   });
+  const { setHonorarium } = useHonorariumAmount();
+  const { push } = useRouter();
 
   return (
     <Table
@@ -158,60 +152,72 @@ export default function AcademicsHonorariumsTable({
                   { title: "Horas comprometidas" },
                   { title: "Monto a pagar" },
                   { title: "Último pago" },
+                  { title: "" },
                 ]}
                 className="overflow-visible"
               >
-                {field.functions.map((func, j) => (
-                  <Row
-                    key={field.honorarium_id + func.function}
-                    currentRow={j + 1}
-                  >
-                    <Cell className="py-0">
-                      <span>
-                        {HONORARIUMS_FUNCTIONS_DICTIONARY[func.function]}
-                      </span>
-                    </Cell>
-                    <Cell className="py-0">
-                      <Controller
-                        name={`academicsHonorariums.${i}.functions.${j}.hours`}
-                        control={control}
-                        render={({ field: { onChange, ...field } }) => (
-                          <Input
-                            {...field}
-                            onChange={(e) => {
-                              onChange(decimalNumberFormat(e.target.value));
-                            }}
-                          />
-                        )}
-                      />
-                    </Cell>
-                    <Cell className="!py-0">
-                      <TotalByFunction
-                        control={control}
-                        field={field}
-                        academicIndex={i}
-                        hourValue={hourValue}
-                        functionIndex={j}
-                      />
-                    </Cell>
-                    <Cell className="!py-0">
-                      <span className="text-xs">-</span>
-                    </Cell>
+                {field.functions.map((func, j) => {
+                  const total = getTotalByFunction({
+                    control,
+                    academicIndex: i,
+                    hourValue,
+                    functionIndex: j,
+                  });
 
-                    <Cell className="flex">
-                      {func.academic_honorarium_id && (
-                        <ActionRowButton
-                          href={`pagos/honorarios-academicos/${func.academic_honorarium_id}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                        >
-                          <span className="icon-[ph--receipt] text-xl" />
-                        </ActionRowButton>
-                      )}
-                    </Cell>
-                  </Row>
-                ))}
+                  return (
+                    <Row
+                      key={field.honorarium_id + func.function}
+                      currentRow={j + 1}
+                    >
+                      <Cell className="py-0">
+                        <span>
+                          {HONORARIUMS_FUNCTIONS_DICTIONARY[func.function]}
+                        </span>
+                      </Cell>
+                      <Cell className="py-0">
+                        <Controller
+                          name={`academicsHonorariums.${i}.functions.${j}.hours`}
+                          control={control}
+                          render={({ field: { onChange, ...field } }) => (
+                            <Input
+                              {...field}
+                              onChange={(e) => {
+                                onChange(decimalNumberFormat(e.target.value));
+                              }}
+                            />
+                          )}
+                        />
+                      </Cell>
+                      <Cell className="!py-0">{convertToMoney(total)}</Cell>
+                      <Cell className="!py-0">
+                        <span className="text-xs">-</span>
+                      </Cell>
+
+                      <Cell className="flex">
+                        {func.academic_honorarium_id && (
+                          <ActionRowButton
+                            type="button"
+                            className="w-max"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setHonorarium({
+                                rut: field.academic_rut,
+                                honorarium_id: func.academic_honorarium_id!,
+                                amount: total,
+                                type: "academic",
+                              });
+                              push(
+                                `pagos/honorarios-academicos/${func.academic_honorarium_id}`
+                              );
+                            }}
+                          >
+                            <span className="icon-[ph--receipt] text-xl" />
+                          </ActionRowButton>
+                        )}
+                      </Cell>
+                    </Row>
+                  );
+                })}
                 {addingFunction === i ? (
                   <Row>
                     <Cell className="flex place-items-center gap-2">
@@ -251,7 +257,7 @@ export default function AcademicsHonorariumsTable({
                         <ActionRowButton
                           id="add-row"
                           type="button"
-                          className="max-w-max grid place-items-center"
+                          className="grid place-items-center"
                           onClick={() => {
                             setAddingFunction(i);
                           }}

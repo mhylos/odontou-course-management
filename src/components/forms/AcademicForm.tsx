@@ -88,6 +88,22 @@ export default function AcademicForm({
           {...form.register("email")}
           error={form.formState.errors.email?.message}
         />
+        <Controller
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <FloatingInput
+              label="Número de teléfono"
+              error={error?.message}
+              value={value || ""}
+              onChange={(e) => {
+                const value = e.currentTarget.value.replace(/\D/g, "");
+
+                onChange(value);
+              }}
+            />
+          )}
+          name="phone"
+          control={form.control}
+        />
       </FormFieldset>
       <FormFieldset legend="Datos académicos">
         <FetchDropdown

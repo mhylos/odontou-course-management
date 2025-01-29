@@ -11,7 +11,7 @@ export default function ExpensesTotal() {
   const total = expenses.reduce((acc, expense) => {
     if (isNaN(Number(expense.amount))) return acc;
 
-    const value = new Decimal(expense.amount ?? 0);
+    const value = new Decimal(Number(expense.amount) ?? 0);
 
     return acc.plus(value);
   }, new Decimal(0));

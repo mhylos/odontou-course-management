@@ -19,12 +19,12 @@ export default async function Students() {
               { title: "Programas inscritos" },
             ]}
           >
-            {students.map(({ name, rut, email, enrolled }, index) => (
+            {students.map(({ name, rut, email, _count }, index) => (
               <Row key={rut} currentRow={index + 1}>
                 <Cell className="capitalize">{name.toLowerCase()}</Cell>
                 <Cell>{restoreRun(rut)}</Cell>
                 <Cell>{email}</Cell>
-                <Cell>{enrolled.length}</Cell>
+                <Cell>{_count.enrolled}</Cell>
               </Row>
             ))}
           </Table>

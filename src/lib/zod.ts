@@ -53,7 +53,9 @@ export const studentSchema = object({
   email: string({ required_error: "El email es requerido" }).email(
     "El email no es válido"
   ),
-  genre: nativeEnum(Genres).nullable(),
+  genre: nativeEnum(Genres, {
+    required_error: "El género es requerido",
+  }).nullable(),
 });
 
 export const enrollSchema = object({
@@ -143,7 +145,7 @@ export const academicSchema = object({
     .transform((val) => format.notDotDash(val)),
   name: string({ required_error: "El nombre es requerido" }),
   email: string().email("El email no es válido").optional().nullable(),
-  phone: number().optional().nullable(),
+  phone: coerce.number().optional().nullable(),
   isFOUCH: boolean().default(true),
   department_fk: number({ required_error: "El departamento es requerido" }),
 });
@@ -271,6 +273,15 @@ export const paymentSchema = object({
   }),
 });
 
+export const changePasswordSchema = object({
+  oldPassword: string({ required_error: "La contraseña es requerida" }),
+  newPassword: string({ required_error: "La contraseña es requerida" }),
+  confirmNewPassword: string({ required_error: "La contraseña es requerida" }),
+}).refine((data) => data.newPassword === data.confirmNewPassword, {
+  message: "Las contraseñas no coinciden",
+});
+
+export type ChangePasswordSchemaType = z.infer<typeof changePasswordSchema>;
 export type PaymentSchemaType = z.infer<typeof paymentSchema>;
 export type DepartmentsSchemaType = z.infer<typeof departmentsSchema>;
 export type DepartmentSchemaType = z.infer<typeof departmentSchema>;

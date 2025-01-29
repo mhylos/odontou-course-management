@@ -10,24 +10,19 @@ import { formatDateForInput } from "@/lib/utils";
 import { useHonorariumAmount } from "@/context/HonorariumProvider";
 
 interface PaymentFormProps {
-  payment: PaymentSchemaType;
+  payment: Partial<PaymentSchemaType>;
   type: "academic" | "responsible";
 }
 
 export default function PaymentForm({ payment, type }: PaymentFormProps) {
-  const { academics, administrative } = useHonorariumAmount();
+  const { honorarium } = useHonorariumAmount();
+  console.log(honorarium);
 
   const { control, register } = useForm<PaymentSchemaType>({
     defaultValues: {
+      amount: payment.amount || honorarium?.amount || 0,
+      honorarium_id: honorarium?.honorarium_id,
       ...payment,
-      amount:
-        (type === "academic"
-          ? academics.find(
-              (academic) => academic.honorarium_id === payment.honorarium_id
-            )?.amount
-          : administrative.find(
-              (admin) => admin.honorarium_id === payment.honorarium_id
-            )?.amount) || 0,
     },
   });
   return (

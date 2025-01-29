@@ -15,6 +15,7 @@ import { useSWRConfig } from "swr";
 import Decimal from "decimal.js";
 import AcademicForm from "@/components/forms/AcademicForm";
 import DepartmentForm from "@/components/forms/DepartmentForm";
+import { formatDateForInput } from "@/lib/utils";
 
 interface CourseFormProps {
   className?: string;
@@ -39,6 +40,7 @@ export default function CourseForm({
   >();
   const { mutate } = useSWRConfig();
   const dateFrom = form.watch("date_from");
+  const dateTo = form.watch("date_to");
 
   const hours = form.watch([
     "direct_hours",
@@ -122,8 +124,8 @@ export default function CourseForm({
                   label="Inicio"
                   type="date"
                   error={error?.message}
-                  max={form.getValues("date_to")?.toISOString().split("T")[0]}
-                  value={value ? value.toISOString().split("T")[0] : ""}
+                  max={formatDateForInput(dateTo)}
+                  value={formatDateForInput(value) ?? ""}
                   onChange={(e) => {
                     onChange(new Date(e.target.value));
                   }}
@@ -139,8 +141,8 @@ export default function CourseForm({
                   label="Termino"
                   type="date"
                   error={form.formState.errors.date_to?.message}
-                  min={dateFrom?.toISOString().split("T")[0]}
-                  value={value ? value.toISOString().split("T")[0] : ""}
+                  min={formatDateForInput(dateFrom)}
+                  value={formatDateForInput(value) ?? ""}
                   onChange={(e) => {
                     onChange(new Date(e.target.value));
                   }}

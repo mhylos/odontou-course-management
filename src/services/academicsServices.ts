@@ -18,6 +18,11 @@ export async function getAcademicsTable() {
       user: { select: { rut: true, name: true, email: true } },
       department: { select: { name: true } },
     },
+    orderBy: {
+      user: {
+        name: "asc",
+      },
+    },
   });
 
   return academics;
@@ -171,6 +176,7 @@ export async function createAcademic(data: AcademicSchemaType) {
       `Académico **${capitalizeAll(data.name)}** ingresado al sistema`
     );
     revalidatePath("/api/academics/options");
+    revalidatePath("/academicos");
     return { message: "Académico creado con éxito", success: true };
   } catch (error) {
     console.error(error);
@@ -196,6 +202,7 @@ export async function updateAcademic(rut: number, data: AcademicSchemaType) {
       `Datos del académico **${capitalizeAll(data.name)}** actualizados`
     );
     revalidatePath("/api/academics/options");
+    revalidatePath("/academicos");
     return { message: "Académico actualizado con éxito", success: true };
   } catch (error) {
     console.error(error);

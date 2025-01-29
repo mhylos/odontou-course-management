@@ -2,77 +2,40 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-interface HonorariumEntry {
+interface Honorarium {
   honorarium_id: number;
   rut: number;
   amount: number;
+  type: "academic" | "administrative";
 }
 
-interface HonorariumAmountContextType {
-  academics: HonorariumEntry[];
-  administrative: HonorariumEntry[];
-  addOrUpdateAdministrative: (value: HonorariumEntry) => void;
-  addOrUpdateAcademic: (value: HonorariumEntry) => void;
+interface HonorariumContextType {
+  setHonorarium: (honorarium: Honorarium) => void;
+  honorarium: Honorarium | undefined;
 }
 
-const HonorariumAmountContext = createContext<
-  HonorariumAmountContextType | undefined
->(undefined);
+const HonorariumContext = createContext<HonorariumContextType | undefined>(
+  undefined
+);
 
-interface HonorariumAmountProviderProps {
+interface HonorariumProviderProps {
   children: ReactNode;
 }
 
 export function HonorariumAmountProvider({
   children,
-}: HonorariumAmountProviderProps) {
-  const [academics, setAcademics] = useState<HonorariumEntry[]>([]);
-  const [administrative, setAdministrative] = useState<HonorariumEntry[]>([]);
-
-  function addOrUpdateAdministrative(value: HonorariumEntry) {
-    setAdministrative((prev) => {
-      const index = prev.findIndex(
-        (item) => item.honorarium_id === value.honorarium_id
-      );
-      if (index === -1) {
-        return [...prev, value];
-      }
-      const updated = [...prev];
-      updated[index] = value;
-      return updated;
-    });
-  }
-
-  function addOrUpdateAcademic(value: HonorariumEntry) {
-    setAcademics((prev) => {
-      const index = prev.findIndex(
-        (item) => item.honorarium_id === value.honorarium_id
-      );
-      if (index === -1) {
-        return [...prev, value];
-      }
-      const updated = [...prev];
-      updated[index] = value;
-      return updated;
-    });
-  }
+}: HonorariumProviderProps) {
+  const [honorarium, setHonorarium] = useState<Honorarium>();
 
   return (
-    <HonorariumAmountContext.Provider
-      value={{
-        academics,
-        administrative,
-        addOrUpdateAdministrative,
-        addOrUpdateAcademic,
-      }}
-    >
+    <HonorariumContext.Provider value={{ setHonorarium, honorarium }}>
       {children}
-    </HonorariumAmountContext.Provider>
+    </HonorariumContext.Provider>
   );
 }
 
-export const useHonorariumAmount = (): HonorariumAmountContextType => {
-  const context = useContext(HonorariumAmountContext);
+export const useHonorariumAmount = (): HonorariumContextType => {
+  const context = useContext(HonorariumContext);
   if (!context) {
     throw new Error(
       "useHonorariumAmount must be used within a HonorariumAmountProvider"

@@ -64,12 +64,8 @@ export default function StudentForm({
         <SectionItem title="RUT" className="flex-1">
           <div className="items-center flex gap-2">
             <Controller
-              render={({
-                field: { onChange, value, name },
-                fieldState: { error },
-              }) => (
+              render={({ field: { onChange, value, name } }) => (
                 <Input
-                  error={error?.message}
                   id={name}
                   value={value || ""}
                   disabled={disableRunInput}

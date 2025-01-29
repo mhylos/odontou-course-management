@@ -9,7 +9,7 @@ import {
   ResponsibleHonorariumSchemaType,
 } from "@/lib/zod";
 import Decimal from "decimal.js";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
 
 function TotalToPayToResponsible({
@@ -23,7 +23,6 @@ function TotalToPayToResponsible({
   totalHonorariums: Decimal;
   field: ResponsibleHonorariumSchemaType;
 }) {
-  const { addOrUpdateAdministrative } = useHonorariumAmount();
   const percentage = useWatch({
     name: `responsiblesHonorariums.${index}.percentage`,
     control,
@@ -35,14 +34,6 @@ function TotalToPayToResponsible({
     isNaN(parsedPercentage) ? 100 : parsedPercentage,
     100
   ).mul(totalHonorariums);
-
-  useEffect(() => {
-    addOrUpdateAdministrative({
-      honorarium_id: field.responsible_honorarium_id,
-      rut: field.academic_rut,
-      amount: total.toNumber(),
-    });
-  }, [percentage, addOrUpdateAdministrative, field, total]);
 
   return <span>{convertToMoney(total.toNumber())}</span>;
 }
@@ -68,7 +59,7 @@ export default function ResponsibleHonorariumTable({
         { title: "Función" },
         { title: "Porcentaje" },
         { title: "Monto a pagar" },
-        { title: "Detalles" },
+        { title: "" },
       ]}
     >
       {fields.map((field, i) => (

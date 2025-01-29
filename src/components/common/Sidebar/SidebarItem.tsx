@@ -1,7 +1,8 @@
 import Link, { LinkProps } from "next/link";
+import { ReactNode } from "react";
 
-interface SidebarItemProps extends LinkProps {
-  title: string;
+interface SidebarItemProps {
+  children: ReactNode;
   isActive: boolean;
   height: number;
   className?: string;
@@ -9,14 +10,13 @@ interface SidebarItemProps extends LinkProps {
 
 export default function SidebarItem(props: SidebarItemProps) {
   return (
-    <Link
-      className={`text-xl text-center font-extralight transition-colors grid place-items-center z-10 ${
+    <div
+      className={`text-xl font-extralight transition-colors grid place-items-center z-10 ${
         props.className ? props.className : ""
       } ${props.isActive ? "text-white" : "hover:bg-gray-100"}`}
-      href={props.href}
       style={{ height: props.height }}
     >
-      {props.title}
-    </Link>
+      {props.children}
+    </div>
   );
 }

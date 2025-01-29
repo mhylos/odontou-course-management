@@ -70,12 +70,16 @@ export default {
     session({ session, token }) {
       session.user.rut = token.rut;
       session.user.role = token.role;
+      session.user.email = token.email ?? "";
+      session.user.name = token.name;
       return session;
     },
     jwt({ token, user }) {
       if (user) {
         token.rut = user.rut;
         token.role = user.role;
+        token.email = user.email ?? "";
+        token.name = user.name ?? "";
       }
       return token;
     },

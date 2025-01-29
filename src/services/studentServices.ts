@@ -18,7 +18,19 @@ import { Actions } from "@prisma/client";
 
 export async function getAllStudents() {
   const students = await prisma.student.findMany({
-    include: { enrolled: true },
+    select: {
+      name: true,
+      rut: true,
+      email: true,
+      _count: {
+        select: {
+          enrolled: true,
+        },
+      },
+    },
+    orderBy: {
+      name: "asc",
+    },
   });
 
   return students;

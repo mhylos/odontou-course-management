@@ -64,7 +64,7 @@ export default async function CourseAcademics({
             ]}
           >
             {invitedAcademics.map((person, i) => (
-              <Row key={person.academic.user.rut} currentRow={i}>
+              <Row key={person.academic.user.rut} currentRow={i + 1}>
                 <Cell>
                   <span className="capitalize">
                     {person.academic.user.name?.toLowerCase()}

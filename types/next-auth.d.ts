@@ -10,12 +10,16 @@ declare module "next-auth" {
   interface User {
     role: Roles;
     rut: number;
+    email: string;
+    name: string;
   }
 
   interface Session {
     user: {
       role: Roles;
       rut: number;
+      email: string;
+      name: string;
     };
   }
 }
@@ -24,5 +28,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     role: Roles;
     rut: number;
+    email: string;
+    name: string;
   }
 }
