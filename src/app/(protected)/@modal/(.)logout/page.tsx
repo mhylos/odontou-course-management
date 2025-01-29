@@ -1,8 +1,8 @@
 "use client";
 import { logoutAction } from "@/app/actions/auth-actions";
-import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function Logout() {
   const router = useRouter();

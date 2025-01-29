@@ -1,5 +1,5 @@
-import RightSidebar from "@/components/common/RightSidebar";
 import Overlay from "@/components/common/Overlay";
+import RightSidebar from "@/components/common/RightSidebar";
 import AcademicForm from "@/components/forms/AcademicForm";
 import { getAcademicToEdit } from "@/services/academicsServices";
 
