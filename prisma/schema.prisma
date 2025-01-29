@@ -216,7 +216,7 @@ model ResponsiblePayment {
   created_at                DateTime @default(now())
   updated_at                DateTime @updatedAt
 
-  honorarium ResponsibleHonorarium @relation(fields: [id], references: [id])
+  responsible_honorarium ResponsibleHonorarium @relation(fields: [responsible_honorarium_fk], references: [id])
 }
 
 model AcademicPayment {
@@ -230,7 +230,7 @@ model AcademicPayment {
   created_at             DateTime @default(now())
   updated_at             DateTime @updatedAt
 
-  honorarium AcademicHonorarium @relation(fields: [id], references: [id])
+  academic_honorarium AcademicHonorarium @relation(fields: [academic_honorarium_fk], references: [id])
 }
 
 model ResponsibleHonorarium {
@@ -308,7 +308,7 @@ model Academic {
   user       User       @relation(fields: [user_fk], references: [rut])
 
   manages    Participation[]
-  Honorarium Honorarium[]
+  honorarium Honorarium[]
 }
 
 model Administrator {

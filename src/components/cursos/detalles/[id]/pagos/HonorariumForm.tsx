@@ -78,7 +78,6 @@ export default function HonorariumForm({
       responsiblesHonorariums: responsiblesHonorariums,
     },
   });
-
   const totalToDistribute = useTotalToDistribute(
     control,
     new Decimal(totalHonorariums)
@@ -90,19 +89,34 @@ export default function HonorariumForm({
 
   const onSubmit = async (data: HonorariumsSchemaType) => {
     return new Promise(async (resolve) => {
-      await updateAcademicsHonorariums(courseId, data.academicsHonorariums);
-      await updateResponsiblesHonorariums(
-        courseId,
-        data.responsiblesHonorariums
-      );
-      toast.update("save-changes-toast", {
-        isLoading: false,
-        type: "success",
-        render: "Cambios guardados",
-        autoClose: 2000,
-      });
-      reset(data);
-      resolve(true);
+      const updateAcademicsHonorariumsResponse =
+        await updateAcademicsHonorariums(courseId, data.academicsHonorariums);
+      const updateResponsibleHonorariumResponse =
+        await updateResponsiblesHonorariums(
+          courseId,
+          data.responsiblesHonorariums
+        );
+      if (
+        !updateAcademicsHonorariumsResponse.success ||
+        !updateResponsibleHonorariumResponse.success
+      ) {
+        toast.update("save-changes-toast", {
+          isLoading: false,
+          type: "error",
+          render: "Error al guardar los cambios",
+          autoClose: 2000,
+        });
+        resolve(false);
+      } else {
+        toast.update("save-changes-toast", {
+          isLoading: false,
+          type: "success",
+          render: "Cambios guardados",
+          autoClose: 2000,
+        });
+        reset(data);
+        resolve(true);
+      }
     });
   };
 
@@ -128,7 +142,11 @@ export default function HonorariumForm({
           isLoading: true,
           render: "Guardando cambios...",
         });
-      } else toast.dismiss("save-changes-toast");
+      }
+
+      if (!isDirty) {
+        toast.dismiss("save-changes-toast");
+      }
     }
   }, [isDirty, isSubmitting, reset]);
 

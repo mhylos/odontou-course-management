@@ -46,13 +46,17 @@ export default function EnrollModal({ course, values }: EnrollModalProps) {
 
   const handleSave = async () => {
     setIsLoading(true);
-    const studentValues = studentSchema.safeParse(studentForm.getValues());
-    const enrollValues = enrollSchema.safeParse(enrollForm.getValues());
+    const studentValues = studentForm.getValues();
+    const enrollValues = enrollForm.getValues();
+    const studentValuesParsed = studentSchema.safeParse(
+      studentForm.getValues()
+    );
+    const enrollValuesParsed = enrollSchema.safeParse(enrollForm.getValues());
 
-    if (!studentValues.success || !enrollValues.success) {
+    if (!studentValuesParsed.success || !enrollValuesParsed.success) {
       const errors = {
-        ...studentValues.error?.errors,
-        ...enrollValues.error?.errors,
+        ...studentValuesParsed.error?.errors,
+        ...enrollValuesParsed.error?.errors,
       };
       toast.error(errors[0].message);
 
@@ -61,16 +65,16 @@ export default function EnrollModal({ course, values }: EnrollModalProps) {
     }
 
     const formData = new FormData();
-    formData.append("file", enrollValues.data.file || "");
-    formData.append("student", JSON.stringify(studentValues.data));
-    enrollValues.data.file = null;
-    formData.append("enroll", JSON.stringify(enrollValues.data));
+    formData.append("file", enrollValuesParsed.data.file || "");
+    formData.append("student", JSON.stringify(studentValuesParsed.data));
+    enrollValuesParsed.data.file = null;
+    formData.append("enroll", JSON.stringify(enrollValuesParsed.data));
 
     const response = await upsertStudentEnroll(course.id, formData);
 
     if (response.success) {
-      studentForm.reset();
-      enrollForm.reset();
+      studentForm.reset(studentValues);
+      enrollForm.reset(enrollValues);
     }
 
     toast(response.message, { type: response.success ? "success" : "error" });
@@ -87,7 +91,11 @@ export default function EnrollModal({ course, values }: EnrollModalProps) {
         </div>
       </ModalHeader>
       <div className="w-full h-full grid grid-cols-2 gap-2">
-        <StudentForm courseId={course.id} form={studentForm} />
+        <StudentForm
+          courseId={course.id}
+          form={studentForm}
+          disableRunInput={!!values}
+        />
         <EnrollForm
           enrollValue={course.enroll_value}
           disabled={!studentForm.formState.isValid}

@@ -3,6 +3,7 @@ import RightSidebar from "@/components/common/RightSidebar";
 import { CreateCourseSchemaType } from "@/lib/zod";
 import { getCourseById } from "@/services/courseServices";
 import { notFound } from "next/navigation";
+import Overlay from "@/components/common/Overlay";
 
 export default async function EditCourse({
   params,
@@ -26,8 +27,11 @@ export default async function EditCourse({
   };
 
   return (
-    <RightSidebar backRoute={`/cursos/detalles/${id}`} title="Editar Curso">
-      <CourseForm values={values} editId={parseInt(id)} />
-    </RightSidebar>
+    <>
+      <Overlay backHref={`/cursos/detalles/${id}`} />
+      <RightSidebar title="Editar Curso" backHref={`/cursos/detalles/${id}`}>
+        <CourseForm values={values} editId={parseInt(id)} />
+      </RightSidebar>
+    </>
   );
 }

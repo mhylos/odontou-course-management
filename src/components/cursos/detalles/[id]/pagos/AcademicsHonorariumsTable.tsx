@@ -2,9 +2,9 @@ import Input from "@/components/common/Input";
 import Table, { Row, Cell } from "@/components/common/Table/Table";
 import { HONORARIUMS_FUNCTIONS_DICTIONARY } from "@/lib/constants";
 import { convertToMoney, decimalNumberFormat, restoreRun } from "@/lib/utils";
-import { HonorariumsSchemaType } from "@/lib/zod";
+import { AcademicHonorariumSchemaType, HonorariumsSchemaType } from "@/lib/zod";
 import { AcademicFunctions } from "@prisma/client";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   Control,
   Controller,
@@ -16,6 +16,7 @@ import Dropdown, { Option } from "@/components/common/Dropdown";
 import Decimal from "decimal.js";
 import Chip from "@/components/common/Chip";
 import ActionRowButton from "@/components/common/Table/ActionRowButton";
+import { useHonorariumAmount } from "@/context/HonorariumProvider";
 
 function TotalToPayToAcademic({
   control,
@@ -41,21 +42,33 @@ function TotalToPayToAcademic({
 
 function TotalByFunction({
   control,
+  field,
   academicIndex,
   hourValue,
   functionIndex,
 }: {
   control: Control<HonorariumsSchemaType>;
+  field: AcademicHonorariumSchemaType;
   academicIndex: number;
   hourValue: Decimal;
   functionIndex: number;
 }) {
+  const { addOrUpdateAcademic } = useHonorariumAmount();
   const hours = useWatch({
     name: `academicsHonorariums.${academicIndex}.functions.${functionIndex}.hours`,
     control,
   });
 
   const total = hourValue.times(!hours ? 0 : hours);
+  useEffect(() => {
+    const honorarium_id = field.functions[functionIndex].academic_honorarium_id;
+    if (!honorarium_id) return;
+    addOrUpdateAcademic({
+      honorarium_id,
+      rut: field.academic_rut,
+      amount: parseInt(total.toFixed()),
+    });
+  }, [hours, addOrUpdateAcademic, field, functionIndex, total]);
 
   return <span>{convertToMoney(total.toNumber())}</span>;
 }
@@ -91,7 +104,6 @@ export default function AcademicsHonorariumsTable({
         { title: "RUT", width: "15%" },
         { title: "Funciones", width: "20%" },
         { title: "Monto a pagar total", width: "10%" },
-        { title: "", width: "5%" },
         { title: "", width: "5%" },
       ]}
       className="h-full overflow-y-scroll"
@@ -130,17 +142,6 @@ export default function AcademicsHonorariumsTable({
               />
             </Cell>
 
-            <Cell className="flex">
-              <ActionRowButton
-                href={`pagos/${field.honorarium_id}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                <span className="icon-[ph--receipt] text-xl" />
-              </ActionRowButton>
-            </Cell>
-
             <Cell>
               <span
                 className={`icon-[ci--chevron-down] text-gray-400 text-xl transition-transform ${
@@ -150,7 +151,6 @@ export default function AcademicsHonorariumsTable({
             </Cell>
           </Row>
           <Row className={`${expandedRow.includes(i) ? "" : "hidden"}`}>
-            <Cell />
             <Cell colSpan={5} className="p-2 relative">
               <Table
                 headers={[
@@ -188,6 +188,7 @@ export default function AcademicsHonorariumsTable({
                     <Cell className="!py-0">
                       <TotalByFunction
                         control={control}
+                        field={field}
                         academicIndex={i}
                         hourValue={hourValue}
                         functionIndex={j}
@@ -195,6 +196,19 @@ export default function AcademicsHonorariumsTable({
                     </Cell>
                     <Cell className="!py-0">
                       <span className="text-xs">-</span>
+                    </Cell>
+
+                    <Cell className="flex">
+                      {func.academic_honorarium_id && (
+                        <ActionRowButton
+                          href={`pagos/honorarios-academicos/${func.academic_honorarium_id}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          <span className="icon-[ph--receipt] text-xl" />
+                        </ActionRowButton>
+                      )}
                     </Cell>
                   </Row>
                 ))}

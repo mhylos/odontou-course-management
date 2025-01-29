@@ -2,24 +2,20 @@
 
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import {
-  AcademicParticipationSchemaType,
-  CreateAcademicSchemaType,
-} from "@/lib/zod";
+import { AcademicParticipationSchemaType, AcademicSchemaType } from "@/lib/zod";
 import { capitalizeAll, restoreRun, runToNumber } from "@/lib/utils";
-import { Option } from "@/components/common/Dropdown";
 import { revalidatePath } from "next/cache";
 import { upsertAcademicsHonorariums } from "./honorariumServices";
 import { AcademicFunctions, Actions } from "@prisma/client";
 import Decimal from "decimal.js";
 import { registerAction } from "./loggerServices";
+import { Option } from "@/components/common/Dropdown";
 
-export async function getAcademics() {
+export async function getAcademicsTable() {
   const academics = await prisma.academic.findMany({
     omit: { user_fk: true, department_fk: true },
     include: {
-      user: { select: { rut: true, name: true } },
-      manages: true,
+      user: { select: { rut: true, name: true, email: true } },
       department: { select: { name: true } },
     },
   });
@@ -27,15 +23,90 @@ export async function getAcademics() {
   return academics;
 }
 
-export async function getAcademicsOptions(name?: string) {
+export async function getAcademicToEdit(
+  rut: number
+): Promise<AcademicSchemaType | null> {
+  const academic = await prisma.academic.findUnique({
+    where: { user_fk: rut },
+    select: {
+      user: {
+        select: {
+          rut: true,
+          name: true,
+          email: true,
+        },
+      },
+      isFOUCH: true,
+      phone: true,
+      department_fk: true,
+    },
+  });
+
+  if (!academic) return null;
+
+  return {
+    rut: restoreRun(academic.user.rut),
+    name: academic.user.name ?? "",
+    email: academic.user.email,
+    department_fk: academic.department_fk,
+    isFOUCH: academic.isFOUCH,
+    phone: academic.phone,
+  };
+}
+
+export async function getAcademicOptionByRun(run: number) {
+  if (!run) {
+    return null;
+  }
+  const academic = await prisma.academic.findUnique({
+    where: {
+      user_fk: run,
+    },
+    select: {
+      user: {
+        select: {
+          name: true,
+          rut: true,
+        },
+      },
+    },
+  });
+
+  if (!academic) {
+    return null;
+  }
+
+  const option: Option = {
+    name:
+      capitalizeAll(
+        academic.user.name ? academic.user.name.toLowerCase() : ""
+      ) +
+      " - " +
+      restoreRun(academic.user.rut),
+    value: academic.user.rut,
+  };
+
+  return option;
+}
+
+export async function getAcademicsOptions(name?: string, rut?: number) {
   const academics = await prisma.academic.findMany({
     take: 5,
     where: {
       user: {
-        name: {
-          contains: name,
-          mode: "insensitive",
-        },
+        OR: [
+          {
+            name: {
+              contains: name,
+              mode: "insensitive",
+            },
+          },
+          {
+            rut: {
+              equals: rut,
+            },
+          },
+        ],
       },
     },
     select: {
@@ -66,7 +137,7 @@ export async function getAcademicsOptions(name?: string) {
   return options;
 }
 
-export async function createAcademic(data: CreateAcademicSchemaType) {
+export async function createAcademic(data: AcademicSchemaType) {
   const exists = await prisma.user.findUnique({
     where: {
       rut: runToNumber(data.rut),
@@ -107,6 +178,31 @@ export async function createAcademic(data: CreateAcademicSchemaType) {
   }
 }
 
+export async function updateAcademic(rut: number, data: AcademicSchemaType) {
+  try {
+    await prisma.academic.update({
+      where: {
+        user_fk: rut,
+      },
+      data: {
+        isFOUCH: data.isFOUCH,
+        department_fk: data.department_fk,
+        phone: data.phone,
+      },
+    });
+
+    registerAction(
+      Actions.update,
+      `Datos del académico **${capitalizeAll(data.name)}** actualizados`
+    );
+    revalidatePath("/api/academics/options");
+    return { message: "Académico actualizado con éxito", success: true };
+  } catch (error) {
+    console.error(error);
+    return { message: "Error inesperado", success: false };
+  }
+}
+
 export async function getHierarchyOptions() {
   const hierarchyTypes = await prisma.hierarchyTypes.findMany();
 
@@ -116,6 +212,23 @@ export async function getHierarchyOptions() {
   }));
 
   return options;
+}
+
+export async function getHierarchyOptionById(id: number) {
+  const hierarchyType = await prisma.hierarchyTypes.findUnique({
+    where: { id },
+  });
+
+  if (!hierarchyType) {
+    return null;
+  }
+
+  const option: Option = {
+    name: hierarchyType.name,
+    value: hierarchyType.id,
+  };
+
+  return option;
 }
 
 export async function upsertAcademicParticipation(
@@ -147,21 +260,22 @@ export async function upsertAcademicParticipation(
         updated_at: true,
         id: true,
         course: { select: { name: true } },
+        academic: { select: { user: { select: { name: true } } } },
       },
     });
 
     if (participation.created_at === participation.updated_at) {
       registerAction(
         Actions.create,
-        `Participación del académico **${restoreRun(
-          data.academic_fk
+        `Participación del académico **${capitalizeAll(
+          participation.academic.user.name ?? ""
         )}** ingresada al curso **${participation.course.name}**`
       );
     } else {
       registerAction(
         Actions.update,
-        `Participación del académico **${restoreRun(
-          data.academic_fk
+        `Participación del académico **${capitalizeAll(
+          participation.academic.user.name ?? ""
         )}** actualizada en el curso **${participation.course.name}**`
       );
     }
@@ -248,4 +362,7 @@ export async function getParticipations(courseId: number) {
   });
 }
 
-export type getAcademicsResponse = ReturnType<typeof getAcademics>;
+export type getAcademicsTableResponse = ReturnType<typeof getAcademicsTable>;
+export type getAcademicOptionResponse = ReturnType<
+  typeof getAcademicOptionByRun
+>;

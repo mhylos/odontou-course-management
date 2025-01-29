@@ -128,7 +128,9 @@ export default function Dropdown({
             autoComplete="off"
           />
         ) : (
-          <span className="text-sm text-gray-900">
+          <span
+            className={"text-sm " + (disabled ? " disable" : "text-gray-900")}
+          >
             {selectedOption ? selectedOption.name : ""}
           </span>
         )}

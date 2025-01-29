@@ -10,7 +10,6 @@ import FloatingInput from "../common/FloatingInput";
 import FetchDropdown from "../common/FetchDropdown";
 import FormFieldset from "@/components/forms/FormFieldset";
 import Button from "../common/Button";
-import BackButton from "../common/BackButton";
 import { toast } from "react-toastify";
 import { upsertAcademicParticipation } from "@/services/academicsServices";
 import AcademicForm from "@/components/forms/AcademicForm";
@@ -64,7 +63,11 @@ export default function AcademicParticipationForm({
             name="academic_fk"
             control={form.control}
             fetchUrl="/api/academics/options"
-            selectedValue={values?.academic_fk}
+            fetchDefaultUrl={
+              values
+                ? `/api/academics/options/${values.academic_fk}`
+                : undefined
+            }
             disabled={!!values}
             error={form.formState.errors.academic_fk?.message}
             create={() => setCreateAcademic(true)}
@@ -76,7 +79,11 @@ export default function AcademicParticipationForm({
             name="hierarchy_type_fk"
             control={form.control}
             fetchUrl="/api/hierarchy-types/options"
-            selectedValue={values?.hierarchy_type_fk}
+            fetchDefaultUrl={
+              values
+                ? `/api/hierarchy-types/options/${values.hierarchy_type_fk}`
+                : undefined
+            }
             error={form.formState.errors.hierarchy_type_fk?.message}
           />
           <div className="grid grid-cols-2 gap-2">
@@ -93,9 +100,9 @@ export default function AcademicParticipationForm({
           </div>
         </FormFieldset>
         <div className="flex gap-2 mt-2">
-          <BackButton>
+          {/* <BackButton href="">
             <Button className="!bg-gray-500">Cancelar</Button>
-          </BackButton>
+          </BackButton> */}
           <Button type="submit">Guardar</Button>
         </div>
       </form>

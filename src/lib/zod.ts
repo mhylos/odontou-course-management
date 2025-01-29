@@ -1,4 +1,13 @@
-import { boolean, object, string, z, number, coerce, nativeEnum } from "zod";
+import {
+  boolean,
+  object,
+  string,
+  z,
+  number,
+  coerce,
+  nativeEnum,
+  date,
+} from "zod";
 import { format } from "rutility";
 import {
   Genres,
@@ -127,13 +136,14 @@ export const createCourseSchema = object({
   coordinator_fk: number({ required_error: "El coordinador es requerido" }),
 });
 
-export const createAcademicSchema = object({
+export const academicSchema = object({
   rut: string({ required_error: "El RUT es requerido" })
     .min(9, "El RUT debe tener al menos 9 caracteres")
     .max(12, "El RUT debe tener a lo más 12 caracteres")
     .transform((val) => format.notDotDash(val)),
   name: string({ required_error: "El nombre es requerido" }),
   email: string().email("El email no es válido").optional().nullable(),
+  phone: number().optional().nullable(),
   isFOUCH: boolean().default(true),
   department_fk: number({ required_error: "El departamento es requerido" }),
 });
@@ -211,10 +221,14 @@ export const distributionsSchema = object({
 });
 
 export const responsibleHonorariumSchema = object({
-  honorarium_id: number(),
+  responsible_honorarium_id: number(),
+  academic_rut: number(),
   academic_name: string(),
   function: nativeEnum(ResponsibleFunctions),
-  percentage: string({ required_error: "Las horas son requeridas" }),
+  percentage: string({ required_error: "Las horas son requeridas" }).refine(
+    (val) => parseFloat(val) >= 0 && parseFloat(val) <= 100,
+    { message: "El porcentaje debe estar entre 0 y 100" }
+  ),
 });
 
 export const academicHonorariumSchema = object({
@@ -223,6 +237,7 @@ export const academicHonorariumSchema = object({
   academic_name: string(),
   functions: z.array(
     object({
+      academic_honorarium_id: number().optional(),
       function: nativeEnum(AcademicFunctions),
       hours: string({ required_error: "Las horas son requeridas" }),
     })
@@ -237,13 +252,26 @@ export const honorariumsSchema = object({
 export const departmentSchema = object({
   departmentId: number(),
   name: string(),
-  directorId: number().nullable(),
+  directorId: number().optional().nullable(),
 });
 
 export const departmentsSchema = object({
   departments: z.array(departmentSchema),
 });
 
+export const paymentSchema = object({
+  honorarium_id: number(),
+  id: number().optional().nullable(),
+  amount: number({ required_error: "El monto es requerido" }),
+  observation: string().optional().nullable(),
+  paid: boolean(),
+  payment_date: date({ required_error: "La fecha del pago es requerida" }),
+  next_payment_date: date({
+    required_error: "La fecha del proximo pago es requerida",
+  }),
+});
+
+export type PaymentSchemaType = z.infer<typeof paymentSchema>;
 export type DepartmentsSchemaType = z.infer<typeof departmentsSchema>;
 export type DepartmentSchemaType = z.infer<typeof departmentSchema>;
 export type AcademicHonorariumSchemaType = z.infer<
@@ -264,7 +292,7 @@ export type AcademicParticipationSchemaType = z.infer<
 >;
 export type SearchCourseSchemaType = z.infer<typeof searchCourseSchema>;
 export type CreateDepartmentSchemaType = z.infer<typeof createDepartmentSchema>;
-export type CreateAcademicSchemaType = z.infer<typeof createAcademicSchema>;
+export type AcademicSchemaType = z.infer<typeof academicSchema>;
 export type CreateCourseSchemaType = z.infer<typeof createCourseSchema>;
 export type StudentSchemaType = z.infer<typeof studentSchema>;
 export type EnrollSchemaType = z.infer<typeof enrollSchema>;

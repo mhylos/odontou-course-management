@@ -8,13 +8,13 @@ interface ModalHeaderProps {
 }
 
 export default function ModalHeader({ children, prevPath }: ModalHeaderProps) {
-  const { length } = window.history;
-  const { back, replace } = useRouter();
-  const handleBack = () => {
-    if (length > 1) {
-      back();
+  const router = useRouter();
+
+  const navigateBack = () => {
+    if (window.history.length <= 1) {
+      router.push(prevPath);
     } else {
-      replace(prevPath);
+      router.back();
     }
   };
 
@@ -23,7 +23,7 @@ export default function ModalHeader({ children, prevPath }: ModalHeaderProps) {
       {children}
       <button
         className="icon-[material-symbols--close-rounded] text-2xl"
-        onClick={handleBack}
+        onClick={navigateBack}
       />
     </div>
   );

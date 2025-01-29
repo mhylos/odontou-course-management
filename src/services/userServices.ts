@@ -10,6 +10,19 @@ export async function checkStarted() {
   }
 }
 
+export async function getPersonalInfo(rut: number) {
+  const response = await prisma.user.findUnique({
+    where: {
+      rut: rut,
+    },
+    select: {
+      name: true,
+      email: true,
+    },
+  });
+  return response;
+}
+
 // export function registerAction(body: Omit<LoggerCreateBody, "timestamp">) {
 //   prisma.logger.create({
 //     data: {

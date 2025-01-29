@@ -1,7 +1,7 @@
-import { forwardRef, InputHTMLAttributes } from "react";
+import { forwardRef, TextareaHTMLAttributes } from "react";
 
 interface InputProps
-  extends Omit<InputHTMLAttributes<HTMLTextAreaElement>, "ref"> {
+  extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "ref"> {
   label: string;
   error?: string;
 }

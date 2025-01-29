@@ -72,10 +72,10 @@ export async function getAcademicsHonorariumsByCourse(
     honorarium_id: honorarium.id,
     academic_rut: honorarium.academic.user.rut,
     academic_name: honorarium.academic.user.name ?? "",
-    functions: honorarium.academic_honorarium.map((honorarium) => ({
-      academic_honorarium_id: honorarium.id,
-      function: honorarium.function,
-      hours: honorarium.hours.toString(),
+    functions: honorarium.academic_honorarium.map((academicHonorarium) => ({
+      academic_honorarium_id: academicHonorarium.id,
+      function: academicHonorarium.function,
+      hours: academicHonorarium.hours.toString(),
     })),
   }));
 }
@@ -84,22 +84,31 @@ export async function updateResponsiblesHonorariums(
   courseId: number,
   responsiblesHonorariums: ResponsibleHonorariumSchemaType[]
 ) {
+  const courseName = await getCourseName(courseId);
   await Promise.all(
     responsiblesHonorariums.map(async (honorarium) => {
+      if (!honorarium.percentage) {
+        return {
+          success: false,
+          message: `Error al actualizar el honorario de ${capitalizeAll(
+            honorarium.academic_name
+          )}, porcentaje no puede estar vacío`,
+        };
+      }
+
       await prisma.responsibleHonorarium.update({
-        where: { id: honorarium.honorarium_id },
+        where: { id: honorarium.responsible_honorarium_id },
         data: {
           percentage: honorarium.percentage,
         },
       });
+      registerAction(
+        Actions.update,
+        `Honorario de administrativo **${capitalizeAll(
+          honorarium.academic_name
+        )}** actualizado para el curso **${courseName}**`
+      );
     })
-  );
-
-  const courseName = await getCourseName(courseId);
-
-  registerAction(
-    Actions.update,
-    `Honorarios de administrativos actualizados del curso **${courseName}**`
   );
 
   return {
@@ -112,6 +121,7 @@ export async function updateAcademicsHonorariums(
   courseId: number,
   academicsHonorariums: AcademicHonorariumSchemaType[]
 ) {
+  const courseName = await getCourseName(courseId);
   await Promise.all(
     academicsHonorariums.map(async (honorarium) => {
       const participation = await prisma.participation.findFirst({
@@ -126,6 +136,14 @@ export async function updateAcademicsHonorariums(
             message:
               "No se encontró la participación del academico: " +
               honorarium.academic_name,
+          };
+        }
+        if (!field.hours) {
+          return {
+            success: false,
+            message: `Error al actualizar el honorario de ${capitalizeAll(
+              honorarium.academic_name
+            )}, horas no pueden estar vacías`,
           };
         }
 
@@ -147,15 +165,15 @@ export async function updateAcademicsHonorariums(
             hours: field.hours,
           },
         });
+
+        registerAction(
+          Actions.update,
+          `Honorario de académico **${capitalizeAll(
+            honorarium.academic_name
+          )}** actualizado para el curso **${courseName}**`
+        );
       });
     })
-  );
-
-  const courseName = await getCourseName(courseId);
-
-  registerAction(
-    Actions.update,
-    `Honorarios de académicos actualizados del curso **${courseName}**`
   );
   return {
     success: true,
@@ -192,7 +210,7 @@ export async function getResponsiblesHonorariumsByCourse(
         honorarium: {
           select: {
             academic: {
-              select: { user: { select: { name: true } } },
+              select: { user: { select: { name: true, rut: true } } },
             },
           },
         },
@@ -218,7 +236,8 @@ export async function getResponsiblesHonorariumsByCourse(
     .map((responsible) => {
       if (!responsible) return null;
       return {
-        honorarium_id: responsible.id,
+        responsible_honorarium_id: responsible.id,
+        academic_rut: responsible.honorarium.academic.user.rut,
         academic_name: responsible.honorarium.academic.user.name ?? "",
         function: responsible.function,
         percentage: responsible.percentage.toString(),
@@ -337,7 +356,11 @@ export async function upsertAcademicsHonorariums(
 
   registerAction(
     Actions.update,
-    `Honorario de académico **${updatedHonorarium.honorarium.academic.user.name}** actualizado para el curso de **${updatedHonorarium.honorarium.course.name}**`
+    `Honorario de académico **${capitalizeAll(
+      updatedHonorarium.honorarium.academic.user.name ?? ""
+    )}** actualizado para el curso de **${
+      updatedHonorarium.honorarium.course.name
+    }**`
   );
   return updatedHonorarium;
 }

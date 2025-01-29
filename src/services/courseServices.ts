@@ -431,6 +431,29 @@ export async function getProgramsOptions() {
   return options;
 }
 
+export async function getProgramOptionById(programId: number) {
+  const program = await prisma.program.findUnique({
+    where: {
+      id: programId,
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  if (!program) {
+    return null;
+  }
+
+  const option: Option = {
+    name: program.name,
+    value: program.id,
+  };
+
+  return option;
+}
+
 export async function getPaymentOptions() {
   const paymentTypes = await prisma.paymentTypes.findMany();
 

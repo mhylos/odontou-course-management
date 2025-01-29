@@ -1,4 +1,5 @@
 import { format, calculateDv } from "rutility";
+import { formatISO, isDate, isValid } from "date-fns";
 
 export function runFormatter(run: string) {
   const cleanedRun: string = run.replace(/[^0-9kK]/g, "").slice(0, 9);
@@ -39,6 +40,14 @@ export function dublicateItems<T>(arr: Array<T>, numberOfRepetitions: number) {
   return arr.flatMap((i) =>
     Array.from({ length: numberOfRepetitions }).fill(i)
   );
+}
+
+export function formatDateForInput(date: unknown) {
+  if (!isDate(date) || !isValid(date)) return undefined;
+
+  const formatDate = formatISO(date, { representation: "date" });
+
+  return formatDate;
 }
 
 export function formatDate(date: string | Date) {
@@ -92,3 +101,26 @@ export const fetcher = (url: string | Request | URL) =>
   fetch(url).then((r) => r.json());
 
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+export function getDirtyValues<
+  DirtyFields extends Record<string, unknown>,
+  Values extends Record<keyof DirtyFields, unknown>
+>(dirtyFields: DirtyFields, values: Values): Partial<typeof values> {
+  const dirtyValues = Object.keys(dirtyFields).reduce((prev, key) => {
+    // Unsure when RFH sets this to `false`, but omit the field if so.
+    if (!dirtyFields[key]) return prev;
+
+    return {
+      ...prev,
+      [key]:
+        typeof dirtyFields[key] === "object"
+          ? getDirtyValues(
+              dirtyFields[key] as DirtyFields,
+              values[key] as Values
+            )
+          : values[key],
+    };
+  }, {});
+
+  return dirtyValues;
+}

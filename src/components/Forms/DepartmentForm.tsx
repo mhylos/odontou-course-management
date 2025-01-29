@@ -1,3 +1,5 @@
+"use client";
+
 import { createDepartmentSchema, CreateDepartmentSchemaType } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -5,61 +7,86 @@ import Button from "@/components/common/Button";
 import FetchDropdown from "@/components/common/FetchDropdown";
 import FloatingInput from "@/components/common/FloatingInput";
 import FormFieldset from "@/components/forms/FormFieldset";
-import { createDepartment } from "@/services/departmentServices";
+import {
+  createDepartment,
+  updateDepartment,
+} from "@/services/departmentServices";
 import { toast } from "react-toastify";
-
+import { useParams } from "next/navigation";
 interface DepartmentFormProps {
   className?: string;
-  onClose: () => void;
+  initialValues?: CreateDepartmentSchemaType;
+  onClose?: () => void;
 }
 
 export default function DepartmentForm({
   className,
+  initialValues,
   onClose,
 }: DepartmentFormProps) {
-  const form = useForm<CreateDepartmentSchemaType>({
-    resolver: zodResolver(createDepartmentSchema),
-  });
+  const { departmentId } = useParams<{ departmentId: string }>();
+  const { handleSubmit, register, reset, formState, control } =
+    useForm<CreateDepartmentSchemaType>({
+      defaultValues: initialValues,
+      resolver: zodResolver(createDepartmentSchema),
+    });
+
+  const createOrUpdateDepartment = async (data: CreateDepartmentSchemaType) => {
+    if (departmentId) {
+      return await updateDepartment(Number(departmentId), data);
+    } else {
+      return await createDepartment(data);
+    }
+  };
 
   const onSubmit = async (data: CreateDepartmentSchemaType) => {
+    const response = await createOrUpdateDepartment(data);
     try {
-      const response = await createDepartment(data);
       toast(response.message, { type: response.success ? "success" : "error" });
       if (response.success) {
-        onClose();
+        reset(data);
+        if (onClose) onClose();
         return;
       }
     } catch (error) {
       console.error(error);
+      toast("Ocurrió un error inesperado", { type: "error" });
     }
   };
 
   return (
     <form
       className={`flex flex-col gap-2 ${className}`}
-      onSubmit={form.handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit)}
       id="department-form"
     >
       <FormFieldset legend="Departamento">
         <FloatingInput
           label="Nombre"
-          {...form.register("name")}
-          error={form.formState.errors.name?.message}
+          {...register("name")}
+          error={formState.errors.name?.message}
         />
 
         <FetchDropdown
           name="director_fk"
           label="Director del departamento"
-          control={form.control}
+          control={control}
           fetchUrl="/api/academics/options"
-          error={form.formState.errors.director_fk?.message}
+          fetchDefaultUrl={`/api/academics/options/${initialValues?.director_fk}`}
+          error={formState.errors.director_fk?.message}
         />
       </FormFieldset>
 
       <div className="flex gap-2">
-        <Button className="!bg-gray-500 !w-max" onClick={onClose} type="button">
-          Volver
-        </Button>
+        {onClose && (
+          <Button
+            className="!bg-gray-500 !w-max"
+            onClick={onClose}
+            type="button"
+          >
+            Volver
+          </Button>
+        )}
         <Button type="submit" form="department-form">
           Guardar
         </Button>

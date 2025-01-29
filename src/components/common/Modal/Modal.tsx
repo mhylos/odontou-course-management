@@ -7,7 +7,11 @@ interface ModalProps {
 }
 
 export default function Modal({ children, prevPath }: ModalProps) {
-  const { length } = window.history;
+  let length = 0;
+  if (typeof window !== "undefined") {
+    const { length: historyLength } = window.history;
+    length = historyLength;
+  }
   const { back, replace } = useRouter();
   const handleBack = () => {
     if (length > 1) {
@@ -22,7 +26,7 @@ export default function Modal({ children, prevPath }: ModalProps) {
         className="absolute bg-black/15 w-full h-full grid place-items-center -z-10"
         onClick={handleBack}
       />
-      <div className="bg-white p-2 gap-3 items-center rounded-md mx-5 xl:w-4/6 h-max flex flex-col justify-between">
+      <div className="bg-white p-2 gap-3 items-center rounded-md mx-5 h-max flex flex-col justify-between">
         {children}
       </div>
     </div>

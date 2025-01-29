@@ -7,7 +7,12 @@ import { Controller, UseFormReturn } from "react-hook-form";
 import { EnrollSchemaType } from "@/lib/zod";
 import FetchDropdown from "@/components/common/FetchDropdown";
 import { FILE_EXTENSIONS } from "@/lib/constants";
-import { capitalize, convertToMoney, decimalNumberFormat } from "@/lib/utils";
+import {
+  capitalize,
+  convertToMoney,
+  decimalNumberFormat,
+  formatDateForInput,
+} from "@/lib/utils";
 import { EnrollTypes } from "@prisma/client";
 import Checkbox from "@/components/common/Checkbox";
 import { useEffect, useState } from "react";
@@ -81,7 +86,7 @@ export default function EnrollForm({
           />
         </SectionItem>
       </div>
-      <div className="w-full grid grid-cols-3 gap-2">
+      <div className="w-full grid grid-cols-[2fr_1fr_2fr] gap-2">
         <SectionItem title="Fecha de pago">
           <Controller
             name="payment_date"
@@ -91,7 +96,7 @@ export default function EnrollForm({
                 disabled={disabled}
                 type="date"
                 error={error?.message}
-                value={value ? value.toISOString().split("T")[0] : ""}
+                value={formatDateForInput(value) ?? ""}
                 onChange={(e) => {
                   onChange(new Date(e.target.value));
                 }}
@@ -100,8 +105,8 @@ export default function EnrollForm({
           />
         </SectionItem>
         <SectionItem title="Descuento">
-          <div className="grid grid-cols-2 place-items-center gap-2">
-            <div className="relative w-full grid place-items-center">
+          <div className="grid place-items-center gap-2">
+            <div className="relative w-full grid place-items-center col-span-2">
               <Controller
                 render={({
                   field: { onChange, value, name },
@@ -133,7 +138,9 @@ export default function EnrollForm({
                 control={form.control}
               />
 
-              <span className="absolute right-1 text-gray-400">%</span>
+              <span className="absolute right-2 text-gray-400 select-none col-span-2">
+                %
+              </span>
             </div>
           </div>
         </SectionItem>

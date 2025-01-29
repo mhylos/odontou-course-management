@@ -2,8 +2,8 @@ import SubtitlePage from "@/components/common/SubtitlePage";
 import Table, { Cell, Row } from "@/components/common/Table/Table";
 import TitlePage from "@/components/common/TitlePage";
 import { ACTIONS_DICTIONARY } from "@/lib/constants";
-import { formatDate } from "@/lib/utils";
 import { getLogs } from "@/services/loggerServices";
+import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 
 export default async function Home() {
@@ -27,7 +27,7 @@ export default async function Home() {
           >
             {logs.map((log) => (
               <Row key={log.id} currentRow={log.id}>
-                <Cell>{formatDate(log.timestamp)}</Cell>
+                <Cell>{format(log.timestamp, "Pp")}</Cell>
                 <Cell className="capitalize">
                   {log.user.name?.toLowerCase() ?? ""}
                 </Cell>

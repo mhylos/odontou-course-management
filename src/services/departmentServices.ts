@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { Option } from "@/components/common/Dropdown";
 import { registerAction } from "./loggerServices";
 import { Actions } from "@prisma/client";
+import { capitalizeAll } from "@/lib/utils";
 
 export async function createDepartment(data: CreateDepartmentSchemaType) {
   try {
@@ -17,9 +18,47 @@ export async function createDepartment(data: CreateDepartmentSchemaType) {
         ...data,
       },
     });
+    registerAction(
+      Actions.create,
+      `Departamento **${capitalizeAll(data.name)}** creado`
+    );
     revalidatePath("/cursos/ingresar");
     return {
       message: "Departamento creado con éxito",
+      success: true,
+    };
+  } catch (error) {
+    console.error(error);
+    return { message: "Error inesperado", success: false };
+  }
+}
+
+export async function updateDepartment(
+  departmentId: number,
+  data: CreateDepartmentSchemaType
+) {
+  try {
+    if (data.name === "") {
+      return { message: "El nombre es obligatorio", success: false };
+    }
+    const updatedDepartment = await prisma.department.update({
+      where: {
+        id: departmentId,
+      },
+      data: {
+        ...data,
+      },
+      select: {
+        name: true,
+      },
+    });
+    registerAction(
+      Actions.update,
+      `Departamento **${capitalizeAll(updatedDepartment.name)}** actualizado`
+    );
+    revalidatePath("/departamentos");
+    return {
+      message: "Departamento actualizado con éxito",
       success: true,
     };
   } catch (error) {
@@ -36,9 +75,47 @@ export async function getDepartments(name?: string) {
         mode: "insensitive",
       },
     },
+    orderBy: {
+      id: "asc",
+    },
+    select: {
+      id: true,
+      name: true,
+      director: {
+        select: {
+          name: true,
+          rut: true,
+        },
+      },
+      _count: {
+        select: {
+          courses: true,
+          academic: true,
+        },
+      },
+    },
   });
 
   return departments;
+}
+
+export async function getDepartmentById(departmentId: number) {
+  const department = await prisma.department.findUnique({
+    where: {
+      id: departmentId,
+    },
+    select: {
+      name: true,
+      director: {
+        select: {
+          rut: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  return department;
 }
 
 export async function getDepartmentsOptions(name?: string) {
@@ -60,6 +137,27 @@ export async function getDepartmentsOptions(name?: string) {
   return options;
 }
 
+export async function getDepartmentOptionById(departmentId: number) {
+  const department = await prisma.department.findUnique({
+    where: {
+      id: departmentId,
+    },
+    select: {
+      name: true,
+      id: true,
+    },
+  });
+
+  if (!department) return null;
+
+  const option: Option = {
+    name: department.name,
+    value: department.id,
+  };
+
+  return option;
+}
+
 export async function updateDepartments(data: DepartmentsSchemaType) {
   try {
     await Promise.all(
@@ -69,7 +167,8 @@ export async function updateDepartments(data: DepartmentsSchemaType) {
             id: departmentId,
           },
           data: {
-            ...data,
+            name: data.name,
+            director_fk: data.directorId,
           },
         });
       })
@@ -81,3 +180,4 @@ export async function updateDepartments(data: DepartmentsSchemaType) {
     return false;
   }
 }
+export type GetDepartmentsResponse = ReturnType<typeof getDepartments>;

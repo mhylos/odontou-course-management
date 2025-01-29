@@ -4,6 +4,9 @@ import { SessionProvider } from "next-auth/react";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 import "react-loading-skeleton/dist/skeleton.css";
+import { es } from "date-fns/locale";
+import { setDefaultOptions } from "date-fns";
+setDefaultOptions({ locale: es });
 
 export const metadata: Metadata = {
   title: "Gestión de cobros y pagos",

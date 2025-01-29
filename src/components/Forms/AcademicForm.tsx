@@ -1,4 +1,6 @@
-import { createAcademicSchema, CreateAcademicSchemaType } from "@/lib/zod";
+"use client";
+
+import { academicSchema, AcademicSchemaType } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import Button from "@/components/common/Button";
@@ -6,29 +8,47 @@ import FetchDropdown from "@/components/common/FetchDropdown";
 import FloatingInput from "@/components/common/FloatingInput";
 import FormFieldset from "@/components/forms/FormFieldset";
 import Checkbox from "@/components/common/Checkbox";
-import { runFormatter } from "@/lib/utils";
-import { createAcademic } from "@/services/academicsServices";
+import { runFormatter, runToNumber } from "@/lib/utils";
+import { createAcademic, updateAcademic } from "@/services/academicsServices";
 import { toast } from "react-toastify";
 
 interface AcademicFormProps {
   className?: string;
-  onClose: () => void;
+  defaultValues?: AcademicSchemaType;
+  onClose?: () => void;
 }
 
 export default function AcademicForm({
   className,
+  defaultValues,
   onClose,
 }: AcademicFormProps) {
-  const form = useForm<CreateAcademicSchemaType>({
-    resolver: zodResolver(createAcademicSchema),
+  const form = useForm<AcademicSchemaType>({
+    defaultValues: {
+      rut: "",
+      name: "",
+      email: "",
+      department_fk: undefined,
+      isFOUCH: false,
+      ...defaultValues,
+    },
+    resolver: zodResolver(academicSchema),
   });
 
-  const onSubmit = async (data: CreateAcademicSchemaType) => {
+  const createOrUpdate = async (data: AcademicSchemaType) => {
+    if (defaultValues) {
+      return await updateAcademic(runToNumber(data.rut), data);
+    } else {
+      return await createAcademic(data);
+    }
+  };
+
+  const onSubmit = async (data: AcademicSchemaType) => {
     try {
-      const response = await createAcademic(data);
+      const response = await createOrUpdate(data);
       toast(response.message, { type: response.success ? "success" : "error" });
       if (response.success) {
-        onClose();
+        if (onClose) onClose();
       }
     } catch (error) {
       console.error(error);
@@ -45,9 +65,10 @@ export default function AcademicForm({
         <Controller
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <FloatingInput
+              disabled={defaultValues?.rut !== undefined}
               label="RUT"
               error={error?.message}
-              value={value || ""}
+              value={value}
               onChange={(value) => {
                 const formatted = runFormatter(value.currentTarget.value);
                 onChange(formatted);
@@ -74,6 +95,11 @@ export default function AcademicForm({
           label="Departamento perteneciente"
           control={form.control}
           fetchUrl="/api/department/options"
+          fetchDefaultUrl={
+            defaultValues?.department_fk
+              ? `/api/department/options/${defaultValues.department_fk}`
+              : undefined
+          }
         />
         <Checkbox
           id="isFOUCH"
@@ -83,9 +109,15 @@ export default function AcademicForm({
       </FormFieldset>
 
       <div className="flex gap-2">
-        <Button className="!bg-gray-500 !w-max" onClick={onClose} type="button">
-          Volver
-        </Button>
+        {onClose && (
+          <Button
+            className="!bg-gray-500 !w-max"
+            onClick={onClose}
+            type="button"
+          >
+            Volver
+          </Button>
+        )}
         <Button type="submit" form="academic-form">
           Guardar
         </Button>

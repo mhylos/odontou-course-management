@@ -38,6 +38,7 @@ export default function Sidebar({ routes }: SidebarProps) {
           alt="Logo Sidebar"
           width={230}
           height={136}
+          priority
           className={`object-scale-down ${isOpen ? "block" : "hidden"}`}
         />
         <span

@@ -5,8 +5,8 @@ import Overlay from "@/components/common/Overlay";
 export default function CreateCourse() {
   return (
     <>
-      <Overlay href="/cursos" />
-      <RightSidebar title="Ingresar Curso">
+      <Overlay backHref="/cursos" />
+      <RightSidebar title="Ingresar Curso" backHref="/cursos">
         <CreateCourseForm />
       </RightSidebar>
     </>

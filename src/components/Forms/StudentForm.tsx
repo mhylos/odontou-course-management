@@ -11,9 +11,9 @@ import { Controller, UseFormReturn } from "react-hook-form";
 import { Genres } from "@prisma/client";
 
 interface StudentFormProps {
+  disableRunInput?: boolean;
   courseId: number;
   form: UseFormReturn<StudentSchemaType>;
-  disableRut?: boolean;
 }
 
 const genreOptions = [
@@ -24,7 +24,7 @@ const genreOptions = [
 export default function StudentForm({
   courseId,
   form,
-  disableRut = false,
+  disableRunInput,
 }: StudentFormProps) {
   const [creatingStudent, setCreatingStudent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -72,7 +72,7 @@ export default function StudentForm({
                   error={error?.message}
                   id={name}
                   value={value || ""}
-                  disabled={disableRut}
+                  disabled={disableRunInput}
                   onChange={(e) => {
                     const rut = runFormatter(e.currentTarget.value);
                     onChange(rut);
@@ -84,7 +84,7 @@ export default function StudentForm({
               name="rut"
               control={form.control}
             />
-            {!disableRut && (
+            {!disableRunInput && (
               <Button
                 disabled={isLoading || creatingStudent}
                 className={`text-xl w-max`}

@@ -3,6 +3,7 @@ import RightSidebar from "@/components/common/RightSidebar";
 import { runToNumber } from "@/lib/utils";
 import { getParticipation } from "@/services/academicsServices";
 import { getCourseById } from "@/services/courseServices";
+import Overlay from "@/components/common/Overlay";
 
 export default async function EditAcademic({
   params,
@@ -18,14 +19,17 @@ export default async function EditAcademic({
   }
 
   return (
-    <RightSidebar
-      backRoute={`/cursos/detalles/${id}/academicos`}
-      title="Ingresar académico"
-    >
-      <AcademicParticipationForm
-        courseId={parseInt(id)}
-        values={participation ?? undefined}
-      />
-    </RightSidebar>
+    <>
+      <Overlay backHref={`/cursos/detalles/${id}/academicos`} />
+      <RightSidebar
+        title="Ingresar académico"
+        backHref={`/cursos/detalles/${id}/academicos`}
+      >
+        <AcademicParticipationForm
+          courseId={parseInt(id)}
+          values={participation ?? undefined}
+        />
+      </RightSidebar>
+    </>
   );
 }

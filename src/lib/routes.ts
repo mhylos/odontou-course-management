@@ -1,4 +1,4 @@
-const ADMIN_ROUTES = [
+export const ADMIN_ROUTES = [
   {
     title: "Inicio",
     href: "/",
@@ -21,7 +21,7 @@ const ADMIN_ROUTES = [
   },
 ];
 
-const TEACHER_ROUTES = [
+export const TEACHER_ROUTES = [
   {
     title: "Inicio",
     href: "/",

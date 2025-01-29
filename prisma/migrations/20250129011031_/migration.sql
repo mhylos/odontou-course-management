@@ -70,6 +70,8 @@ CREATE TABLE "Student" (
     "genre" "Genres",
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Student_pkey" PRIMARY KEY ("rut")
 );
@@ -393,10 +395,10 @@ ALTER TABLE "Expenses" ADD CONSTRAINT "Expenses_course_fk_fkey" FOREIGN KEY ("co
 ALTER TABLE "Department" ADD CONSTRAINT "Department_director_fk_fkey" FOREIGN KEY ("director_fk") REFERENCES "User"("rut") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ResponsiblePayment" ADD CONSTRAINT "ResponsiblePayment_id_fkey" FOREIGN KEY ("id") REFERENCES "ResponsibleHonorarium"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ResponsiblePayment" ADD CONSTRAINT "ResponsiblePayment_responsible_honorarium_fk_fkey" FOREIGN KEY ("responsible_honorarium_fk") REFERENCES "ResponsibleHonorarium"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AcademicPayment" ADD CONSTRAINT "AcademicPayment_id_fkey" FOREIGN KEY ("id") REFERENCES "AcademicHonorarium"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "AcademicPayment" ADD CONSTRAINT "AcademicPayment_academic_honorarium_fk_fkey" FOREIGN KEY ("academic_honorarium_fk") REFERENCES "AcademicHonorarium"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ResponsibleHonorarium" ADD CONSTRAINT "ResponsibleHonorarium_honorarium_fk_fkey" FOREIGN KEY ("honorarium_fk") REFERENCES "Honorarium"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

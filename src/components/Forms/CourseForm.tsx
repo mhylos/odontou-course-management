@@ -8,7 +8,6 @@ import FloatingTextarea from "@/components/common/FloatingTextarea";
 import { createCourse, updateCourse } from "@/services/courseServices";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import BackButton from "@/components/common/BackButton";
 import FetchDropdown from "@/components/common/FetchDropdown";
 import FormFieldset from "@/components/forms/FormFieldset";
 import { toast } from "react-toastify";
@@ -90,11 +89,13 @@ export default function CourseForm({
           />
           <FloatingTextarea
             label="Objetivo"
+            rows={3}
             {...form.register("objective")}
             error={form.formState.errors.objective?.message}
           />
           <FloatingTextarea
             label="Comentarios"
+            rows={2}
             {...form.register("additional_comments")}
             error={form.formState.errors.additional_comments?.message}
           />
@@ -103,7 +104,7 @@ export default function CourseForm({
             name="program_fk"
             control={form.control}
             fetchUrl="/api/courses/programs/options"
-            selectedValue={values?.program_fk}
+            fetchDefaultUrl={`/api/courses/programs/options/${values?.program_fk}`}
             error={form.formState.errors.program_fk?.message}
           />
 
@@ -179,7 +180,7 @@ export default function CourseForm({
             control={form.control}
             fetchUrl="/api/department/options"
             create={() => setCurrentForm("department")}
-            selectedValue={values?.department_fk}
+            fetchDefaultUrl={`/api/department/options/${values?.department_fk}`}
             error={form.formState.errors.department_fk?.message}
           />
           <FetchDropdown
@@ -188,7 +189,7 @@ export default function CourseForm({
             control={form.control}
             fetchUrl="/api/academics/options"
             create={() => setCurrentForm("director")}
-            selectedValue={values?.course_director_fk}
+            fetchDefaultUrl={`/api/academics/options/${values?.course_director_fk}`}
             error={form.formState.errors.course_director_fk?.message}
           />
           <FetchDropdown
@@ -197,7 +198,7 @@ export default function CourseForm({
             control={form.control}
             fetchUrl="/api/academics/options"
             create={() => setCurrentForm("coordinator")}
-            selectedValue={values?.coordinator_fk}
+            fetchDefaultUrl={`/api/academics/options/${values?.coordinator_fk}`}
             error={form.formState.errors.coordinator_fk?.message}
           />
         </FormFieldset>
@@ -238,9 +239,9 @@ export default function CourseForm({
           </div>
         </FormFieldset>
         <div className="flex gap-2 mt-2">
-          <BackButton className="flex cursor-pointer">
+          {/* <BackButton className="flex cursor-pointer">
             <span className="button !bg-gray-500">Cancelar</span>
-          </BackButton>
+          </BackButton> */}
           <Button type="submit" disabled={!!currentForm}>
             Guardar
           </Button>

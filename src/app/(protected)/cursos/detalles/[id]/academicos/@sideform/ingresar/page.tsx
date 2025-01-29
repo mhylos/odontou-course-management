@@ -1,6 +1,7 @@
 import AcademicParticipationForm from "@/components/forms/AcademicParticipationForm";
 import RightSidebar from "@/components/common/RightSidebar";
 import { getCourseById } from "@/services/courseServices";
+import Overlay from "@/components/common/Overlay";
 
 export default async function AddAcademic({
   params,
@@ -15,11 +16,14 @@ export default async function AddAcademic({
   }
 
   return (
-    <RightSidebar
-      backRoute={`/cursos/detalles/${id}/academicos`}
-      title="Ingresar académico"
-    >
-      <AcademicParticipationForm courseId={parseInt(id)} />
-    </RightSidebar>
+    <>
+      <Overlay backHref={`/cursos/detalles/${id}/academicos`} />
+      <RightSidebar
+        title="Ingresar académico"
+        backHref={`/cursos/detalles/${id}/academicos`}
+      >
+        <AcademicParticipationForm courseId={parseInt(id)} />
+      </RightSidebar>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import Table, { Cell, Row } from "@/components/common/Table/Table";
 import TitlePage from "@/components/common/TitlePage";
+import { restoreRun } from "@/lib/utils";
 import { getAllStudents } from "@/services/studentServices";
 
 export default async function Students() {
@@ -20,8 +21,8 @@ export default async function Students() {
           >
             {students.map(({ name, rut, email, enrolled }, index) => (
               <Row key={rut} currentRow={index + 1}>
-                <Cell>{name}</Cell>
-                <Cell>{rut}</Cell>
+                <Cell className="capitalize">{name.toLowerCase()}</Cell>
+                <Cell>{restoreRun(rut)}</Cell>
                 <Cell>{email}</Cell>
                 <Cell>{enrolled.length}</Cell>
               </Row>
