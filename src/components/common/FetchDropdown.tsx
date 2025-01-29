@@ -25,7 +25,7 @@ export default function FetchDropdown<T extends FieldValues>(
   );
 
   const { data: defaultOption, isLoading: defaultOptionLoading } =
-    useSWR<Option>(fetchDefaultUrl ?? null, fetcher);
+    useSWR<Option>(() => fetchDefaultUrl ?? null, fetcher);
 
   const handleSearch = useDebouncedCallback((search: string) => {
     fetchDefaultUrl = undefined;

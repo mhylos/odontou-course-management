@@ -104,7 +104,11 @@ export default function CourseForm({
             name="program_fk"
             control={form.control}
             fetchUrl="/api/courses/programs/options"
-            fetchDefaultUrl={`/api/courses/programs/options/${values?.program_fk}`}
+            fetchDefaultUrl={
+              values?.program_fk
+                ? `/api/courses/programs/options/${values.program_fk}`
+                : undefined
+            }
             error={form.formState.errors.program_fk?.message}
           />
 
@@ -180,7 +184,11 @@ export default function CourseForm({
             control={form.control}
             fetchUrl="/api/department/options"
             create={() => setCurrentForm("department")}
-            fetchDefaultUrl={`/api/department/options/${values?.department_fk}`}
+            fetchDefaultUrl={
+              values?.department_fk
+                ? `/api/department/options/${values.department_fk}`
+                : undefined
+            }
             error={form.formState.errors.department_fk?.message}
           />
           <FetchDropdown
@@ -189,7 +197,11 @@ export default function CourseForm({
             control={form.control}
             fetchUrl="/api/academics/options"
             create={() => setCurrentForm("director")}
-            fetchDefaultUrl={`/api/academics/options/${values?.course_director_fk}`}
+            fetchDefaultUrl={
+              values?.course_director_fk
+                ? `/api/academics/options/${values.course_director_fk}`
+                : undefined
+            }
             error={form.formState.errors.course_director_fk?.message}
           />
           <FetchDropdown
@@ -198,7 +210,11 @@ export default function CourseForm({
             control={form.control}
             fetchUrl="/api/academics/options"
             create={() => setCurrentForm("coordinator")}
-            fetchDefaultUrl={`/api/academics/options/${values?.coordinator_fk}`}
+            fetchDefaultUrl={
+              values?.coordinator_fk
+                ? `/api/academics/options/${values.coordinator_fk}`
+                : undefined
+            }
             error={form.formState.errors.coordinator_fk?.message}
           />
         </FormFieldset>
