@@ -1,14 +1,14 @@
 "use client";
 
-import Image from "next/image";
-import SidebarItem from "./SidebarItem";
-import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "@/app/context/sidebarContext";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
-import SidebarItemDescription from "./SidebarItemDescription";
 import Skeleton from "react-loading-skeleton";
+import SidebarItem from "./SidebarItem";
+import SidebarItemDescription from "./SidebarItemDescription";
 
 export interface SidebarProps {
   routes: SidebarRoute[];

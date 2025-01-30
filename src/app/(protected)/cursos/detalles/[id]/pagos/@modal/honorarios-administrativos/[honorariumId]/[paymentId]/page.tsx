@@ -1,9 +1,6 @@
 import PaymentForm from "@/components/forms/PaymentForm";
 import { PaymentSchemaType } from "@/lib/zod";
-import {
-  getAcademicPayment,
-  getResponsiblePayment,
-} from "@/services/paymentServices";
+import { getResponsiblePayment } from "@/services/paymentServices";
 import { addMonths } from "date-fns";
 
 interface PaymentPageProps {

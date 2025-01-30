@@ -17,8 +17,6 @@ import {
   AcademicFunctions,
   ResponsibleFunctions,
 } from "@prisma/client";
-import { FILE_EXTENSIONS } from "./constants";
-import { checkFileExtension } from "./utils";
 
 export const loginSchema = object({
   rut: string({ required_error: "El RUT es requerido" })

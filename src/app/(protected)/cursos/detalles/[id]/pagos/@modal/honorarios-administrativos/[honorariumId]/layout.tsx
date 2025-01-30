@@ -1,7 +1,7 @@
 import Modal from "@/components/common/Modal/Modal";
 import ModalHeader from "@/components/common/Modal/ModalHeader";
 import {
-  getAcademicHonorariumPayments,
+  
   getResponsibleHonorariumPayments,
 } from "@/services/paymentServices";
 import { Option } from "@/components/common/Dropdown";

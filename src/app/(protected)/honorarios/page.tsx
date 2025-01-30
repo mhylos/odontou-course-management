@@ -1,9 +1,7 @@
 import { auth } from "@/auth";
-import Table, { Cell, Row } from "@/components/common/Table/Table";
+import Table from "@/components/common/Table/Table";
 import TitlePage from "@/components/common/TitlePage";
 import HonorariumRow from "@/components/honorarios/HonorariumRow";
-import { HONORARIUMS_FUNCTIONS_DICTIONARY } from "@/lib/constants";
-import { convertToMoney } from "@/lib/utils";
 import { getHonorariumsByRut } from "@/services/honorariumServices";
 
 export default async function Honorariums() {

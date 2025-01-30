@@ -1,27 +1,22 @@
 import Input from "@/components/common/Input";
 import ActionRowButton from "@/components/common/Table/ActionRowButton";
-import Table, { Row, Cell } from "@/components/common/Table/Table";
-import { useHonorariumAmount } from "@/app/context/HonorariumProvider";
+import Table, { Cell, Row } from "@/components/common/Table/Table";
 import { HONORARIUMS_FUNCTIONS_DICTIONARY } from "@/lib/constants";
 import { convertToMoney, decimalNumberFormat } from "@/lib/utils";
 import {
   HonorariumsSchemaType,
-  ResponsibleHonorariumSchemaType,
 } from "@/lib/zod";
 import Decimal from "decimal.js";
-import { useCallback, useEffect } from "react";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
 
 function TotalToPayToResponsible({
   control,
   index,
   totalHonorariums,
-  field,
 }: {
   control: Control<HonorariumsSchemaType>;
   index: number;
   totalHonorariums: Decimal;
-  field: ResponsibleHonorariumSchemaType;
 }) {
   const percentage = useWatch({
     name: `responsiblesHonorariums.${index}.percentage`,
@@ -97,7 +92,6 @@ export default function ResponsibleHonorariumTable({
               control={control}
               index={i}
               totalHonorariums={totalHonorariums}
-              field={field}
             />
           </Cell>
 
