@@ -7,7 +7,12 @@ import FloatingTextarea from "@/components/common/FloatingTextarea";
 import FloatingInput from "@/components/common/FloatingInput";
 import Checkbox from "@/components/common/Checkbox";
 import { formatDateForInput } from "@/lib/utils";
-import { useHonorariumAmount } from "@/context/HonorariumProvider";
+import { useHonorariumAmount } from "@/app/context/HonorariumProvider";
+import {
+  upsertAcademicPayment,
+  upsertResponsiblePayment,
+} from "@/services/paymentServices";
+import { toast } from "react-toastify";
 
 interface PaymentFormProps {
   payment: Partial<PaymentSchemaType>;
@@ -18,17 +23,34 @@ export default function PaymentForm({ payment, type }: PaymentFormProps) {
   const { honorarium } = useHonorariumAmount();
   console.log(honorarium);
 
-  const { control, register } = useForm<PaymentSchemaType>({
+  const { control, register, handleSubmit } = useForm<PaymentSchemaType>({
     defaultValues: {
       amount: payment.amount || honorarium?.amount || 0,
       honorarium_id: honorarium?.honorarium_id,
       ...payment,
     },
   });
+
+  const createOrUpdatePayment = async (data: PaymentSchemaType) => {
+    switch (type) {
+      case "academic":
+        return await upsertAcademicPayment(data, payment.honorarium_id!);
+      case "responsible":
+        return await upsertResponsiblePayment(data, payment.honorarium_id!);
+    }
+  };
+
+  const onSubmit = async (data: PaymentSchemaType) => {
+    if (!payment.honorarium_id) return;
+
+    const response = await createOrUpdatePayment(data);
+    toast(response.message, { type: response.success ? "success" : "error" });
+  };
+
   return (
     <form
       className="grid grid-cols-2 gap-4 items-center w-full"
-      onSubmit={() => {}}
+      onSubmit={handleSubmit(onSubmit)}
     >
       <Controller
         control={control}

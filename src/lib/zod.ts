@@ -84,14 +84,15 @@ export const enrollSchema = object({
   observation: string().default(""),
   installments: number().default(1),
   paid: coerce.number().default(0),
-  file: z
-    .instanceof(File)
-    .optional()
-    .nullable()
-    .refine((file) => {
-      if (!file) return true;
-      return checkFileExtension(file, FILE_EXTENSIONS);
-    }, "El archivo no es válido"),
+  refund: boolean().default(false),
+  // file: z
+  //   .instanceof(File)
+  //   .optional()
+  //   .nullable()
+  //   .refine((file) => {
+  //     if (!file) return true;
+  //     return checkFileExtension(file, FILE_EXTENSIONS);
+  //   }, "El archivo no es válido"),
   enroll_type: nativeEnum(EnrollTypes),
 });
 

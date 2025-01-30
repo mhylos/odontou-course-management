@@ -32,8 +32,8 @@ export default function SearchCourses() {
   }, 500);
 
   const paymentsOptions = [
-    { value: 1, name: "Completos" },
-    { value: 0, name: "Pendientes" },
+    { value: "current", name: "Al día" },
+    { value: "delayed", name: "Atrasados" },
   ];
 
   return (
@@ -51,7 +51,7 @@ export default function SearchCourses() {
         options={paymentsOptions}
         clearable={true}
         selected={paymentsOptions.find(
-          (option) => option.value == parseInt(searchParams.get("pagos") ?? "")
+          (option) => option.value == (searchParams.get("pagos") ?? "")
         )}
         onChange={(value) => handleSearch("pagos", value.value.toString())}
         onRemove={() => handleSearch("pagos", "")}

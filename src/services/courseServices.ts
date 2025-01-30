@@ -342,13 +342,93 @@ export async function getAllCourses(
     },
     include: {
       program: { select: { name: true } },
+      enrolled: {
+        select: {
+          paid: true,
+          installments: true,
+        },
+      },
+      honorarium: {
+        select: {
+          academic_honorarium: {
+            select: {
+              payment: {
+                select: {
+                  payment_date: true,
+                  next_payment_date: true,
+                },
+                orderBy: {
+                  payment_date: "desc",
+                },
+              },
+            },
+          },
+          responsible_honorarium: {
+            select: {
+              payment: {
+                select: {
+                  payment_date: true,
+                  next_payment_date: true,
+                },
+                orderBy: {
+                  payment_date: "desc",
+                },
+              },
+            },
+          },
+        },
+      },
     },
     orderBy: {
       date_from: "desc",
     },
   });
 
-  return courses;
+  const extendedCourses = courses.map((course) => {
+    const students = course.enrolled.length;
+    const paidStudents = course.enrolled.filter(
+      (enrolled) => enrolled.paid == enrolled.installments
+    ).length;
+
+    return {
+      id: course.id,
+      name: course.name,
+      programName: course.program.name,
+      totalHours: course.online_hours
+        .plus(course.inperson_hours)
+        .plus(course.direct_hours)
+        .plus(course.indirect_hours)
+        .toString(),
+      enrollValue: course.enroll_value,
+      incompleteStudents: students - paidStudents === 0 ? false : true,
+      delayedHonorariums: course.honorarium.some(
+        (honorarium) =>
+          honorarium.academic_honorarium.some((academicHonorarium) => {
+            if (academicHonorarium.payment.length < 1) return false;
+            return academicHonorarium.payment[0].next_payment_date < new Date();
+          }) ||
+          honorarium.responsible_honorarium.some((responsibleHonorarium) => {
+            if (responsibleHonorarium.payment.length < 1) return false;
+            return (
+              responsibleHonorarium.payment[0].next_payment_date < new Date()
+            );
+          })
+      ),
+    };
+  });
+
+  switch (payment) {
+    case "delayed":
+      return extendedCourses.filter(
+        (course) => course.delayedHonorariums || course.incompleteStudents
+      );
+    case "current":
+      return extendedCourses.filter(
+        (course) => !course.incompleteStudents && !course.delayedHonorariums
+      );
+    default:
+      return extendedCourses;
+  }
 }
 
 export async function isStudentEnrolled(courseId: number, rut: string) {

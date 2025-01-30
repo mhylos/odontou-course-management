@@ -37,7 +37,7 @@ export default async function StudentDetails({ params }: StudentDetailsProps) {
       paid: enroll?.paid ?? 0,
       enroll_type: enroll?.enroll_type ?? "autofinanciado",
       observation: enroll?.observation ?? "",
-      file: null,
+      refund: enroll?.refund ?? false,
     },
   };
 

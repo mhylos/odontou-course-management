@@ -38,31 +38,32 @@ export async function getAllStudents() {
 
 export async function upsertStudentEnroll(
   courseId: number,
-  formData: FormData
+  student: StudentSchemaType,
+  enroll: EnrollSchemaType
 ) {
-  const student = JSON.parse(
-    formData.get("student") as string
-  ) as StudentSchemaType;
-  const enroll = JSON.parse(
-    formData.get("enroll") as string
-  ) as EnrollSchemaType;
-  const file = formData.get("file") as File;
+  // const student = JSON.parse(
+  //   formData.get("student") as string
+  // ) as StudentSchemaType;
+  // const enroll = JSON.parse(
+  //   formData.get("enroll") as string
+  // ) as EnrollSchemaType;
+  // const file = formData.get("file") as File;
   const rut = runToNumber(student.rut);
   const { payment_type_fk, ...enrollData } = enroll;
-  let filename = null;
-  if (file) {
-    const buffer = Buffer.from(await file.arrayBuffer());
-    filename = `${rut}_${courseId}.${file.name.split(".").pop()}`;
-    const uploadDir = join(process.cwd(), "public", "comprobantes");
-    try {
-      await stat(uploadDir);
-    } catch (e) {
-      if ((e as NodeJS.ErrnoException).code === "ENOENT") {
-        await mkdir(uploadDir, { recursive: true });
-      }
-      await writeFile(`${uploadDir}/${filename}`, buffer);
-    }
-  }
+  // let filename = null;
+  // if (file) {
+  //   const buffer = Buffer.from(await file.arrayBuffer());
+  //   filename = `${rut}_${courseId}.${file.name.split(".").pop()}`;
+  //   const uploadDir = join(process.cwd(), "public", "comprobantes");
+  //   try {
+  //     await stat(uploadDir);
+  //   } catch (e) {
+  //     if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+  //       await mkdir(uploadDir, { recursive: true });
+  //     }
+  //     await writeFile(`${uploadDir}/${filename}`, buffer);
+  //   }
+  // }
 
   const course = await prisma.course.findUnique({
     where: {
@@ -86,7 +87,7 @@ export async function upsertStudentEnroll(
         enrolled: {
           create: {
             ...enrollData,
-            file: filename,
+            // file: filename,
             payment: payment_type_fk
               ? { connect: { id: payment_type_fk } }
               : undefined,
@@ -121,7 +122,7 @@ export async function upsertStudentEnroll(
       },
       create: {
         ...enrollData,
-        file: filename,
+        // file: filename,
         payment: payment_type_fk
           ? { connect: { id: payment_type_fk } }
           : undefined,
@@ -138,7 +139,7 @@ export async function upsertStudentEnroll(
       },
       update: {
         ...enrollData,
-        file: filename,
+        // file: filename,
         payment: payment_type_fk
           ? { connect: { id: payment_type_fk } }
           : undefined,

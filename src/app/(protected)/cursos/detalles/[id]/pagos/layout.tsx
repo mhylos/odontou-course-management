@@ -1,4 +1,4 @@
-import { HonorariumAmountProvider } from "@/context/HonorariumProvider";
+import { HonorariumAmountProvider } from "@/app/context/HonorariumProvider";
 
 interface HonorariumsLayoutProps {
   modal: React.ReactNode;

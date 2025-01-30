@@ -6,7 +6,6 @@ import { Enroll } from "@/lib/definitions";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { EnrollSchemaType } from "@/lib/zod";
 import FetchDropdown from "@/components/common/FetchDropdown";
-import { FILE_EXTENSIONS } from "@/lib/constants";
 import {
   capitalize,
   convertToMoney,
@@ -164,8 +163,8 @@ export default function EnrollForm({
           />
         </SectionItem>
       </div>
-      <div className="w-full grid grid-cols-2 gap-2">
-        <SectionItem title="Método de pago">
+      <div className="w-full grid grid-cols-3 gap-2">
+        <SectionItem title="Método de pago" className="col-span-3">
           <FetchDropdown
             name="payment_type_fk"
             control={form.control}
@@ -176,7 +175,7 @@ export default function EnrollForm({
             selectedValue={form.getValues("payment_type_fk")}
           />
         </SectionItem>
-        <SectionItem title="Comprobante">
+        {/* <SectionItem title="Comprobante">
           <Controller
             render={({ field: { onChange }, fieldState: { error } }) => (
               <Input
@@ -194,7 +193,7 @@ export default function EnrollForm({
             name="file"
             control={form.control}
           />
-        </SectionItem>
+        </SectionItem> */}
         <Checkbox
           id="isInstallments"
           label={"Pago en cuotas"}
@@ -203,7 +202,6 @@ export default function EnrollForm({
           onChange={() => {
             setInstallments(!isInstallments);
           }}
-          className={isInstallments ? "col-span-2" : ""}
         />
 
         {isInstallments ? (
@@ -280,7 +278,17 @@ export default function EnrollForm({
             disabled={disabled}
           />
         )}
-        <SectionItem title="Tipo de matrícula">
+
+        <Checkbox
+          label={"Devuelto"}
+          {...form.register("refund")}
+          id="refund"
+          disabled={disabled}
+        />
+        <SectionItem
+          title="Tipo de matrícula"
+          className={isInstallments ? "col-span-2" : ""}
+        >
           <Controller
             render={({
               field: { onChange, value, name },
@@ -299,7 +307,10 @@ export default function EnrollForm({
             control={form.control}
           />
         </SectionItem>
-        <SectionItem title="Observación">
+        <SectionItem
+          title="Observación"
+          className={isInstallments ? "col-span-3" : "col-span-2"}
+        >
           <Input
             {...form.register("observation")}
             disabled={disabled}

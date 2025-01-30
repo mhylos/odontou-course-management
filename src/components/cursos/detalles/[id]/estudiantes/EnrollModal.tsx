@@ -38,6 +38,8 @@ export default function EnrollModal({ course, values }: EnrollModalProps) {
       enroll_type: "autofinanciado",
     },
   });
+  console.log(values);
+
   const [isLoading, setIsLoading] = useState(false);
 
   if (!course) {
@@ -64,13 +66,17 @@ export default function EnrollModal({ course, values }: EnrollModalProps) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", enrollValuesParsed.data.file || "");
-    formData.append("student", JSON.stringify(studentValuesParsed.data));
-    enrollValuesParsed.data.file = null;
-    formData.append("enroll", JSON.stringify(enrollValuesParsed.data));
+    // const formData = new FormData();
+    // formData.append("file", enrollValuesParsed.data.file || "");
+    // formData.append("student", JSON.stringify(studentValuesParsed.data));
+    // enrollValuesParsed.data.file = null;
+    // formData.append("enroll", JSON.stringify(enrollValuesParsed.data));
 
-    const response = await upsertStudentEnroll(course.id, formData);
+    const response = await upsertStudentEnroll(
+      course.id,
+      studentValuesParsed.data,
+      enrollValuesParsed.data
+    );
 
     if (response.success) {
       studentForm.reset(studentValues);
@@ -82,7 +88,10 @@ export default function EnrollModal({ course, values }: EnrollModalProps) {
   };
 
   return (
-    <Modal prevPath={`/cursos/detalles/${course.id}/estudiantes`}>
+    <Modal
+      prevPath={`/cursos/detalles/${course.id}/estudiantes`}
+      className="w-3/4"
+    >
       <ModalHeader prevPath={`/cursos/detalles/${course.id}/estudiantes`}>
         <div>
           <h3 className="text-4xl">

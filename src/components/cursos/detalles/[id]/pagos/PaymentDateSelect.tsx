@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 
 interface PaymentDateSelectProps {
   paymentsOptions: Option[];
-  honorariumId: string;
+  baseUrl: string;
 }
 
 export default function PaymentDateSelect({
   paymentsOptions,
-  honorariumId,
+  baseUrl,
 }: PaymentDateSelectProps) {
   const router = useRouter();
   return (
@@ -19,9 +19,9 @@ export default function PaymentDateSelect({
       options={paymentsOptions}
       id="payment-select"
       onChange={(selected) =>
-        router.push(`${honorariumId}/${selected.value.toString()}`)
+        router.push(`${baseUrl}/${selected.value.toString()}`)
       }
-      selected={paymentsOptions[0]}
+      create={() => router.push(`${baseUrl}/nuevo`)}
       label="Fecha de pago"
     />
   );

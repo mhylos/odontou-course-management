@@ -1,6 +1,9 @@
 import Modal from "@/components/common/Modal/Modal";
 import ModalHeader from "@/components/common/Modal/ModalHeader";
-import { getAcademicHonorariumPayments } from "@/services/paymentServices";
+import {
+  getAcademicHonorariumPayments,
+  getResponsibleHonorariumPayments,
+} from "@/services/paymentServices";
 import { Option } from "@/components/common/Dropdown";
 import { format } from "date-fns";
 import PaymentDateSelect from "@/components/cursos/detalles/[id]/pagos/PaymentDateSelect";
@@ -15,11 +18,11 @@ export default async function HonorariumLayout({
   children,
 }: HonorariumLayoutProps) {
   const { id, honorariumId } = await params;
-  const academicPayments = await getAcademicHonorariumPayments(
+  const responsiblePayments = await getResponsibleHonorariumPayments(
     parseInt(honorariumId)
   );
 
-  let paymentsOptions: Option[] | undefined = academicPayments?.map(
+  let paymentsOptions: Option[] | undefined = responsiblePayments?.map(
     (payment) => ({
       name: format(payment.payment_date, "PPP"),
       value: payment.id,
@@ -38,11 +41,11 @@ export default async function HonorariumLayout({
   return (
     <Modal prevPath={`/cursos/detalles/${id}/pagos`}>
       <ModalHeader prevPath={`/cursos/detalles/${id}/pagos`}>
-        <h2 className="text-4xl">Honorarios de académico</h2>
+        <h2 className="text-4xl">Honorarios de administrativos</h2>
       </ModalHeader>
       <PaymentDateSelect
         paymentsOptions={paymentsOptions}
-        baseUrl={`/cursos/detalles/${id}/pagos/honorarios-academicos/${honorariumId}`}
+        baseUrl={`/cursos/detalles/${id}/pagos/honorarios-administrativos/${honorariumId}`}
       />
       {children}
     </Modal>

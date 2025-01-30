@@ -1,7 +1,7 @@
 import Input from "@/components/common/Input";
 import ActionRowButton from "@/components/common/Table/ActionRowButton";
 import Table, { Row, Cell } from "@/components/common/Table/Table";
-import { useHonorariumAmount } from "@/context/HonorariumProvider";
+import { useHonorariumAmount } from "@/app/context/HonorariumProvider";
 import { HONORARIUMS_FUNCTIONS_DICTIONARY } from "@/lib/constants";
 import { convertToMoney, decimalNumberFormat } from "@/lib/utils";
 import {

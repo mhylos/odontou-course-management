@@ -16,7 +16,7 @@ import Dropdown, { Option } from "@/components/common/Dropdown";
 import Decimal from "decimal.js";
 import Chip from "@/components/common/Chip";
 import ActionRowButton from "@/components/common/Table/ActionRowButton";
-import { useHonorariumAmount } from "@/context/HonorariumProvider";
+import { useHonorariumAmount } from "@/app/context/HonorariumProvider";
 import { useRouter } from "next/navigation";
 
 function TotalToPayToAcademic({

@@ -9,12 +9,7 @@ interface CoursePreviewProps {
 }
 
 export default function CoursePreview({ course }: CoursePreviewProps) {
-  const totalHours = Decimal.sum(
-    course?.direct_hours || 0,
-    course?.inperson_hours || 0,
-    course?.online_hours || 0,
-    course?.indirect_hours || 0
-  );
+  const totalHours = Decimal.sum(course?.totalHours || 0);
 
   return (
     <div className="bg-white shadow-lg rounded-lg p-5 grid grid-rows-[2.5fr_1fr_1fr_1fr_2fr] gap-1 hover:scale-[101%] transition-transform h-96">
@@ -23,7 +18,7 @@ export default function CoursePreview({ course }: CoursePreviewProps) {
       </h2>
       <div className={"flex flex-col"}>
         <span>{course ? "Modalidad" : <Skeleton />}</span>
-        <span className="text-xl">{course?.program.name || <Skeleton />}</span>
+        <span className="text-xl">{course?.programName || <Skeleton />}</span>
       </div>
       <div className={"flex flex-col"}>
         <span>{course ? "Total de horas" : <Skeleton />}</span>
@@ -33,9 +28,27 @@ export default function CoursePreview({ course }: CoursePreviewProps) {
       </div>
       <div className={"flex flex-col"}>
         <span>{course ? "Pagos" : <Skeleton />}</span>
-        <span className="text-xl">
-          <Skeleton />
-        </span>
+        <div className="flex flex-col ">
+          {course ? (
+            course.delayedHonorariums ? (
+              <span className="text-red-500">Honorarios atrasados</span>
+            ) : (
+              <span className="text-secondary">Honorarios al día</span>
+            )
+          ) : (
+            <Skeleton />
+          )}
+
+          {course ? (
+            course.incompleteStudents ? (
+              <span className="text-red-500">Matrículas incompletas</span>
+            ) : (
+              <span className="text-secondary">Matrículas completas</span>
+            )
+          ) : (
+            <Skeleton />
+          )}
+        </div>
       </div>
       <div className={"self-end grid grid-cols-[1fr_5rem] gap-2"}>
         <div className="flex gap-1 justify-items-center">
@@ -49,7 +62,7 @@ export default function CoursePreview({ course }: CoursePreviewProps) {
             <Skeleton />
           )}
           <div className="p-3 text-2xl border-b-2 text-nowrap flex-1">
-            {course ? convertToMoney(course.enroll_value) : <Skeleton />}
+            {course ? convertToMoney(course.enrollValue) : <Skeleton />}
           </div>
         </div>
         {course ? (

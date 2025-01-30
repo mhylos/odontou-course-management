@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { PaymentSchemaType } from "@/lib/zod";
 
 export async function getResponsibleHonorariumPayments(honorariumId: number) {
   try {
@@ -126,5 +127,81 @@ export async function getAmountToPay(
   } catch (error) {
     console.error(error);
     return 0;
+  }
+}
+
+export async function upsertAcademicPayment(
+  data: PaymentSchemaType,
+  honorariumId: number
+) {
+  try {
+    await prisma.academicPayment.upsert({
+      where: {
+        id: data.id ?? undefined,
+      },
+      update: {
+        payment_date: data.payment_date,
+        next_payment_date: data.next_payment_date,
+        paid: data.paid,
+        amount: data.amount,
+        observation: data.observation ?? "",
+      },
+      create: {
+        payment_date: data.payment_date,
+        next_payment_date: data.next_payment_date,
+        paid: data.paid,
+        amount: data.amount,
+        academic_honorarium_fk: honorariumId,
+        observation: data.observation ?? "",
+      },
+    });
+    return {
+      success: true,
+      message: "Pago creado",
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "Error al crear el pago",
+    };
+  }
+}
+
+export async function upsertResponsiblePayment(
+  data: PaymentSchemaType,
+  honorariumId: number
+) {
+  try {
+    await prisma.responsiblePayment.upsert({
+      where: {
+        id: data.id ?? undefined,
+      },
+      update: {
+        payment_date: data.payment_date,
+        next_payment_date: data.next_payment_date,
+        paid: data.paid,
+        amount: data.amount,
+        observation: data.observation ?? "",
+      },
+      create: {
+        payment_date: data.payment_date,
+        next_payment_date: data.next_payment_date,
+        paid: data.paid,
+        amount: data.amount,
+        responsible_honorarium_fk: honorariumId,
+        observation: data.observation ?? "",
+      },
+    });
+    return {
+      success: true,
+      message: "Pago creado",
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "Error al crear el pago",
+    };
   }
 }

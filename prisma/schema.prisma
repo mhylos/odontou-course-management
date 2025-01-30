@@ -95,18 +95,18 @@ model PaymentTypes {
   enrolled Enrolled[]
 }
 
-model Refund {
-  id          Int      @id @default(autoincrement())
-  enrolled_fk Int
-  refund_date DateTime
-  amount      Int
-  observation String
+// model Refund {
+//   id          Int      @id @default(autoincrement())
+//   enrolled_fk Int
+//   refund_date DateTime
+//   amount      Int
+//   observation String
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+//   created_at DateTime @default(now())
+//   updated_at DateTime @updatedAt
 
-  enrolled Enrolled @relation(fields: [enrolled_fk], references: [id])
-}
+//   enrolled Enrolled @relation(fields: [enrolled_fk], references: [id])
+// }
 
 enum EnrollTypes {
   convenio
@@ -127,7 +127,8 @@ model Enrolled {
   observation     String
   installments    Int?        @default(1)
   paid            Int?        @default(0)
-  file            String?
+  refund          Boolean?    @default(false)
+  // file            String?
   enroll_type     EnrollTypes @default(autofinanciado)
   created_at      DateTime    @default(now())
   updated_at      DateTime    @updatedAt
@@ -135,7 +136,7 @@ model Enrolled {
   student Student       @relation(fields: [student_fk], references: [rut], onDelete: Cascade)
   course  Course        @relation(fields: [course_fk], references: [id], onDelete: Cascade)
   payment PaymentTypes? @relation(fields: [payment_type_fk], references: [id], onDelete: SetDefault)
-  refunds Refund[]
+  // refunds Refund[]
 
   @@id([student_fk, course_fk])
 }

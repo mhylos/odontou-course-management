@@ -365,6 +365,48 @@ export async function upsertAcademicsHonorariums(
   return updatedHonorarium;
 }
 
+export async function getHonorariumsByRut(rut: number) {
+  const honorariums = await prisma.honorarium.findMany({
+    where: {
+      academic_fk: rut,
+    },
+    select: {
+      course: { select: { name: true, id: true } },
+      academic_honorarium: {
+        select: {
+          id: true,
+          function: true,
+          payment: {
+            select: { amount: true, payment_date: true },
+            take: 1,
+            orderBy: { payment_date: "desc" },
+          },
+        },
+      },
+      responsible_honorarium: {
+        select: {
+          id: true,
+          function: true,
+          payment: {
+            select: { amount: true, payment_date: true },
+            take: 1,
+            orderBy: { payment_date: "desc" },
+          },
+        },
+      },
+    },
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+
+  return honorariums;
+}
+
+export type GetHonorariumsByRutResponse = ReturnType<
+  typeof getHonorariumsByRut
+>;
+
 export type ResponsiblesHonorariumsResponse = ReturnType<
   typeof getResponsiblesHonorariumsByCourse
 >;
