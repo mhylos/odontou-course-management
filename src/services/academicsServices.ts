@@ -143,20 +143,24 @@ export async function getAcademicsOptions(name?: string, rut?: number) {
 }
 
 export async function createAcademic(data: AcademicSchemaType) {
-  const exists = await prisma.user.findUnique({
+  const academicExists = await prisma.academic.findUnique({
     where: {
-      rut: runToNumber(data.rut),
+      user_fk: runToNumber(data.rut),
     },
   });
 
-  if (exists) {
+  if (academicExists) {
     return { message: "El académico ya existe", success: false };
   }
 
   try {
     const password = await bcrypt.hash(data.rut.toString(), 10);
-    await prisma.user.create({
-      data: {
+
+    await prisma.user.upsert({
+      where: {
+        rut: runToNumber(data.rut),
+      },
+      create: {
         rut: runToNumber(data.rut),
         name: data.name.toLowerCase(),
         email: data.email,
@@ -168,7 +172,14 @@ export async function createAcademic(data: AcademicSchemaType) {
           },
         },
       },
-      omit: { password: true },
+      update: {
+        academic: {
+          create: {
+            isFOUCH: data.isFOUCH,
+            department_fk: data.department_fk,
+          },
+        },
+      },
     });
 
     registerAction(

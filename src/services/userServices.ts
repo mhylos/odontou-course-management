@@ -1,4 +1,4 @@
-"use client";
+"use server";
 
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
@@ -28,6 +28,8 @@ export async function getPersonalInfo(rut: number) {
 
 export async function changePassword(oldPassword: string, newPassword: string) {
   const session = await auth();
+  console.log(session?.user.rut);
+
   if (!session) {
     return { success: false, message: "Usuario no autenticado" };
   }
@@ -44,7 +46,8 @@ export async function changePassword(oldPassword: string, newPassword: string) {
     return { success: false, message: "Usuario no encontrado" };
   }
 
-  const isValidPassword = await bcrypt.compare(user.password, oldPassword);
+  const isValidPassword = await bcrypt.compare(oldPassword, user.password);
+  console.log(user.password);
 
   if (!isValidPassword) {
     return { success: false, message: "Contraseña incorrecta" };
@@ -65,5 +68,23 @@ export async function changePassword(oldPassword: string, newPassword: string) {
   } catch (error) {
     console.error(error);
     return { success: false, message: "Error al actualizar la contraseña" };
+  }
+}
+
+export async function restartPassword(rut: number) {
+  const newPassword = await bcrypt.hash(rut.toString(), 10);
+  try {
+    await prisma.user.update({
+      where: {
+        rut: rut,
+      },
+      data: {
+        password: newPassword,
+      },
+    });
+    return { success: true, message: "Contraseña reiniciada" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Error al reiniciar la contraseña" };
   }
 }

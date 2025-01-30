@@ -72,7 +72,7 @@ export async function logoutAction() {
   try {
     await signOut({ redirect: false });
 
-    registerAction(Actions.logout, "Cierre de sesión");
+    // registerAction(Actions.logout, "Cierre de sesión");
     return { success: true, message: "Se ha cerrado sesión" };
   } catch (error) {
     if (error instanceof AuthError) {

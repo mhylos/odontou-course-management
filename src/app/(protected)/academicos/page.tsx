@@ -1,4 +1,5 @@
 import ActionRowButton from "@/components/common/Table/ActionRowButton";
+import RestartPasswordButton from "@/components/common/Table/RestartPasswordButton";
 import Table, { Cell, Row } from "@/components/common/Table/Table";
 import TitlePage from "@/components/common/TitlePage";
 import { restoreRun } from "@/lib/utils";
@@ -25,7 +26,7 @@ export default async function Academics() {
               { title: "Correo electrónico", width: "20%" },
               { title: "Pertenece a FOUCh" },
               { title: "Departmento", width: "20%" },
-              { title: "Acciones", width: "10%" },
+              { title: "Acciones", width: "15%" },
             ]}
           >
             {academics.map(({ user, isFOUCH, phone, department }, index) => {
@@ -45,10 +46,11 @@ export default async function Academics() {
                     )}
                   </Cell>
                   <Cell>{department.name}</Cell>
-                  <Cell>
+                  <Cell className="flex gap-2">
                     <ActionRowButton href={`/academicos/editar/${user.rut}`}>
                       <span className="icon-[ph--note-pencil] text-xl" />
                     </ActionRowButton>
+                    <RestartPasswordButton rut={user.rut} />
                   </Cell>
                 </Row>
               );

@@ -279,6 +279,7 @@ export const changePasswordSchema = object({
   confirmNewPassword: string({ required_error: "La contraseña es requerida" }),
 }).refine((data) => data.newPassword === data.confirmNewPassword, {
   message: "Las contraseñas no coinciden",
+  path: ["unmatched_passwords"],
 });
 
 export type ChangePasswordSchemaType = z.infer<typeof changePasswordSchema>;

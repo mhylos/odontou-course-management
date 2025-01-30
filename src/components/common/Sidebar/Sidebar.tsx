@@ -5,18 +5,20 @@ import SidebarItem from "./SidebarItem";
 import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "@/app/context/sidebarContext";
 import { useSession } from "next-auth/react";
-import Button from "../Button";
 import Link from "next/link";
 import { ReactNode } from "react";
 import SidebarItemDescription from "./SidebarItemDescription";
+import Skeleton from "react-loading-skeleton";
 
-interface SidebarProps {
-  routes: Array<{
-    title: string;
-    description?: string;
-    href: string;
-    icon: ReactNode;
-  }>;
+export interface SidebarProps {
+  routes: SidebarRoute[];
+}
+
+export interface SidebarRoute {
+  title: string;
+  description?: string;
+  href: string;
+  icon: ReactNode;
 }
 
 const ITEM_HEIGHT = 80; // sidebar item height
@@ -24,7 +26,6 @@ const SIDEBAR_GAP = 10; // sidebar item gap
 
 export default function Sidebar({ routes }: SidebarProps) {
   const session = useSession();
-  const { push } = useRouter();
   const { isOpen, toggle } = useSidebar();
   const pathname = usePathname();
   const currentSectionPath = `/${pathname.split("/")[1]}`;
@@ -100,33 +101,43 @@ export default function Sidebar({ routes }: SidebarProps) {
           })}
           <SidebarItem
             className="mt-auto border-2 border-solid border-primary rounded-md flex justify-between"
-            isActive={false}
+            isActive={activeIndex === -1}
             height={ITEM_HEIGHT}
           >
             <div
-              className="flex items-center gap-2 p-2"
+              className="flex flex-1 items-center gap-2 p-2"
               style={{ height: ITEM_HEIGHT }}
             >
               <span
-                className={`icon-[ph--user-square-fill] text-primary text-4xl`}
+                className={`icon-[ph--user-square-fill] text-4xl ${
+                  activeIndex === -1 ? "text-white" : "text-primary"
+                }`}
               />
               <div className="flex flex-col">
                 <span className="font-semibold">
-                  {session.data?.user?.name}
+                  {session.data?.user?.name ?? <Skeleton circle />}
                 </span>
-                <span className="text-xs text-gray-500">
-                  {session.data?.user?.email}
+                <span
+                  className={`text-xs ${
+                    activeIndex === -1 ? "text-white" : "text-gray-500"
+                  }`}
+                >
+                  {session.data?.user?.email ?? <Skeleton />}
                 </span>
               </div>
             </div>
-            <div className="flex flex-col items-center gap-2 p-2 py-4 text-xl justify-around">
-              <Button
-                className="icon-[ph--password]"
-                onClick={() => push("cambiar-contraseña")}
+            <div className="flex flex-col items-center gap-2 px-3 py-4 text-xl justify-around">
+              <Link
+                href="/cambiar-clave"
+                className={`icon-[ph--password] ${
+                  activeIndex === -1 ? "text-white" : "text-primary"
+                }`}
               />
-              <Button
-                className="icon-[ph--sign-out]"
-                onClick={() => push("logout")}
+              <Link
+                href={`/logout`}
+                className={`icon-[ph--sign-out] ${
+                  activeIndex === -1 ? "text-white" : "text-primary"
+                } `}
               />
             </div>
           </SidebarItem>

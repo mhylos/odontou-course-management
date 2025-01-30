@@ -1,5 +1,5 @@
-import Link, { LinkProps } from "next/link";
 import { ReactNode } from "react";
+import { twMerge } from "tailwind-merge";
 
 interface SidebarItemProps {
   children: ReactNode;
@@ -11,9 +11,11 @@ interface SidebarItemProps {
 export default function SidebarItem(props: SidebarItemProps) {
   return (
     <div
-      className={`text-xl font-extralight transition-colors grid place-items-center z-10 ${
-        props.className ? props.className : ""
-      } ${props.isActive ? "text-white" : "hover:bg-gray-100"}`}
+      className={twMerge(
+        `text-xl font-extralight transition-colors grid place-items-center z-10`,
+        props.className,
+        props.isActive ? "text-white" : "hover:bg-gray-100"
+      )}
       style={{ height: props.height }}
     >
       {props.children}

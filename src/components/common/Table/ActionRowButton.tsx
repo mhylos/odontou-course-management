@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Button from "../Button";
+import { twMerge } from "tailwind-merge";
 
 interface AddBottomRowButtonProps
   extends React.ComponentPropsWithoutRef<"button"> {
@@ -20,7 +21,10 @@ export default function ActionRowButton({
       <Link
         href={href}
         onClick={(e) => e.stopPropagation()}
-        className={`button !p-0 grid place-items-center h-10 aspect-square ${className}`.trimEnd()}
+        className={twMerge(
+          `button !p-0 grid place-items-center h-10 aspect-square`,
+          className
+        )}
       >
         {children}
       </Link>

@@ -1,12 +1,14 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { twMerge } from "tailwind-merge";
 
 interface ModalProps {
   children: React.ReactNode;
   prevPath: string;
+  className?: string;
 }
 
-export default function Modal({ children, prevPath }: ModalProps) {
+export default function Modal({ children, prevPath, className }: ModalProps) {
   let length = 0;
   if (typeof window !== "undefined") {
     const { length: historyLength } = window.history;
@@ -26,7 +28,12 @@ export default function Modal({ children, prevPath }: ModalProps) {
         className="absolute bg-black/15 w-full h-full grid place-items-center -z-10"
         onClick={handleBack}
       />
-      <div className="bg-white p-2 gap-3 items-center rounded-md mx-5 h-max flex flex-col justify-between">
+      <div
+        className={twMerge(
+          "bg-white p-2 gap-3 items-center rounded-md mx-5 h-max flex flex-col justify-between",
+          className
+        )}
+      >
         {children}
       </div>
     </div>
