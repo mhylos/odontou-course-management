@@ -1,9 +1,9 @@
 import { useHonorariumAmount } from "@/app/context/HonorariumProvider";
 import Input from "@/components/common/Input";
 import ActionRowButton from "@/components/common/Table/ActionRowButton";
-import { Row, Cell } from "@/components/common/Table/Table";
+import { Cell, Row } from "@/components/common/Table/Table";
 import { HONORARIUMS_FUNCTIONS_DICTIONARY } from "@/lib/constants";
-import { decimalNumberFormat, convertToMoney } from "@/lib/utils";
+import { convertToMoney, decimalNumberFormat } from "@/lib/utils";
 import { AcademicHonorariumSchemaType, HonorariumsSchemaType } from "@/lib/zod";
 import Decimal from "decimal.js";
 import { useRouter } from "next/navigation";
@@ -60,6 +60,10 @@ export default function FunctionRow({
 
   const { push } = useRouter();
 
+  // const lastPaymentDay = functionField.academic_honorarium_id
+  //   ? getLastAcademicPaymentDateById(functionField.academic_honorarium_id)
+  //   : null;
+
   return (
     <Row currentRow={functionIndex + 1}>
       <Cell className="py-0">
@@ -80,9 +84,6 @@ export default function FunctionRow({
         />
       </Cell>
       <Cell className="!py-0">{convertToMoney(total)}</Cell>
-      <Cell className="!py-0">
-        <span className="text-xs">-</span>
-      </Cell>
 
       <Cell className="flex">
         {functionField.academic_honorarium_id && (

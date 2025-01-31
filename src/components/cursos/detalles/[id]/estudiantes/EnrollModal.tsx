@@ -38,7 +38,6 @@ export default function EnrollModal({ course, values }: EnrollModalProps) {
       enroll_type: "autofinanciado",
     },
   });
-  console.log(values);
 
   const [isLoading, setIsLoading] = useState(false);
 

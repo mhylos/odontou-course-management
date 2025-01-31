@@ -1,7 +1,6 @@
 import PaymentForm from "@/components/forms/PaymentForm";
 import { PaymentSchemaType } from "@/lib/zod";
 import { getAcademicPayment } from "@/services/paymentServices";
-import { addMonths } from "date-fns";
 
 interface PaymentPageProps {
   params: Promise<{ paymentId: string; honorariumId: string }>;
@@ -14,7 +13,6 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
     payment = {
       honorarium_id: parseInt(honorariumId),
       payment_date: new Date(),
-      next_payment_date: addMonths(new Date(), 1),
       amount: 0,
       observation: "",
       paid: false,
@@ -26,7 +24,6 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
       : {
           honorarium_id: parseInt(honorariumId),
           payment_date: new Date(),
-          next_payment_date: addMonths(new Date(), 1),
           amount: 0,
           observation: "",
           paid: false,

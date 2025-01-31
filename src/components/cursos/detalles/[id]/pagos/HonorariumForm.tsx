@@ -186,11 +186,11 @@ export default function HonorariumForm({
         containerClassname="h-full"
         className="overflow-hidden"
       >
-        <div className="grid grid-cols-3 place-items-center w-max text-center self-center">
+        <div className="grid grid-cols-[1fr_max-content_1fr] place-items-center w-max text-center self-center">
           <span className="font-extralight text-sm">Total a distribuir</span>
           <span className="row-span-2 icon-[iconamoon--sign-division-slash-thin] text-4xl" />
           <span className="font-extralight text-sm">Horas totales</span>
-          <span className="text-xl font-light overflow-hidden max-w-[5rem]">
+          <span className="text-xl font-light overflow-hidden max-w-[7rem]">
             {convertToMoney(totalToDistribute.toNumber())}
           </span>
           <span className="text-xl font-light max-w-[5rem]">

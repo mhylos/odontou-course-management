@@ -1,15 +1,18 @@
 "use client";
 
-import { adminSchema, AdminSchemaType } from "@/lib/zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import AboutPassword from "@/components/common/AboutPassword";
 import Button from "@/components/common/Button";
 import FloatingInput from "@/components/common/FloatingInput";
 import FormFieldset from "@/components/forms/FormFieldset";
-import { runFormatter } from "@/lib/utils";
+import { fetcher, runFormatter, runToNumber } from "@/lib/utils";
+import { adminSchema, AdminSchemaType } from "@/lib/zod";
 import { createAdmin } from "@/services/adminServices";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import AboutPassword from "@/components/common/AboutPassword";
+import useSWR from "swr";
+import { useDebounce } from "use-debounce";
 
 interface AdministratorFormProps {
   className?: string;
@@ -30,6 +33,13 @@ export default function AdministratorForm({
     resolver: zodResolver(adminSchema),
   });
 
+  const rut = useDebounce(form.watch("rut"), 500)[0];
+
+  const { data: fetchedUser, isLoading } = useSWR(
+    rut ? `/api/admins/${String(runToNumber(rut))}` : null,
+    fetcher
+  );
+
   const onSubmit = async (data: AdminSchemaType) => {
     try {
       const response = await createAdmin(data);
@@ -41,6 +51,13 @@ export default function AdministratorForm({
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    if (fetchedUser) {
+      form.setValue("name", fetchedUser.name);
+      form.setValue("email", fetchedUser.email);
+    }
+  }, [fetchedUser, form]);
 
   return (
     <>
@@ -66,15 +83,29 @@ export default function AdministratorForm({
             name={"rut"}
             control={form.control}
           />
-          <FloatingInput
-            label="Nombre"
-            {...form.register("name")}
-            error={form.formState.errors.name?.message}
+          <Controller
+            render={({ field: { value, onChange } }) => (
+              <FloatingInput
+                label="Nombre"
+                value={value}
+                onChange={onChange}
+                disabled={isLoading || !!fetchedUser}
+              />
+            )}
+            name="name"
+            control={form.control}
           />
-          <FloatingInput
-            label="Email"
-            {...form.register("email")}
-            error={form.formState.errors.email?.message}
+          <Controller
+            render={({ field: { value, onChange } }) => (
+              <FloatingInput
+                label="Correo electrónico"
+                value={value}
+                onChange={onChange}
+                disabled={isLoading || !!fetchedUser}
+              />
+            )}
+            name="email"
+            control={form.control}
           />
         </FormFieldset>
 

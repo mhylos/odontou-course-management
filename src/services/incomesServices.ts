@@ -24,7 +24,6 @@ export async function recalculateFee(courseId: number) {
 
   const totalDiscounted = total
     .reduce((acc, student) => {
-      console.log(acc);
       return acc.plus(
         course.enroll_value -
           Decimal.div(student.discount, 100)

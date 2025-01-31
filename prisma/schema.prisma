@@ -1,49 +1,38 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-// prettier-ignore
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  // provider = "postgresql"
   provider = "postgresql"
-  url      = env("POSTGRES_URL") // uses connection pooling
-  // directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  url      = env("POSTGRES_URL")
 }
 
 model Course {
-  id                  Int      @id @default(autoincrement())
+  id                  Int             @id @default(autoincrement())
   enroll_value        Int
-  direct_hours        Decimal  @db.Decimal(5, 2)
-  indirect_hours      Decimal  @db.Decimal(5, 2)
-  inperson_hours      Decimal  @db.Decimal(5, 2)
-  online_hours        Decimal  @db.Decimal(5, 2)
+  direct_hours        Decimal         @db.Decimal(5, 2)
+  indirect_hours      Decimal         @db.Decimal(5, 2)
+  inperson_hours      Decimal         @db.Decimal(5, 2)
+  online_hours        Decimal         @db.Decimal(5, 2)
   name                String
-  objective           String   @db.Text
-  additional_comments String?  @db.Text
+  objective           String
+  additional_comments String?
   date_from           DateTime
   date_to             DateTime
-
-  department_fk      Int
-  program_fk         Int
-  course_director_fk Int
-  coordinator_fk     Int
-
-  program         Program    @relation(fields: [program_fk], references: [id])
-  department      Department @relation(fields: [department_fk], references: [id])
-  course_director User       @relation(fields: [course_director_fk], references: [rut], name: "course_director")
-  coordinator     User       @relation(fields: [coordinator_fk], references: [rut], name: "coordinator")
-
-  expenses     Expenses[]
-  enrolled     Enrolled[]
-  manages      Participation[]
-  incomes      Income[]
-  distribution Distribution[]
-  honorarium   Honorarium[]
+  department_fk       Int
+  program_fk          Int
+  course_director_fk  Int
+  coordinator_fk      Int
+  coordinator         User            @relation("coordinator", fields: [coordinator_fk], references: [rut])
+  course_director     User            @relation("course_director", fields: [course_director_fk], references: [rut])
+  department          Department      @relation(fields: [department_fk], references: [id])
+  program             Program         @relation(fields: [program_fk], references: [id])
+  distribution        Distribution[]
+  enrolled            Enrolled[]
+  expenses            Expenses[]
+  honorarium          Honorarium[]
+  incomes             Income[]
+  manages             Participation[]
 }
 
 model Distribution {
@@ -53,8 +42,7 @@ model Distribution {
   percentage Decimal  @db.Decimal(6, 3)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-
-  course Course @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [course_fk], references: [id], onDelete: Cascade)
 
   @@unique([name, course_fk])
 }
@@ -64,12 +52,269 @@ model Income {
   name      String
   course_fk Int
   amount    Int
-  comment   String? @db.Text
+  comment   String?
   order     Int     @default(0)
-
-  course Course @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+  course    Course  @relation(fields: [course_fk], references: [id], onDelete: Cascade)
 
   @@unique([name, course_fk])
+}
+
+model Student {
+  rut        Int        @id
+  genre      Genres?
+  name       String
+  email      String
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  enrolled   Enrolled[]
+}
+
+model PaymentTypes {
+  id       Int        @id @default(autoincrement())
+  name     String
+  enrolled Enrolled[]
+}
+
+model EnrollReceipt {
+  id        Int      @id @default(autoincrement())
+  enroll_id Int
+  date      DateTime
+
+  enroll Enrolled @relation(fields: [enroll_id], references: [id])
+
+  @@unique([enroll_id, date])
+}
+
+model Enrolled {
+  id              Int             @unique @default(autoincrement())
+  student_fk      Int
+  course_fk       Int
+  payment_type_fk Int?
+  status          Boolean         @default(false)
+  discount        Decimal         @default(0) @db.Decimal(6, 3)
+  ticket_num      Int?
+  payment_date    DateTime?
+  total           Int
+  observation     String
+  installments    Int?            @default(1)
+  paid            Int?            @default(0)
+  refund          Boolean?        @default(false)
+  enroll_type     EnrollTypes     @default(autofinanciado)
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  course          Course          @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+  payment         PaymentTypes?   @relation(fields: [payment_type_fk], references: [id], onDelete: SetDefault)
+  student         Student         @relation(fields: [student_fk], references: [rut], onDelete: Cascade)
+  receipt         EnrollReceipt[]
+
+  @@id([student_fk, course_fk])
+}
+
+model Expenses {
+  id         Int             @id @default(autoincrement())
+  course_fk  Int
+  name       String
+  type       MultiplierTypes
+  multiplier Decimal         @db.Decimal(10, 2)
+  multiply   MultiplyWith?
+  amount     Int             @default(0)
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+  course     Course          @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+
+  @@unique([name, course_fk])
+}
+
+model Program {
+  id      Int      @id @default(autoincrement())
+  name    String
+  courses Course[]
+}
+
+model Department {
+  id          Int        @id @default(autoincrement())
+  name        String
+  director_fk Int?
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  academic    Academic[]
+  courses     Course[]
+  director    User?      @relation(fields: [director_fk], references: [rut])
+}
+
+model HierarchyTypes {
+  id      Int             @id @default(autoincrement())
+  name    String
+  manages Participation[]
+}
+
+model ResponsiblePayment {
+  id                        Int                   @id @default(autoincrement())
+  responsible_honorarium_fk Int
+  payment_date              DateTime
+  paid                      Boolean               @default(false)
+  amount                    Int
+  observation               String
+  created_at                DateTime              @default(now())
+  updated_at                DateTime              @updatedAt
+  responsible_honorarium    ResponsibleHonorarium @relation(fields: [responsible_honorarium_fk], references: [id])
+}
+
+model AcademicPayment {
+  id                     Int                @id @default(autoincrement())
+  academic_honorarium_fk Int
+  payment_date           DateTime
+  paid                   Boolean            @default(false)
+  amount                 Int
+  observation            String
+  created_at             DateTime           @default(now())
+  updated_at             DateTime           @updatedAt
+  academic_honorarium    AcademicHonorarium @relation(fields: [academic_honorarium_fk], references: [id])
+}
+
+model ResponsibleHonorarium {
+  id            Int                  @id @default(autoincrement())
+  honorarium_fk Int
+  percentage    Decimal              @default(0) @db.Decimal(6, 3)
+  function      ResponsibleFunctions
+  created_at    DateTime             @default(now())
+  updated_at    DateTime             @updatedAt
+  honorarium    Honorarium           @relation(fields: [honorarium_fk], references: [id])
+  payment       ResponsiblePayment[]
+
+  @@unique([honorarium_fk, function])
+}
+
+model AcademicHonorarium {
+  id               Int               @id @default(autoincrement())
+  honorarium_fk    Int
+  participation_fk Int
+  hours            Decimal           @default(0) @db.Decimal(5, 2)
+  function         AcademicFunctions
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+  honorarium       Honorarium        @relation(fields: [honorarium_fk], references: [id])
+  participation    Participation     @relation(fields: [participation_fk], references: [id])
+  payment          AcademicPayment[]
+
+  @@unique([honorarium_fk, participation_fk, function])
+}
+
+model Honorarium {
+  id                     Int                     @unique @default(autoincrement())
+  course_fk              Int
+  academic_fk            Int
+  created_at             DateTime                @default(now())
+  updated_at             DateTime                @updatedAt
+  academic_honorarium    AcademicHonorarium[]
+  academic               Academic                @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
+  course                 Course                  @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+  responsible_honorarium ResponsibleHonorarium[]
+
+  @@id([course_fk, academic_fk])
+}
+
+model Participation {
+  id                  Int                  @unique @default(autoincrement())
+  academic_fk         Int
+  course_fk           Int
+  hierarchy_type_fk   Int
+  dedicated_hours     Int?
+  contract_hours      Int?
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @updatedAt
+  academic_honorarium AcademicHonorarium[]
+  academic            Academic             @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
+  course              Course               @relation(fields: [course_fk], references: [id], onDelete: Cascade)
+  hierarchy_type      HierarchyTypes       @relation(fields: [hierarchy_type_fk], references: [id])
+
+  @@id([academic_fk, course_fk])
+}
+
+model Academic {
+  user_fk       Int             @id
+  department_fk Int
+  isFOUCH       Boolean
+  phone         Int?
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  department    Department      @relation(fields: [department_fk], references: [id])
+  user          User            @relation(fields: [user_fk], references: [rut])
+  honorarium    Honorarium[]
+  manages       Participation[]
+}
+
+model Administrator {
+  user_fk    Int      @id
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user       User     @relation(fields: [user_fk], references: [rut], onDelete: Cascade)
+}
+
+model User {
+  id              String         @id @default(cuid())
+  rut             Int            @unique
+  password        String
+  name            String?
+  email           String?        @unique
+  emailVerified   DateTime?      @map("email_verified")
+  image           String?
+  pass_changed    Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  academic        Academic?
+  accounts        Account[]
+  administrator   Administrator?
+  coordinator     Course[]       @relation("coordinator")
+  course_director Course[]       @relation("course_director")
+  director        Department[]
+  logger          Logger[]
+  sessions        Session[]
+}
+
+model Logger {
+  id          Int      @id @default(autoincrement())
+  user_fk     String
+  action      Actions
+  description String
+  timestamp   DateTime @default(now())
+  user        User     @relation(fields: [user_fk], references: [id])
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
 }
 
 enum Genres {
@@ -77,68 +322,10 @@ enum Genres {
   masculino
 }
 
-model Student {
-  rut        Int      @id
-  genre      Genres?
-  name       String
-  email      String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  enrolled Enrolled[]
-}
-
-model PaymentTypes {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  enrolled Enrolled[]
-}
-
-// model Refund {
-//   id          Int      @id @default(autoincrement())
-//   enrolled_fk Int
-//   refund_date DateTime
-//   amount      Int
-//   observation String
-
-//   created_at DateTime @default(now())
-//   updated_at DateTime @updatedAt
-
-//   enrolled Enrolled @relation(fields: [enrolled_fk], references: [id])
-// }
-
 enum EnrollTypes {
   convenio
   autofinanciado
   becado
-}
-
-model Enrolled {
-  id              Int         @unique @default(autoincrement())
-  student_fk      Int
-  course_fk       Int
-  payment_type_fk Int?
-  status          Boolean     @default(false)
-  discount        Decimal     @default(0) @db.Decimal(6, 3)
-  ticket_num      Int?
-  payment_date    DateTime?
-  total           Int
-  observation     String
-  installments    Int?        @default(1)
-  paid            Int?        @default(0)
-  refund          Boolean?    @default(false)
-  // file            String?
-  enroll_type     EnrollTypes @default(autofinanciado)
-  created_at      DateTime    @default(now())
-  updated_at      DateTime    @updatedAt
-
-  student Student       @relation(fields: [student_fk], references: [rut], onDelete: Cascade)
-  course  Course        @relation(fields: [course_fk], references: [id], onDelete: Cascade)
-  payment PaymentTypes? @relation(fields: [payment_type_fk], references: [id], onDelete: SetDefault)
-  // refunds Refund[]
-
-  @@id([student_fk, course_fk])
 }
 
 enum MultiplierTypes {
@@ -152,48 +339,6 @@ enum MultiplyWith {
   elearning_incomes
 }
 
-model Expenses {
-  id         Int             @id @default(autoincrement())
-  course_fk  Int
-  name       String
-  type       MultiplierTypes
-  multiplier Decimal         @db.Decimal(10, 2)
-  multiply   MultiplyWith?
-  amount     Int             @default(0)
-  created_at DateTime        @default(now())
-  updated_at DateTime        @updatedAt
-
-  course Course @relation(fields: [course_fk], references: [id], onDelete: Cascade)
-
-  @@unique([name, course_fk])
-}
-
-model Program {
-  id      Int      @id @default(autoincrement())
-  name    String
-  courses Course[]
-}
-
-model Department {
-  id          Int      @id @default(autoincrement())
-  name        String
-  director_fk Int?
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-
-  director User? @relation(fields: [director_fk], references: [rut], onDelete: SetNull)
-
-  courses  Course[]
-  academic Academic[]
-}
-
-model HierarchyTypes {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  manages Participation[]
-}
-
 enum ResponsibleFunctions {
   director
   coordinator
@@ -204,199 +349,10 @@ enum AcademicFunctions {
   tutor
 }
 
-model ResponsiblePayment {
-  id                        Int      @id @default(autoincrement())
-  responsible_honorarium_fk Int
-  payment_date              DateTime
-  next_payment_date         DateTime
-  paid                      Boolean  @default(false)
-  amount                    Int
-  observation               String
-  created_at                DateTime @default(now())
-  updated_at                DateTime @updatedAt
-
-  responsible_honorarium ResponsibleHonorarium @relation(fields: [responsible_honorarium_fk], references: [id])
-}
-
-model AcademicPayment {
-  id                     Int      @id @default(autoincrement())
-  academic_honorarium_fk Int
-  payment_date           DateTime
-  next_payment_date      DateTime
-  paid                   Boolean  @default(false)
-  amount                 Int
-  observation            String
-  created_at             DateTime @default(now())
-  updated_at             DateTime @updatedAt
-
-  academic_honorarium AcademicHonorarium @relation(fields: [academic_honorarium_fk], references: [id])
-}
-
-model ResponsibleHonorarium {
-  id            Int                  @id @default(autoincrement())
-  honorarium_fk Int
-  percentage    Decimal              @default(0) @db.Decimal(6, 3)
-  function      ResponsibleFunctions
-  created_at    DateTime             @default(now())
-  updated_at    DateTime             @updatedAt
-
-  honorarium Honorarium           @relation(fields: [honorarium_fk], references: [id])
-  payment    ResponsiblePayment[]
-
-  @@unique([honorarium_fk, function])
-}
-
-model AcademicHonorarium {
-  id               Int               @id @default(autoincrement())
-  honorarium_fk    Int
-  participation_fk Int
-  hours            Decimal           @default(0) @db.Decimal(5, 2)
-  function         AcademicFunctions
-  created_at       DateTime          @default(now())
-  updated_at       DateTime          @updatedAt
-
-  honorarium    Honorarium        @relation(fields: [honorarium_fk], references: [id])
-  participation Participation     @relation(fields: [participation_fk], references: [id])
-  payment       AcademicPayment[]
-
-  @@unique([honorarium_fk, participation_fk, function])
-}
-
-model Honorarium {
-  id          Int      @unique @default(autoincrement())
-  course_fk   Int
-  academic_fk Int
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-
-  course                 Course                  @relation(fields: [course_fk], references: [id], onDelete: Cascade)
-  academic               Academic                @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
-  responsible_honorarium ResponsibleHonorarium[]
-  academic_honorarium    AcademicHonorarium[]
-
-  @@id([course_fk, academic_fk])
-}
-
-model Participation {
-  id                Int      @unique @default(autoincrement())
-  academic_fk       Int
-  course_fk         Int
-  hierarchy_type_fk Int
-  dedicated_hours   Int?
-  contract_hours    Int?
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
-
-  academic            Academic             @relation(fields: [academic_fk], references: [user_fk], onDelete: Cascade)
-  course              Course               @relation(fields: [course_fk], references: [id], onDelete: Cascade)
-  hierarchy_type      HierarchyTypes       @relation(fields: [hierarchy_type_fk], references: [id], onDelete: Restrict)
-  academic_honorarium AcademicHonorarium[]
-
-  @@id([academic_fk, course_fk])
-}
-
-model Academic {
-  user_fk       Int      @id
-  department_fk Int
-  isFOUCH       Boolean
-  phone         Int?
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  department Department @relation(fields: [department_fk], references: [id])
-  user       User       @relation(fields: [user_fk], references: [rut])
-
-  manages    Participation[]
-  honorarium Honorarium[]
-}
-
-model Administrator {
-  user_fk    Int      @id
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  user User @relation(fields: [user_fk], references: [rut], onDelete: Cascade)
-}
-
-model User {
-  id            String    @id @default(cuid())
-  rut           Int       @unique
-  password      String
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime? @map("email_verified")
-  image         String?
-  pass_changed  Boolean   @default(false)
-
-  academic        Academic?
-  administrator   Administrator?
-  director        Department[]
-  course_director Course[]       @relation(name: "course_director")
-  coordinator     Course[]       @relation(name: "coordinator")
-  logger          Logger[]
-
-  //authjs 
-  accounts Account[]
-  sessions Session[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 enum Actions {
   create
   update
   delete
   login
   logout
-}
-
-model Logger {
-  id          Int      @id @default(autoincrement())
-  user_fk     String
-  action      Actions
-  description String   @db.Text
-  timestamp   DateTime @default(now())
-
-  user User @relation(fields: [user_fk], references: [id])
-}
-
-// AUTH.JS
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([provider, providerAccountId])
-}
-
-model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@id([identifier, token])
 }

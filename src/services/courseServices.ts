@@ -355,7 +355,6 @@ export async function getAllCourses(
               payment: {
                 select: {
                   payment_date: true,
-                  next_payment_date: true,
                 },
                 orderBy: {
                   payment_date: "desc",
@@ -368,7 +367,6 @@ export async function getAllCourses(
               payment: {
                 select: {
                   payment_date: true,
-                  next_payment_date: true,
                 },
                 orderBy: {
                   payment_date: "desc",
@@ -401,31 +399,14 @@ export async function getAllCourses(
         .toString(),
       enrollValue: course.enroll_value,
       incompleteStudents: students - paidStudents === 0 ? false : true,
-      delayedHonorariums: course.honorarium.some(
-        (honorarium) =>
-          honorarium.academic_honorarium.some((academicHonorarium) => {
-            if (academicHonorarium.payment.length < 1) return false;
-            return academicHonorarium.payment[0].next_payment_date < new Date();
-          }) ||
-          honorarium.responsible_honorarium.some((responsibleHonorarium) => {
-            if (responsibleHonorarium.payment.length < 1) return false;
-            return (
-              responsibleHonorarium.payment[0].next_payment_date < new Date()
-            );
-          })
-      ),
     };
   });
 
   switch (payment) {
     case "delayed":
-      return extendedCourses.filter(
-        (course) => course.delayedHonorariums || course.incompleteStudents
-      );
+      return extendedCourses.filter((course) => course.incompleteStudents);
     case "current":
-      return extendedCourses.filter(
-        (course) => !course.incompleteStudents && !course.delayedHonorariums
-      );
+      return extendedCourses.filter((course) => !course.incompleteStudents);
     default:
       return extendedCourses;
   }

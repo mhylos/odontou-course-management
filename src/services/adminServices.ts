@@ -34,21 +34,25 @@ export async function getAllAdmins() {
 export async function createAdmin(data: AdminSchemaType) {
   try {
     const formattedRut = runToNumber(data.rut);
-    const hashedPassword = await bcrypt.hash(data.rut, 10);
-    await prisma.administrator.upsert({
+    const user = await prisma.user.findUnique({
       where: {
-        user_fk: formattedRut,
+        rut: formattedRut,
       },
-      update: {},
-      create: {
-        user: {
-          create: {
-            rut: formattedRut,
-            name: data.name.toLowerCase(),
-            email: data.email,
-            password: hashedPassword,
-          },
+    });
+    const hashedPassword = await bcrypt.hash(formattedRut.toString(), 10);
+    if (!user) {
+      await prisma.user.create({
+        data: {
+          rut: formattedRut,
+          name: data.name.toLowerCase(),
+          email: data.email,
+          password: hashedPassword,
         },
+      });
+    }
+    await prisma.administrator.create({
+      data: {
+        user_fk: formattedRut,
       },
     });
 

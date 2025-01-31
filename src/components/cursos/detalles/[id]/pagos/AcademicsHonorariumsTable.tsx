@@ -121,7 +121,6 @@ export default function AcademicsHonorariumsTable({
                   { title: "Función" },
                   { title: "Horas comprometidas" },
                   { title: "Monto a pagar" },
-                  { title: "Último pago" },
                   { title: "" },
                 ]}
                 className="overflow-visible"

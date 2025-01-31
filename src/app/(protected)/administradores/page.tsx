@@ -1,4 +1,5 @@
 import RevokeButton from "@/components/adminisrador/RevokeButton";
+import RestartPasswordButton from "@/components/common/Table/RestartPasswordButton";
 import Table, { Cell, Row } from "@/components/common/Table/Table";
 import TitlePage from "@/components/common/TitlePage";
 import { restoreRun } from "@/lib/utils";
@@ -29,8 +30,9 @@ export default async function Admins() {
                 <Cell className="capitalize">{name?.toLowerCase()}</Cell>
                 <Cell>{restoreRun(rut)}</Cell>
                 <Cell>{email ?? ""}</Cell>
-                <Cell>
+                <Cell className="flex gap-2">
                   <RevokeButton rut={rut} />
+                  <RestartPasswordButton rut={rut} />
                 </Cell>
               </Row>
             ))}

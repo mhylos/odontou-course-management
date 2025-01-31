@@ -1,4 +1,5 @@
 import { forwardRef, TextareaHTMLAttributes } from "react";
+import { twMerge } from "tailwind-merge";
 
 interface InputProps
   extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "ref"> {
@@ -7,16 +8,18 @@ interface InputProps
 }
 
 const FloatingTextarea = forwardRef(function FloatingTextarea(
-  { label, error, ...props }: InputProps,
+  { label, error, className, ...props }: InputProps,
   ref: React.ForwardedRef<HTMLTextAreaElement>
 ) {
   return (
     <div className="relative z-0">
       <textarea
         id={`floating_${label}`}
-        className={`block py-2.5 px-0 w-full text-sm bg-transparent rounded-md border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-primary peer ${
-          error ? "border-red-500" : "border-gray-300"
-        }`}
+        className={twMerge(
+          `block py-2.5 px-0 w-full text-sm bg-transparent rounded-md border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-primary peer`,
+          error ? "border-red-500" : "border-gray-300",
+          className
+        )}
         placeholder=" "
         rows={1}
         {...props}

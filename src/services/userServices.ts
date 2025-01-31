@@ -29,7 +29,6 @@ export async function getPersonalInfo(rut: number) {
 
 export async function changePassword(oldPassword: string, newPassword: string) {
   const session = await auth();
-  console.log(session?.user.rut);
 
   if (!session) {
     return { success: false, message: "Usuario no autenticado" };
@@ -48,7 +47,6 @@ export async function changePassword(oldPassword: string, newPassword: string) {
   }
 
   const isValidPassword = await bcrypt.compare(oldPassword, user.password);
-  console.log(user.password);
 
   if (!isValidPassword) {
     return { success: false, message: "Contraseña incorrecta" };

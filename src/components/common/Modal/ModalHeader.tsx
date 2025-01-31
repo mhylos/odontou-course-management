@@ -8,14 +8,10 @@ interface ModalHeaderProps {
 }
 
 export default function ModalHeader({ children, prevPath }: ModalHeaderProps) {
-  const router = useRouter();
+  const { replace } = useRouter();
 
   const navigateBack = () => {
-    if (window.history.length <= 1) {
-      router.push(prevPath);
-    } else {
-      router.back();
-    }
+    replace(prevPath);
   };
 
   return (

@@ -9,18 +9,14 @@ interface ModalProps {
 }
 
 export default function Modal({ children, prevPath, className }: ModalProps) {
-  let length = 0;
-  if (typeof window !== "undefined") {
-    const { length: historyLength } = window.history;
-    length = historyLength;
-  }
-  const { back, replace } = useRouter();
+  // let length = 0;
+  // if (typeof window !== "undefined") {
+  //   const { length: historyLength } = window.history;
+  //   length = historyLength;
+  // }
+  const { replace } = useRouter();
   const handleBack = () => {
-    if (length > 1) {
-      back();
-    } else {
-      replace(prevPath);
-    }
+    replace(prevPath);
   };
   return (
     <div className="absolute left-0 top-0 w-screen h-screen z-50 grid place-items-center">

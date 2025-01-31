@@ -19,21 +19,12 @@ export default async function HonorariumLayout({
     parseInt(honorariumId)
   );
 
-  let paymentsOptions: Option[] | undefined = academicPayments?.map(
+  const paymentsOptions: Option[] | undefined = academicPayments?.map(
     (payment) => ({
       name: format(payment.payment_date, "PPP"),
       value: payment.id,
     })
   );
-
-  if (paymentsOptions?.length === 0 || !paymentsOptions) {
-    paymentsOptions = [
-      {
-        name: `Nuevo: ${format(new Date(), "PPP")}`,
-        value: "nuevo",
-      },
-    ];
-  }
 
   return (
     <Modal prevPath={`/cursos/detalles/${id}/pagos`}>
@@ -41,7 +32,7 @@ export default async function HonorariumLayout({
         <h2 className="text-4xl">Honorarios de académico</h2>
       </ModalHeader>
       <PaymentDateSelect
-        paymentsOptions={paymentsOptions}
+        paymentsOptions={paymentsOptions || []}
         baseUrl={`/cursos/detalles/${id}/pagos/honorarios-academicos/${honorariumId}`}
       />
       {children}

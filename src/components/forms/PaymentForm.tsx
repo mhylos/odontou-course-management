@@ -21,7 +21,6 @@ interface PaymentFormProps {
 
 export default function PaymentForm({ payment, type }: PaymentFormProps) {
   const { honorarium } = useHonorariumAmount();
-  console.log(honorarium);
 
   const { control, register, handleSubmit } = useForm<PaymentSchemaType>({
     defaultValues: {
@@ -44,7 +43,9 @@ export default function PaymentForm({ payment, type }: PaymentFormProps) {
     if (!payment.honorarium_id) return;
 
     const response = await createOrUpdatePayment(data);
-    toast(response.message, { type: response.success ? "success" : "error" });
+    if (response) {
+      toast(response.message, { type: response.success ? "success" : "error" });
+    }
   };
 
   return (
@@ -79,24 +80,17 @@ export default function PaymentForm({ payment, type }: PaymentFormProps) {
             value={formatDateForInput(field.value)}
             label={"Fecha de pago"}
             type="date"
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="next_payment_date"
-        render={({ field }) => (
-          <FloatingInput
-            {...field}
-            value={formatDateForInput(field.value)}
-            label={"Fecha del proximo pago"}
-            type="date"
+            onChange={(e) => {
+              field.onChange(new Date(e.target.value));
+            }}
           />
         )}
       />
 
       <FloatingTextarea label={"Observaciones"} {...register("observation")} />
-      <Button type="submit">Guardar</Button>
+      <Button type="submit" className="col-span-2">
+        Guardar
+      </Button>
     </form>
   );
 }

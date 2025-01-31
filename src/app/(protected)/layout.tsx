@@ -18,8 +18,6 @@ export default async function RootLayout({ children, modal }: RootLayoutProps) {
     return null;
   }
 
-  console.log(session);
-
   const sidebarRoutes = [];
   if (session.user.roles?.includes(Roles.ADMIN))
     sidebarRoutes.push(...ADMIN_SIDEBAR_ROUTES);

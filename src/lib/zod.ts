@@ -267,9 +267,6 @@ export const paymentSchema = object({
   observation: string().optional().nullable(),
   paid: boolean(),
   payment_date: date({ required_error: "La fecha del pago es requerida" }),
-  next_payment_date: date({
-    required_error: "La fecha del proximo pago es requerida",
-  }),
 });
 
 export const changePasswordSchema = object({

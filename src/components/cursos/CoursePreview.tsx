@@ -28,17 +28,7 @@ export default function CoursePreview({ course }: CoursePreviewProps) {
       </div>
       <div className={"flex flex-col"}>
         <span>{course ? "Pagos" : <Skeleton />}</span>
-        <div className="flex flex-col ">
-          {course ? (
-            course.delayedHonorariums ? (
-              <span className="text-red-500">Honorarios atrasados</span>
-            ) : (
-              <span className="text-secondary">Honorarios al día</span>
-            )
-          ) : (
-            <Skeleton />
-          )}
-
+        <div className="text-xl">
           {course ? (
             course.incompleteStudents ? (
               <span className="text-red-500">Matrículas incompletas</span>

@@ -3,7 +3,7 @@ import { loginSchema } from "@/lib/zod";
 import bcrypt from "bcryptjs";
 import { type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { format, isValidRut } from "rutility";
+import { format } from "rutility";
 import { Roles } from "./lib/definitions";
 import {
   ACADEMIC_ROUTES,
@@ -32,9 +32,9 @@ export default {
           throw new Error("Credenciales invalidas");
         }
 
-        if (!isValidRut(data.rut)) {
-          throw new Error("RUT invalido");
-        }
+        // if (!isValidRut(data.rut)) {
+        //   throw new Error("RUT invalido");
+        // }
 
         const user = await db.user.findFirst({
           where: {

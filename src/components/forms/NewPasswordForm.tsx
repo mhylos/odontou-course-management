@@ -37,8 +37,6 @@ export default function NewPasswordForm({ className }: NewPasswordFormProps) {
     });
   };
 
-  console.log(errors);
-
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
