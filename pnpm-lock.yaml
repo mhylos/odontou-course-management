@@ -35,6 +35,9 @@ importers:
       next-auth:
         specifier: 5.0.0-beta.25
         version: 5.0.0-beta.25(next@14.2.15(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      prisma:
+        specifier: ^6.3.0
+        version: 6.3.0(typescript@5.7.3)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -2804,11 +2807,9 @@ snapshots:
       prisma: 6.3.0(typescript@5.7.3)
       typescript: 5.7.3
 
-  '@prisma/debug@6.3.0':
-    optional: true
+  '@prisma/debug@6.3.0': {}
 
-  '@prisma/engines-version@6.3.0-17.acc0b9dd43eb689cbd20c9470515d719db10d0b0':
-    optional: true
+  '@prisma/engines-version@6.3.0-17.acc0b9dd43eb689cbd20c9470515d719db10d0b0': {}
 
   '@prisma/engines@6.3.0':
     dependencies:
@@ -2816,19 +2817,16 @@ snapshots:
       '@prisma/engines-version': 6.3.0-17.acc0b9dd43eb689cbd20c9470515d719db10d0b0
       '@prisma/fetch-engine': 6.3.0
       '@prisma/get-platform': 6.3.0
-    optional: true
 
   '@prisma/fetch-engine@6.3.0':
     dependencies:
       '@prisma/debug': 6.3.0
       '@prisma/engines-version': 6.3.0-17.acc0b9dd43eb689cbd20c9470515d719db10d0b0
       '@prisma/get-platform': 6.3.0
-    optional: true
 
   '@prisma/get-platform@6.3.0':
     dependencies:
       '@prisma/debug': 6.3.0
-    optional: true
 
   '@rtsao/scc@1.1.0': {}
 
@@ -4560,7 +4558,6 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
       typescript: 5.7.3
-    optional: true
 
   prop-types@15.8.1:
     dependencies:
