@@ -12,7 +12,7 @@ export default function CoursePreview({ course }: CoursePreviewProps) {
   const totalHours = Decimal.sum(course?.totalHours || 0);
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-5 grid grid-rows-[2.5fr_1fr_1fr_1fr_2fr] gap-1 hover:scale-[101%] transition-transform h-96">
+    <div className="bg-white shadow-lg rounded-lg p-5 grid grid-rows-[3.4fr_1fr_1fr_1fr_2fr] gap-1 hover:scale-[101%] transition-transform h-96">
       <h2 className={"text-2xl font-medium line-clamp-3"}>
         {course?.name || <Skeleton className="h-full" />}
       </h2>

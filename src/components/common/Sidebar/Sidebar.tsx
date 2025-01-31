@@ -1,14 +1,14 @@
 "use client";
 
+import Image from "next/image";
+import SidebarItem from "./SidebarItem";
+import { usePathname } from "next/navigation";
 import { useSidebar } from "@/app/context/sidebarContext";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
-import Skeleton from "react-loading-skeleton";
-import SidebarItem from "./SidebarItem";
 import SidebarItemDescription from "./SidebarItemDescription";
+import Skeleton from "react-loading-skeleton";
 
 export interface SidebarProps {
   routes: SidebarRoute[];
@@ -44,9 +44,9 @@ export default function Sidebar({ routes }: SidebarProps) {
     >
       <div className="relative bg-primary p-5 grid place-items-center">
         <Image
-          src="/logo-sidebar.png"
+          src="/logo-horizontal.png"
           alt="Logo Sidebar"
-          width={230}
+          width={250}
           height={136}
           priority
           className={`object-scale-down ${isOpen ? "block" : "hidden"}`}
@@ -88,7 +88,7 @@ export default function Sidebar({ routes }: SidebarProps) {
                   href={item.href}
                   className="w-full h-full flex items-center ps-5 gap-3"
                 >
-                  {item.icon}
+                  {/* {item.icon} */}
                   <div className="flex flex-col">
                     {item.title}
                     <SidebarItemDescription isActive={isActive}>
@@ -113,16 +113,24 @@ export default function Sidebar({ routes }: SidebarProps) {
                   activeIndex === -1 ? "text-white" : "text-primary"
                 }`}
               />
-              <div className="flex flex-col">
+              <div className="flex flex-col flex-1">
                 <span className="font-semibold">
-                  {session.data?.user?.name ?? <Skeleton circle />}
+                  {session.status === "loading" ? (
+                    <Skeleton />
+                  ) : (
+                    session.data?.user?.name
+                  )}
                 </span>
                 <span
                   className={`text-xs ${
                     activeIndex === -1 ? "text-white" : "text-gray-500"
                   }`}
                 >
-                  {session.data?.user?.email ?? <Skeleton />}
+                  {session.status === "loading" ? (
+                    <Skeleton />
+                  ) : (
+                    session.data?.user?.email
+                  )}
                 </span>
               </div>
             </div>

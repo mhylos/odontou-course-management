@@ -132,4 +132,6 @@ export type MultiplyValues = {
 export enum Roles {
   ADMIN = "admin",
   ACADEMIC = "academic",
+  DIRECTOR = "director",
+  COORDINATOR = "coordinator",
 }

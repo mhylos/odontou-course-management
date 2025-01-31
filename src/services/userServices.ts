@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
+import { Roles } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
@@ -87,4 +88,34 @@ export async function restartPassword(rut: number) {
     console.error(error);
     return { success: false, message: "Error al reiniciar la contraseña" };
   }
+}
+
+export async function getUserRoles(rut: number): Promise<Roles[]> {
+  const response = await prisma.user.findUnique({
+    where: {
+      rut: rut,
+    },
+    select: {
+      administrator: true,
+      academic: true,
+      director: true,
+      coordinator: true,
+    },
+  });
+
+  const roles: Roles[] = [];
+  if (response?.administrator) {
+    roles.push(Roles.ADMIN);
+  }
+  if (response?.academic) {
+    roles.push(Roles.ACADEMIC);
+  }
+  if (response?.director) {
+    roles.push(Roles.DIRECTOR);
+  }
+  if (response?.coordinator) {
+    roles.push(Roles.COORDINATOR);
+  }
+
+  return roles;
 }

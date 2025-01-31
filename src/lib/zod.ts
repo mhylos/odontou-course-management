@@ -281,6 +281,18 @@ export const changePasswordSchema = object({
   path: ["unmatched_passwords"],
 });
 
+export const adminSchema = object({
+  name: string({ required_error: "El nombre es requerido" }),
+  email: string({ required_error: "El email es requerido" }).email(
+    "El email no es válido"
+  ),
+  rut: string({ required_error: "El RUT es requerido" })
+    .min(9, "El RUT debe tener al menos 9 caracteres")
+    .max(12, "El RUT debe tener a lo más 12 caracteres")
+    .transform((val) => format.dotDash(val)),
+});
+
+export type AdminSchemaType = z.infer<typeof adminSchema>;
 export type ChangePasswordSchemaType = z.infer<typeof changePasswordSchema>;
 export type PaymentSchemaType = z.infer<typeof paymentSchema>;
 export type DepartmentsSchemaType = z.infer<typeof departmentsSchema>;

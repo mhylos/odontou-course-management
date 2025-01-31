@@ -1,3 +1,4 @@
+import React from "react";
 import { SidebarRoute } from "@/components/common/Sidebar/Sidebar";
 
 export const ADMIN_SIDEBAR_ROUTES: SidebarRoute[] = [
@@ -30,6 +31,12 @@ export const ADMIN_SIDEBAR_ROUTES: SidebarRoute[] = [
     description: "Gestión de departamentos",
     href: "/departamentos",
     icon: <span className="icon-[ph--buildings]" />,
+  },
+  {
+    title: "Administradores",
+    description: "Gestión de administradores",
+    href: "/administradores",
+    icon: <span className="icon-[ph--user-gear]" />,
   },
 ];
 

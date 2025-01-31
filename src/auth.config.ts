@@ -1,11 +1,18 @@
+import db from "@/lib/prisma";
+import { loginSchema } from "@/lib/zod";
+import bcrypt from "bcryptjs";
 import { type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { loginSchema } from "@/lib/zod";
-import db from "@/lib/prisma";
-import { isValidRut, format } from "rutility";
-import bcrypt from "bcryptjs";
+import { format, isValidRut } from "rutility";
 import { Roles } from "./lib/definitions";
-import { ACADEMIC_ROUTES, ADMIN_ROUTES } from "./lib/roles.routes";
+import {
+  ACADEMIC_ROUTES,
+  ADMIN_ROUTES,
+  COORDINATOR_ROUTES,
+  DIRECTOR_ROUTES,
+  NOT_PROTECTED_ROUTES,
+} from "./lib/roles.routes";
+import { getUserRoles } from "./services/userServices";
 
 // Notice this is only an object, not a full Auth.js instance
 export default {
@@ -44,23 +51,7 @@ export default {
           user.password
         );
 
-        const roles = [];
-
-        const isAdmin = await db.administrator.findUnique({
-          where: { user_fk: user.rut },
-        });
-
-        if (isAdmin) {
-          roles.push(Roles.ADMIN);
-        }
-
-        const isAcademic = await db.academic.findUnique({
-          where: { user_fk: user.rut },
-        });
-
-        if (isAcademic) {
-          roles.push(Roles.ACADEMIC);
-        }
+        const roles = await getUserRoles(user.rut);
 
         if (!isValidPassword) {
           throw new Error("Contraseña incorrecta");
@@ -74,18 +65,35 @@ export default {
     authorized({ request: { nextUrl }, auth }) {
       const isLoggedIn = !!auth?.user;
       const { pathname } = nextUrl;
-      // const role = auth?.user?.role || Roles.ACADEMIC;
+      const roles = auth?.user?.roles;
 
       if (pathname.startsWith("/login") && isLoggedIn) {
         return Response.redirect(new URL("/", nextUrl));
       }
 
-      if (
-        !auth?.user?.roles.includes(Roles.ADMIN) &&
-        ADMIN_ROUTES.includes(pathname)
-      ) {
-        return Response.redirect(new URL(ACADEMIC_ROUTES[0], nextUrl));
-      }
+      const routes: string[] = [];
+      roles?.forEach((role) => {
+        switch (role) {
+          case Roles.ADMIN:
+            routes.push(...ADMIN_ROUTES);
+            break;
+          case Roles.ACADEMIC:
+            routes.push(...ACADEMIC_ROUTES);
+            break;
+          case Roles.COORDINATOR:
+            routes.push(...COORDINATOR_ROUTES);
+            break;
+          case Roles.DIRECTOR:
+            routes.push(...DIRECTOR_ROUTES);
+            break;
+        }
+      });
+
+      routes.push(...NOT_PROTECTED_ROUTES);
+
+      // if (!routes.includes(pathname.split("/")[1])) {
+      //   return Response.redirect(new URL("/403", nextUrl));
+      // }
 
       return !!auth;
     },
