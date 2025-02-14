@@ -36,7 +36,7 @@ export default function Sidebar({ routes }: SidebarProps) {
   return (
     <aside
       id="logo-sidebar"
-      className={`z-10 h-full border-r-2 border-solid border-primary grid transition-[width] ${
+      className={`z-10 h-screen border-r-2 border-solid border-primary grid transition-[width] ${
         isOpen
           ? "w-[20rem] grid-rows-[200px_1fr]"
           : "w-[3rem] grid-rows-[200px_1fr]"
@@ -60,7 +60,7 @@ export default function Sidebar({ routes }: SidebarProps) {
           onClick={toggle}
         />
       </div>
-      <div className={`p-5 ${isOpen ? "block" : "hidden"}`}>
+      <div className={`p-5 ${isOpen ? "block overflow-y-auto" : "hidden"}`}>
         <nav
           className="relative flex flex-col h-full"
           style={{ gap: SIDEBAR_GAP }}
@@ -82,7 +82,7 @@ export default function Sidebar({ routes }: SidebarProps) {
                 key={item.title}
                 isActive={isActive}
                 height={ITEM_HEIGHT}
-                className="border-b-2 border-solid border-primary rounded-md"
+                className="border-b-2 border-solid border-primary rounded-md flex-shrink-0"
               >
                 <Link
                   href={item.href}

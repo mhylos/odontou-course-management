@@ -43,7 +43,7 @@ export default function CoursesPage({ searchParams }: CoursesProps) {
         </Link>
       </div>
 
-      <ul className="grid grid-cols-3 gap-2 h-full overflow-y-auto pe-3">
+      <ul className="grid grid-cols-2 xl:grid-cols-3 gap-2 h-full overflow-y-auto pe-3">
         <Suspense fallback={<CourseListSkeleton />}>
           <Courses searchParams={searchParams} />
         </Suspense>
