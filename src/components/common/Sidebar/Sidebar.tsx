@@ -114,11 +114,11 @@ export default function Sidebar({ routes }: SidebarProps) {
                 }`}
               />
               <div className="flex flex-col flex-1">
-                <span className="font-semibold">
+                <span className="font-semibold capitalize">
                   {session.status === "loading" ? (
                     <Skeleton />
                   ) : (
-                    session.data?.user?.name
+                    session.data?.user?.name.toLowerCase()
                   )}
                 </span>
                 <span
