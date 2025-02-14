@@ -1,3 +1,5 @@
+import { twMerge } from "tailwind-merge";
+
 export default function LoadingSpinner({
   className = "",
 }: {
@@ -5,7 +7,10 @@ export default function LoadingSpinner({
 }) {
   return (
     <span
-      className={`icon-[line-md--loading-loop] text-2xl text-primary ${className}`.trimEnd()}
+      className={twMerge(
+        `icon-[line-md--loading-loop] text-2xl text-primary`,
+        className
+      )}
     />
   );
 }

@@ -15,6 +15,7 @@ import { upsertAcademicParticipation } from "@/services/academicsServices";
 import AcademicForm from "@/components/forms/AcademicForm";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 interface AcademicParticipationFormProps {
   values?: AcademicParticipationSchemaType;
@@ -34,13 +35,16 @@ export default function AcademicParticipationForm({
 
   const onSubmit = async (data: AcademicParticipationSchemaType) => {
     try {
-      const response = await upsertAcademicParticipation(courseId, data);
-      toast(response.message, {
-        type: response.success ? "success" : "error",
+      return new Promise(async (resolve) => {
+        const response = await upsertAcademicParticipation(courseId, data);
+        toast(response.message, {
+          type: response.success ? "success" : "error",
+        });
+        if (response.success) {
+          form.reset();
+        }
+        resolve(response);
       });
-      if (response.success) {
-        form.reset();
-      }
     } catch (error) {
       console.error(error);
     }
@@ -103,7 +107,13 @@ export default function AcademicParticipationForm({
           {/* <BackButton href="">
             <Button className="!bg-gray-500">Cancelar</Button>
           </BackButton> */}
-          <Button type="submit">Guardar</Button>
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? (
+              <LoadingSpinner className="text-gray-500" />
+            ) : (
+              "Guardar"
+            )}
+          </Button>
         </div>
       </form>
       {createAcademic && <AcademicForm onClose={handleFormClose} />}

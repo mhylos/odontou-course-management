@@ -49,7 +49,7 @@ export default function StudentForm({
       return;
     }
     form.setValue("name", student.name);
-    form.setValue("email", student.email);
+    if (student.email) form.setValue("email", student.email);
     form.setValue("genre", student.genre);
     triggerValidation();
   };

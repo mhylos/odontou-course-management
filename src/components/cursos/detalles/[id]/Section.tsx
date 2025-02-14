@@ -20,7 +20,7 @@ export default function Section({
       }
       ${containerClassname}`.trimEnd()}
     >
-      <h3 className="text-2xl font-extralight absolute left-2 -top-1 bg-white">
+      <h3 className="text-2xl font-extralight absolute left-2 -top-1 bg-white text-nowrap">
         {title}
       </h3>
       <div

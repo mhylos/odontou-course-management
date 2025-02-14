@@ -82,6 +82,7 @@ export async function upsertStudentEnroll(
         ...student,
         name: student.name.toUpperCase(),
         rut: rut,
+        ...(student.email ? { email: student.email.toLocaleLowerCase() } : {}),
         enrolled: {
           create: {
             ...enrollData,

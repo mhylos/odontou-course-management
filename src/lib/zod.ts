@@ -48,9 +48,7 @@ export const studentSchema = object({
     .max(12, "El RUT debe tener a lo más 12 caracteres")
     .transform((val) => format.dotDash(val)),
   name: string({ required_error: "El nombre es requerido" }),
-  email: string({ required_error: "El email es requerido" }).email(
-    "El email no es válido"
-  ),
+  email: z.union([z.literal(""), z.string().email("El email no es válido")]),
   genre: nativeEnum(Genres, {
     required_error: "El género es requerido",
   }).nullable(),
@@ -143,7 +141,7 @@ export const academicSchema = object({
     .max(12, "El RUT debe tener a lo más 12 caracteres")
     .transform((val) => format.notDotDash(val)),
   name: string({ required_error: "El nombre es requerido" }),
-  email: string().email("El email no es válido").optional().nullable(),
+  email: z.union([z.literal(""), z.string().email("El email no es válido")]),
   phone: coerce.number().optional().nullable(),
   isFOUCH: boolean().default(true),
   department_fk: number({ required_error: "El departamento es requerido" }),

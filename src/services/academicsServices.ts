@@ -52,7 +52,7 @@ export async function getAcademicToEdit(
   return {
     rut: restoreRun(academic.user.rut),
     name: academic.user.name ?? "",
-    email: academic.user.email,
+    email: academic.user.email ?? "",
     department_fk: academic.department_fk,
     isFOUCH: academic.isFOUCH,
     phone: academic.phone,
@@ -163,7 +163,9 @@ export async function createAcademic(data: AcademicSchemaType) {
       create: {
         rut: runToNumber(data.rut),
         name: data.name.toLowerCase(),
-        email: data.email,
+        ...(data.email
+          ? { email: data.email.toLocaleLowerCase() }
+          : { email: null }),
         password: password,
         academic: {
           create: {
@@ -173,6 +175,10 @@ export async function createAcademic(data: AcademicSchemaType) {
         },
       },
       update: {
+        name: data.name.toLowerCase(),
+        ...(data.email !== ""
+          ? { email: data.email.toLocaleLowerCase() }
+          : { email: null }),
         academic: {
           create: {
             isFOUCH: data.isFOUCH,
@@ -197,14 +203,22 @@ export async function createAcademic(data: AcademicSchemaType) {
 
 export async function updateAcademic(rut: number, data: AcademicSchemaType) {
   try {
-    await prisma.academic.update({
+    await prisma.user.update({
       where: {
-        user_fk: rut,
+        rut,
       },
       data: {
-        isFOUCH: data.isFOUCH,
-        department_fk: data.department_fk,
-        phone: data.phone,
+        name: data.name.toLowerCase(),
+        ...(data.email !== ""
+          ? { email: data.email.toLocaleLowerCase() }
+          : { email: null }),
+        academic: {
+          update: {
+            isFOUCH: data.isFOUCH,
+            department_fk: data.department_fk,
+            phone: data.phone,
+          },
+        },
       },
     });
 

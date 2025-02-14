@@ -63,7 +63,7 @@ model Student {
   rut        Int        @id
   genre      Genres?
   name       String
-  email      String
+  email      String?
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt
   enrolled   Enrolled[]

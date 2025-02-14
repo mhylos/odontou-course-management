@@ -12,6 +12,7 @@ import { runFormatter, runToNumber } from "@/lib/utils";
 import { createAcademic, updateAcademic } from "@/services/academicsServices";
 import { toast } from "react-toastify";
 import AboutPassword from "@/components/common/AboutPassword";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 interface AcademicFormProps {
   className?: string;
@@ -28,7 +29,7 @@ export default function AcademicForm({
     defaultValues: {
       rut: "",
       name: "",
-      email: "",
+      email: undefined,
       department_fk: undefined,
       isFOUCH: false,
       ...defaultValues,
@@ -46,11 +47,16 @@ export default function AcademicForm({
 
   const onSubmit = async (data: AcademicSchemaType) => {
     try {
-      const response = await createOrUpdate(data);
-      toast(response.message, { type: response.success ? "success" : "error" });
-      if (response.success) {
-        if (onClose) onClose();
-      }
+      return new Promise(async (resolve) => {
+        const response = await createOrUpdate(data);
+        toast(response.message, {
+          type: response.success ? "success" : "error",
+        });
+        if (response.success) {
+          if (onClose) onClose();
+        }
+        resolve(response);
+      });
     } catch (error) {
       console.error(error);
     }
@@ -127,19 +133,25 @@ export default function AcademicForm({
           />
         </FormFieldset>
 
-        <div className="flex gap-2">
-          {onClose && (
-            <Button
-              className="!bg-gray-500 !w-max"
-              onClick={onClose}
-              type="button"
-            >
-              Volver
-            </Button>
+        <div className="flex gap-2 justify-center">
+          {form.formState.isSubmitting ? (
+            <LoadingSpinner />
+          ) : (
+            <>
+              {onClose && (
+                <Button
+                  className="!bg-gray-500 !w-max"
+                  onClick={onClose}
+                  type="button"
+                >
+                  Volver
+                </Button>
+              )}
+              <Button type="submit" form="academic-form">
+                Guardar
+              </Button>
+            </>
           )}
-          <Button type="submit" form="academic-form">
-            Guardar
-          </Button>
         </div>
       </form>
     </>
