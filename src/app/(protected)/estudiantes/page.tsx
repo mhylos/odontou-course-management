@@ -23,7 +23,7 @@ export default async function Students() {
               <Row key={rut} currentRow={index + 1}>
                 <Cell className="capitalize">{name.toLowerCase()}</Cell>
                 <Cell>{restoreRun(rut)}</Cell>
-                <Cell>{email}</Cell>
+                <Cell>{email ?? ""}</Cell>
                 <Cell>{_count.enrolled}</Cell>
               </Row>
             ))}
