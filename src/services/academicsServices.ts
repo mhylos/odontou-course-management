@@ -13,10 +13,9 @@ import { Option } from "@/components/common/Dropdown";
 
 export async function getAcademicsTable() {
   const academics = await prisma.academic.findMany({
-    omit: { user_fk: true, department_fk: true },
+    omit: { user_fk: true },
     include: {
       user: { select: { rut: true, name: true, email: true } },
-      department: { select: { name: true } },
     },
     orderBy: {
       user: {
@@ -43,7 +42,6 @@ export async function getAcademicToEdit(
       },
       isFOUCH: true,
       phone: true,
-      department_fk: true,
     },
   });
 
@@ -53,7 +51,6 @@ export async function getAcademicToEdit(
     rut: restoreRun(academic.user.rut),
     name: academic.user.name ?? "",
     email: academic.user.email ?? "",
-    department_fk: academic.department_fk,
     isFOUCH: academic.isFOUCH,
     phone: academic.phone,
   };
@@ -131,9 +128,7 @@ export async function getAcademicsOptions(name?: string, rut?: number) {
 
   const options: Option[] = academics.map((academic) => ({
     name:
-      capitalizeAll(
-        academic.user.name ? academic.user.name.toLowerCase() : ""
-      ) +
+      capitalizeAll(academic.user.name?.toLowerCase() || "") +
       " - " +
       restoreRun(academic.user.rut),
     value: academic.user.rut,
@@ -170,7 +165,6 @@ export async function createAcademic(data: AcademicSchemaType) {
         academic: {
           create: {
             isFOUCH: data.isFOUCH,
-            department_fk: data.department_fk,
           },
         },
       },
@@ -182,7 +176,6 @@ export async function createAcademic(data: AcademicSchemaType) {
         academic: {
           create: {
             isFOUCH: data.isFOUCH,
-            department_fk: data.department_fk,
           },
         },
       },
@@ -215,7 +208,6 @@ export async function updateAcademic(rut: number, data: AcademicSchemaType) {
         academic: {
           update: {
             isFOUCH: data.isFOUCH,
-            department_fk: data.department_fk,
             phone: data.phone,
           },
         },
@@ -296,6 +288,8 @@ export async function upsertAcademicParticipation(
       },
     });
 
+    let message = "";
+
     if (participation.created_at === participation.updated_at) {
       registerAction(
         Actions.create,
@@ -303,6 +297,7 @@ export async function upsertAcademicParticipation(
           participation.academic.user.name ?? ""
         )}** ingresada al curso **${participation.course.name}**`
       );
+      message = "Participación del académico creada con éxito";
     } else {
       registerAction(
         Actions.update,
@@ -310,6 +305,7 @@ export async function upsertAcademicParticipation(
           participation.academic.user.name ?? ""
         )}** actualizada en el curso **${participation.course.name}**`
       );
+      message = "Participación del académico actualizada con éxito";
     }
 
     await upsertAcademicsHonorariums(courseId, participation.id, {
@@ -320,7 +316,7 @@ export async function upsertAcademicParticipation(
 
     revalidatePath(`/cursos/detalles/${courseId}/academicos`);
     revalidatePath(`/cursos/detalles/${courseId}/pagos`);
-    return { message: "Participación del académico agregada", success: true };
+    return { message, success: true };
   } catch (error) {
     console.error(error);
     return { message: "Error inesperado", success: false };

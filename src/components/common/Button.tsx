@@ -1,6 +1,7 @@
 "use client";
 
 import { ButtonHTMLAttributes } from "react";
+import { twMerge } from "tailwind-merge";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children?: React.ReactNode;
@@ -31,10 +32,11 @@ export default function Button(props: ButtonProps) {
   return (
     <button
       {...props}
-      className={
-        `hover:brightness-90 text-white py-2 px-4 rounded w-full disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-gray-500 disabled:border-gray-300 hover:disabled:brightness-100` +
-        ` ${buttonTypeClassname} ${props.className ?? ""}`.trimEnd()
-      }
+      className={twMerge(
+        "hover:brightness-90 text-white py-2 px-4 rounded w-full disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-gray-500 disabled:border-gray-300 hover:disabled:brightness-100",
+        buttonTypeClassname,
+        props.className
+      )}
     >
       {props.buttonActionType && <span className={`${buttonIcon} text-xl`} />}
       {props.children}

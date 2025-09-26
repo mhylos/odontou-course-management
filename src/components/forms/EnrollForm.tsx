@@ -72,7 +72,7 @@ export default function EnrollForm({
                 onChange={(option) => onChange(!!Number(option.value))}
               />
             )}
-            name="status"
+            name="detailed_status"
             control={form.control}
           />
         </SectionItem>
@@ -165,14 +165,23 @@ export default function EnrollForm({
       </div>
       <div className="w-full grid grid-cols-3 gap-2">
         <SectionItem title="Método de pago" className="col-span-3">
-          <FetchDropdown
+          <Controller
+            render={({
+              field: { onChange, value, name },
+              fieldState: { error },
+            }) => (
+              <FetchDropdown
+                id={name}
+                fetchUrl="/api/courses/payment-types/options"
+                disabled={disabled}
+                clearable
+                error={error?.message}
+                selectedValue={value}
+                onChange={(option) => onChange(option.value)}
+              />
+            )}
             name="payment_type_fk"
             control={form.control}
-            fetchUrl="/api/courses/payment-types/options"
-            disabled={disabled}
-            clearable
-            error={form.formState.errors.payment_type_fk?.message}
-            selectedValue={form.getValues("payment_type_fk")}
           />
         </SectionItem>
         {/* <SectionItem title="Comprobante">

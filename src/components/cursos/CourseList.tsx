@@ -1,16 +1,25 @@
-import { getAllCourses } from "@/services/courseServices";
+import { getAllCourses, getCoursesCount } from "@/services/courseServices";
 import CoursePreview from "@/components/cursos/CoursePreview";
+import { Pagination } from "@/lib/definitions";
 
 interface CourseListProps {
-  filters?: { nombre?: string; pagos: string; fecha?: string };
+  filters?: CourseFilters;
 }
 
-export default async function CourseList({ filters }: CourseListProps) {
-  const courses = await getAllCourses(
-    filters?.nombre ?? "",
-    filters?.pagos ?? "",
-    filters?.fecha ? parseInt(filters.fecha) : undefined
-  );
+export interface CourseFilters {
+  name?: string;
+  payments?: "cumplidos" | "atrasados";
+  year?: number;
+}
+
+export default async function CourseList({
+  filters,
+  pagination,
+}: {
+  filters?: CourseFilters;
+  pagination?: Pagination;
+}) {
+  const courses = await getAllCourses(filters, pagination);
 
   return (
     <>

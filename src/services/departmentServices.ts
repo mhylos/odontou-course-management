@@ -90,7 +90,6 @@ export async function getDepartments(name?: string) {
       _count: {
         select: {
           courses: true,
-          academic: true,
         },
       },
     },

@@ -1,3 +1,4 @@
+import Pagination from "@/components/common/ParamsPagination";
 import SubtitlePage from "@/components/common/SubtitlePage";
 import Table, { Cell, Row } from "@/components/common/Table/Table";
 import TitlePage from "@/components/common/TitlePage";
@@ -6,16 +7,30 @@ import { getLogs } from "@/services/loggerServices";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 
-export default async function Home() {
-  const logs = await getLogs();
+interface HomeProps {
+  searchParams?: Promise<{
+    pagina?: string;
+  }>;
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const PAGE_SIZE = 10;
+  const params = await searchParams;
+  const page = params?.pagina ? parseInt(params.pagina) : 1;
+  const { logs, count } = await getLogs({ page, pageSize: PAGE_SIZE });
+  const totalPages = Math.ceil(count / PAGE_SIZE);
 
   return (
     <>
       <TitlePage>Panel de gestión de pagos y cobros</TitlePage>
       <div className="flex flex-col gap-2 overflow-auto">
-        <SubtitlePage className="bg-secondary text-white p-2 rounded">
-          Últimas operaciones
-        </SubtitlePage>
+        <div className="flex items-center justify-between p-2 rounded bg-secondary">
+          <SubtitlePage className="text-white ">
+            Últimas operaciones
+          </SubtitlePage>
+
+          <Pagination currentPage={page} totalPages={totalPages} />
+        </div>
         <div className="flex-1 overflow-auto">
           <Table
             headers={[

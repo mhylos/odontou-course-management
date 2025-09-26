@@ -5,17 +5,14 @@ import Dropdown from "@/components/common/Dropdown";
 import FloatingInput from "@/components/common/FloatingInput";
 import { useDebouncedCallback } from "use-debounce";
 import FetchDropdown from "../common/FetchDropdown";
-import { Form, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { searchCourseSchema, SearchCourseSchemaType } from "@/lib/zod";
 
 export default function SearchCourses() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
-  const form = useForm<SearchCourseSchemaType>({
-    resolver: zodResolver(searchCourseSchema),
-  });
+  // const form = useForm<SearchCourseSchemaType>({
+  //   resolver: zodResolver(searchCourseSchema),
+  // });
 
   function handleSearch(type: string, term: string) {
     const params = new URLSearchParams(searchParams);
@@ -32,18 +29,16 @@ export default function SearchCourses() {
   }, 500);
 
   const paymentsOptions = [
-    { value: "current", name: "Al día" },
-    { value: "delayed", name: "Atrasados" },
+    { value: "cumplidos", name: "Al día" },
+    { value: "atrasados", name: "Atrasados" },
   ];
 
   return (
-    <Form
-      className="grid grid-cols-[2fr_1fr_1fr] gap-2 pe-2"
-      control={form.control}
-    >
+    <div className="grid grid-cols-[2fr_1fr_1fr] gap-2 pe-2">
       <FloatingInput
         label={"Buscar por nombre"}
         onChange={(e) => handleInput("nombre", e.target.value)}
+        defaultValue={searchParams.get("nombre") ?? ""}
       />
       <Dropdown
         id="pagos"
@@ -58,13 +53,17 @@ export default function SearchCourses() {
       />
       <FetchDropdown
         label="Año"
-        name="year"
+        id="year"
         fetchUrl="/api/courses/year/options"
-        control={form.control}
         clearable={true}
         onChange={(value) => handleSearch("fecha", value.value.toString())}
         onRemove={() => handleSearch("fecha", "")}
+        fetchDefaultUrl={
+          searchParams.get("fecha")
+            ? `/api/courses/year/options/${searchParams.get("fecha")}`
+            : undefined
+        }
       />
-    </Form>
+    </div>
   );
 }

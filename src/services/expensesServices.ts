@@ -130,6 +130,7 @@ export async function getMultiplyValues(courseId: number) {
       elearningHours?.online_hours.times(enrolledCount).toString() || "0",
     enroll_incomes: enrollIncome?.amount.toString() || "0",
     students_enrolled: enrolledCount.toString() || "0",
+    manual: "0",
   };
 
   return multiplyValues;

@@ -16,6 +16,7 @@ import Decimal from "decimal.js";
 import AcademicForm from "@/components/forms/AcademicForm";
 import DepartmentForm from "@/components/forms/DepartmentForm";
 import { formatDateForInput } from "@/lib/utils";
+import { formatInTimeZone } from "date-fns-tz";
 
 interface CourseFormProps {
   className?: string;
@@ -33,6 +34,15 @@ export default function CourseForm({
     defaultValues: {
       enroll_value: 0,
       ...values,
+      // the values requires date in "yyyy-MM-dd" format string, but the input internally manages Date objects
+      // @ts-ignore
+      date_from: values?.date_from
+        ? formatInTimeZone(values.date_from, "UTC", "yyyy-MM-dd")
+        : undefined,
+      // @ts-ignore
+      date_to: values?.date_to
+        ? formatInTimeZone(values.date_to, "UTC", "yyyy-MM-dd")
+        : undefined,
     },
   });
   const [currentForm, setCurrentForm] = useState<
@@ -60,7 +70,7 @@ export default function CourseForm({
       toast(response.message, {
         type: response.success ? "success" : "error",
       });
-      if (response.success) {
+      if (response.success && !editId) {
         form.reset(data);
       }
     } catch (error) {
@@ -101,55 +111,49 @@ export default function CourseForm({
             {...form.register("additional_comments")}
             error={form.formState.errors.additional_comments?.message}
           />
-          <FetchDropdown
-            label="Tipo de programa"
+          <Controller
             name="program_fk"
             control={form.control}
-            fetchUrl="/api/courses/programs/options"
-            fetchDefaultUrl={
-              values?.program_fk
-                ? `/api/courses/programs/options/${values.program_fk}`
-                : undefined
-            }
-            error={form.formState.errors.program_fk?.message}
+            render={({
+              field: { onChange, value, name },
+              fieldState: { error },
+            }) => (
+              <FetchDropdown
+                label="Tipo de programa"
+                id="program_fk"
+                fetchUrl="/api/courses/programs/options"
+                fetchDefaultUrl={
+                  values?.program_fk
+                    ? `/api/courses/programs/options/${values.program_fk}`
+                    : undefined
+                }
+                selectedValue={value}
+                onChange={(option) => onChange(option.value)}
+                error={error?.message}
+              />
+            )}
           />
 
           <div className="grid grid-cols-2 gap-x-2 gap-y-5">
-            <Controller
-              render={({
-                field: { onChange, value },
-                fieldState: { error },
-              }) => (
-                <FloatingInput
-                  label="Inicio"
-                  type="date"
-                  error={error?.message}
-                  max={formatDateForInput(dateTo)}
-                  value={formatDateForInput(value) ?? ""}
-                  onChange={(e) => {
-                    onChange(new Date(e.target.value));
-                  }}
-                />
-              )}
-              name="date_from"
-              control={form.control}
+            <FloatingInput
+              label="Inicio"
+              type="date"
+              {...form.register("date_from")}
+              // defaultValue={formatInTimeZone(
+              //   values?.date_from,
+              //   "UTC",
+              //   "yyyy-MM-dd"
+              // )}
+              error={form.formState.errors.date_from?.message}
+              min={formatDateForInput(new Date(2000, 0, 1))}
+              max={formatDateForInput(dateTo)}
             />
-
-            <Controller
-              render={({ field: { onChange, value } }) => (
-                <FloatingInput
-                  label="Termino"
-                  type="date"
-                  error={form.formState.errors.date_to?.message}
-                  min={formatDateForInput(dateFrom)}
-                  value={formatDateForInput(value) ?? ""}
-                  onChange={(e) => {
-                    onChange(new Date(e.target.value));
-                  }}
-                />
-              )}
-              name="date_to"
-              control={form.control}
+            <FloatingInput
+              label="Término"
+              type="date"
+              {...form.register("date_to")}
+              error={form.formState.errors.date_to?.message}
+              min={formatDateForInput(dateFrom)}
             />
             <div className="col-start-2 flex items-center gap-2">
               <span>$</span>
@@ -180,44 +184,74 @@ export default function CourseForm({
         </FormFieldset>
 
         <FormFieldset legend={"Responsables"}>
-          <FetchDropdown
-            label="Departamento Ejecutor"
+          <Controller
             name="department_fk"
             control={form.control}
-            fetchUrl="/api/department/options"
-            create={() => setCurrentForm("department")}
-            fetchDefaultUrl={
-              values?.department_fk
-                ? `/api/department/options/${values.department_fk}`
-                : undefined
-            }
-            error={form.formState.errors.department_fk?.message}
+            render={({
+              field: { value, onChange, name },
+              fieldState: { error },
+            }) => (
+              <FetchDropdown
+                label="Departamento Ejecutor"
+                id="department_fk"
+                fetchUrl="/api/department/options"
+                create={() => setCurrentForm("department")}
+                fetchDefaultUrl={
+                  values?.department_fk
+                    ? `/api/department/options/${values.department_fk}`
+                    : undefined
+                }
+                error={error?.message}
+                selectedValue={value}
+                onChange={(option) => onChange(option.value)}
+              />
+            )}
           />
-          <FetchDropdown
-            label="Director del programa"
+          <Controller
             name="course_director_fk"
             control={form.control}
-            fetchUrl="/api/academics/options"
-            create={() => setCurrentForm("director")}
-            fetchDefaultUrl={
-              values?.course_director_fk
-                ? `/api/academics/options/${values.course_director_fk}`
-                : undefined
-            }
-            error={form.formState.errors.course_director_fk?.message}
+            render={({
+              field: { name, value, onChange },
+              fieldState: { error },
+            }) => (
+              <FetchDropdown
+                id={name}
+                label="Director del programa"
+                selectedValue={value}
+                onChange={(option) => onChange(option.value)}
+                fetchUrl="/api/academics/options"
+                create={() => setCurrentForm("director")}
+                fetchDefaultUrl={
+                  values?.course_director_fk
+                    ? `/api/academics/options/${values.course_director_fk}`
+                    : undefined
+                }
+                error={error?.message}
+              />
+            )}
           />
-          <FetchDropdown
-            label="Coordinador del programa"
+          <Controller
             name="coordinator_fk"
             control={form.control}
-            fetchUrl="/api/academics/options"
-            create={() => setCurrentForm("coordinator")}
-            fetchDefaultUrl={
-              values?.coordinator_fk
-                ? `/api/academics/options/${values.coordinator_fk}`
-                : undefined
-            }
-            error={form.formState.errors.coordinator_fk?.message}
+            render={({
+              field: { name, value, onChange },
+              fieldState: { error },
+            }) => (
+              <FetchDropdown
+                label="Coordinador del programa"
+                id={name}
+                fetchUrl="/api/academics/options"
+                create={() => setCurrentForm("coordinator")}
+                fetchDefaultUrl={
+                  values?.coordinator_fk
+                    ? `/api/academics/options/${values.coordinator_fk}`
+                    : undefined
+                }
+                error={error?.message}
+                selectedValue={value}
+                onChange={(option) => onChange(option.value)}
+              />
+            )}
           />
         </FormFieldset>
         <FormFieldset legend={"Horas"}>

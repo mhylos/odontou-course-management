@@ -68,3 +68,5 @@ export const ACTIONS_DICTIONARY = {
   [Actions.login]: "Inicio de sesión",
   [Actions.logout]: "Cierre de sesión",
 };
+
+export const RECORDS_PER_PAGE = 6 as const;

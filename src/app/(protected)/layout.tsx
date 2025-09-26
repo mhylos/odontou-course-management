@@ -26,7 +26,7 @@ export default async function RootLayout({ children, modal }: RootLayoutProps) {
 
   return (
     <div className="grid grid-cols-[auto_1fr] h-screen">
-      <Sidebar routes={sidebarRoutes} />
+      <Sidebar routes={sidebarRoutes} user={session.user} />
       {modal}
       <main className="p-5 grid grid-rows-[10rem_1fr] gap-2 h-screen">
         {children}

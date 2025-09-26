@@ -19,21 +19,19 @@ export default function Actions({ rut, courseId }: ActionsProps) {
     return <LoadingSpinner />;
   }
 
-  const handleRemove = async () => {
-    setIsLoading(true);
-    const response = await removeParticipation(rut, courseId);
-    if (response) {
-      toast.success("Removido con éxito");
-    } else {
-      toast.error("Error al remover");
-    }
-    setIsLoading(false);
-  };
+  // const handleRemove = async () => {
+  //   setIsLoading(true);
+  //   const response = await removeParticipation(rut, courseId);
+  //   if (response) {
+  //     toast(response.message, { type: response.success ? "success" : "error" });
+  //   }
+  //   setIsLoading(false);
+  // };
 
   return (
     <div className="flex gap-2">
       <EditRowButton href={`/cursos/detalles/${courseId}/academicos/${rut}`} />
-      <DeleteRowButton onClick={handleRemove} />
+      {/* <DeleteRowButton onClick={handleRemove} /> */}
     </div>
   );
 }

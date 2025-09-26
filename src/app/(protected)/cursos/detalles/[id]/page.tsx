@@ -2,9 +2,11 @@ import Section from "@/components/cursos/detalles/[id]/Section";
 import SectionItem from "@/components/cursos/detalles/[id]/SectionItem";
 import { convertToMoney, formatDate } from "@/lib/utils";
 import { getCourseById } from "@/services/courseServices";
+import { format } from "date-fns";
 import Decimal from "decimal.js";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatInTimeZone } from "date-fns-tz";
 
 function ItemDescription({ children }: { children: React.ReactNode }) {
   return (
@@ -107,10 +109,15 @@ export default async function CourseInfo({
 
         <div className="flex gap-2">
           <SectionItem title={"Inicio"}>
-            <ItemDescription>{formatDate(course.date_from)}</ItemDescription>
+            {/* <ItemDescription>{format(course.date_from, "PP")}</ItemDescription> */}
+            <ItemDescription>
+              {formatInTimeZone(course.date_from, "UTC", "PPP")}
+            </ItemDescription>
           </SectionItem>
           <SectionItem title={"Termino"}>
-            <ItemDescription>{formatDate(course.date_to)}</ItemDescription>
+            <ItemDescription>
+              {formatInTimeZone(course.date_to, "UTC", "PPP")}
+            </ItemDescription>
           </SectionItem>
         </div>
 

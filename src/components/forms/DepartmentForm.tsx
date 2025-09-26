@@ -2,7 +2,7 @@
 
 import { createDepartmentSchema, CreateDepartmentSchemaType } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import Button from "@/components/common/Button";
 import FetchDropdown from "@/components/common/FetchDropdown";
 import FloatingInput from "@/components/common/FloatingInput";
@@ -66,14 +66,25 @@ export default function DepartmentForm({
           {...register("name")}
           error={formState.errors.name?.message}
         />
-
-        <FetchDropdown
+        <Controller
           name="director_fk"
-          label="Director del departamento"
           control={control}
-          fetchUrl="/api/academics/options"
-          fetchDefaultUrl={`/api/academics/options/${initialValues?.director_fk}`}
-          error={formState.errors.director_fk?.message}
+          render={({
+            field: { value, name, onChange },
+            fieldState: { error },
+          }) => (
+            <FetchDropdown
+              id={name}
+              label="Director del departamento"
+              fetchUrl="/api/academics/options"
+              fetchDefaultUrl={`/api/academics/options/${initialValues?.director_fk}`}
+              error={error?.message}
+              selectedValue={value ?? undefined}
+              onChange={(option) => {
+                onChange(option?.value);
+              }}
+            />
+          )}
         />
       </FormFieldset>
 

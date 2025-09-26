@@ -11,7 +11,7 @@ export function runFormatter(run: string) {
 }
 
 export function runToNumber(run: string) {
-  return parseInt(format.notDotDash(run));
+  return Number(format.notDotDash(run));
 }
 
 export function restoreRun(run: number) {
@@ -43,11 +43,15 @@ export function dublicateItems<T>(arr: Array<T>, numberOfRepetitions: number) {
 }
 
 export function formatDateForInput(date: unknown) {
-  if (!isDate(date) || !isValid(date)) return undefined;
+  try {
+    const formatDate = formatISO(date as string | Date, {
+      representation: "date",
+    });
 
-  const formatDate = formatISO(date, { representation: "date" });
-
-  return formatDate;
+    return formatDate;
+  } catch {
+    return undefined;
+  }
 }
 
 export function formatDate(date: string | Date) {

@@ -23,7 +23,6 @@ export default function DepartmentRow({ department }: DepartmentRowProps) {
         )}
       </Cell>
       <Cell>{department._count.courses}</Cell>
-      <Cell>{department._count.academic}</Cell>
       <Cell>
         <ActionRowButton href={`/departamentos/${department.id}`}>
           <span className="icon-[ph--note-pencil] text-xl" />

@@ -9,9 +9,11 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import SidebarItemDescription from "./SidebarItemDescription";
 import Skeleton from "react-loading-skeleton";
+import { Session } from "next-auth";
 
 export interface SidebarProps {
   routes: SidebarRoute[];
+  user: Session["user"];
 }
 
 export interface SidebarRoute {
@@ -24,8 +26,7 @@ export interface SidebarRoute {
 const ITEM_HEIGHT = 80; // sidebar item height
 const SIDEBAR_GAP = 10; // sidebar item gap
 
-export default function Sidebar({ routes }: SidebarProps) {
-  const session = useSession();
+export default function Sidebar({ routes, user }: SidebarProps) {
   const { isOpen, toggle } = useSidebar();
   const pathname = usePathname();
   const currentSectionPath = `/${pathname.split("/")[1]}`;
@@ -115,22 +116,14 @@ export default function Sidebar({ routes }: SidebarProps) {
               />
               <div className="flex flex-col flex-1">
                 <span className="font-semibold capitalize">
-                  {session.status === "loading" ? (
-                    <Skeleton />
-                  ) : (
-                    session.data?.user?.name.toLowerCase()
-                  )}
+                  {user.name.toLowerCase()}
                 </span>
                 <span
                   className={`text-xs ${
                     activeIndex === -1 ? "text-white" : "text-gray-500"
                   }`}
                 >
-                  {session.status === "loading" ? (
-                    <Skeleton />
-                  ) : (
-                    session.data?.user?.email
-                  )}
+                  {user.email}
                 </span>
               </div>
             </div>

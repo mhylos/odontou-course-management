@@ -135,3 +135,8 @@ export enum Roles {
   DIRECTOR = "director",
   COORDINATOR = "coordinator",
 }
+
+export type Pagination = {
+  page: number;
+  pageSize: number;
+};

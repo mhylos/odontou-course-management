@@ -1,15 +1,15 @@
 interface StudentCourseLayoutProps {
-  modal: React.ReactNode;
+  sideform: React.ReactNode;
   children: React.ReactNode;
 }
 
 export default function AcademicCourseLayout({
   children,
-  modal,
+  sideform,
 }: StudentCourseLayoutProps) {
   return (
     <>
-      {modal}
+      {sideform}
       {children}
     </>
   );

@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
 
 export interface DropdownProps {
   id: string;
@@ -29,38 +35,59 @@ const ACTIVE_CLASSNAMES =
 const INACTIVE_CLASSNAMES =
   "transition ease-in duration-75 transform opacity-0 scale-95 invisible";
 
-export default function Dropdown({
-  id,
-  label,
-  options,
-  selected,
-  disabled,
-  clearable = false,
-  onChange,
-  onRemove = () => {},
-  isLoading,
-  className = "",
-  onSearch,
-  create,
-  error,
-  inputProps,
-}: DropdownProps) {
-  const [optionsList, setOptionsList] = useState<Option[]>(options || []);
+export interface DropdownRef {
+  reset: () => void;
+}
 
+const Dropdown = forwardRef<DropdownRef, DropdownProps>(function Dropdown(
+  {
+    id,
+    label,
+    options,
+    selected,
+    disabled,
+    clearable,
+    onChange,
+    onRemove = () => {},
+    isLoading,
+    className,
+    onSearch,
+    create,
+    error,
+    inputProps,
+  },
+  ref
+) {
   const [selectedOption, setSelectedOption] = useState<Option | undefined>(
     selected
   );
-  const [search, setSearch] = useState<string>();
+
+  useImperativeHandle(ref, () => {
+    return {
+      reset: () => {
+        setSelectedOption(undefined);
+        setSearch(undefined);
+        onRemove();
+      },
+    };
+  });
+
+  const [search, setSearch] = useState(
+    selected ? selected.name.toString() : undefined
+  );
   const [isOpen, setIsOpen] = useState(false);
   let isClosable = true;
 
-  useEffect(() => {
-    setOptionsList(options || []);
-    if (selected) {
-      setSelectedOption(selected);
-      setSearch(selected.name.toString());
-    }
-  }, [selected, options]);
+  useCallback(() => {
+    setSelectedOption(selected);
+    setSearch(selected ? selected.name.toString() : undefined);
+  }, [selected]);
+
+  // useEffect(() => {
+  //   setOptionsList(options || []);
+  //   setSelectedOption(selected);
+  //   setSearch(selected ? selected.name.toString() : undefined);
+  // }, [selected, options]);
 
   const handleOptionClick = (
     e: React.MouseEvent<HTMLSpanElement, MouseEvent>,
@@ -116,14 +143,17 @@ export default function Dropdown({
             id={id}
             value={search ?? ""}
             onChange={(e) => {
-              inputProps?.onChange?.(e);
-              if (e.currentTarget.value === "") {
+              const event = inputProps?.onChange?.(e) || e;
+              if (event.currentTarget.value === "") {
                 setSelectedOption(undefined);
               }
-              onSearch(e.currentTarget.value);
+              onSearch(event.currentTarget.value);
+              setSearch(event.currentTarget.value);
+            }}
+            onInput={(e) => {
+              inputProps?.onInput?.(e);
               setSearch(e.currentTarget.value);
             }}
-            onInput={(e) => setSearch(e.currentTarget.value)}
             className="w-full bg-transparent outline-none"
             autoComplete="off"
           />
@@ -176,8 +206,8 @@ export default function Dropdown({
             Crear
           </span>
         )}
-        {optionsList.length > 0 ? (
-          optionsList.map((option, index) => (
+        {options && options.length > 0 ? (
+          options.map((option, index) => (
             <span
               key={index}
               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
@@ -197,4 +227,6 @@ export default function Dropdown({
       {error && <span className="text-xs text-red-500">{error}</span>}
     </div>
   );
-}
+});
+
+export default Dropdown;

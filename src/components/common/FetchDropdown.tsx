@@ -1,26 +1,31 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
-import Dropdown, { DropdownProps, Option } from "@/components/common/Dropdown";
+import Dropdown, {
+  DropdownProps,
+  DropdownRef,
+  Option,
+} from "@/components/common/Dropdown";
 import { fetcher } from "@/lib/utils";
-import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { useDebouncedCallback } from "use-debounce";
 
-interface FetchDropdownProps<T extends FieldValues>
-  extends Partial<DropdownProps> {
-  name: Path<T>;
-  control?: Control<T>;
+interface FetchDropdownProps extends DropdownProps {
   fetchUrl: string;
   selectedValue?: Option["value"];
   fetchDefaultUrl?: string;
+  filterName?: string;
 }
 
-export default function FetchDropdown<T extends FieldValues>(
-  props: FetchDropdownProps<T>
-) {
-  let fetchDefaultUrl = props.fetchDefaultUrl;
+export default function FetchDropdown({
+  fetchUrl,
+  selectedValue,
+  filterName = "name",
+  ...props
+}: FetchDropdownProps) {
+  const dropdownRef = useRef<DropdownRef>(null);
   const [filter, setFilter] = useState("");
+  let fetchDefaultUrl = props.fetchDefaultUrl;
   const { data: options, isLoading: optionsLoading } = useSWR<Option[]>(
-    `${props.fetchUrl}${filter}`,
+    `${fetchUrl}${filter}`,
     fetcher
   );
 
@@ -29,39 +34,47 @@ export default function FetchDropdown<T extends FieldValues>(
 
   const handleSearch = useDebouncedCallback((search: string) => {
     fetchDefaultUrl = undefined;
-    setFilter("?name=" + search);
+    setFilter(`?${filterName}=${search}`);
   }, 500);
 
+  useEffect(() => {
+    // Reset the dropdown if the selectedValue prop is cleared
+    if (!selectedValue) {
+      dropdownRef.current?.reset();
+    }
+  }, [selectedValue]);
+
+  const concatenatedOptions = useMemo(() => {
+    return (options || []).concat(defaultOption ? [defaultOption] : []);
+  }, [options, defaultOption]);
+
+  const optionSelected = useMemo(() => {
+    if (selectedValue && concatenatedOptions) {
+      return concatenatedOptions.find(
+        (option) => option.value == selectedValue
+      );
+    }
+  }, [selectedValue, defaultOption]); // debe ser defaultOption para que no refresque al escribir
+
   return (
-    <Controller
-      render={({ field: { onChange } }) => (
-        <Dropdown
-          id={props.name}
-          label={props.label}
-          options={options}
-          selected={
-            options?.find((option) => option.value == props.selectedValue) ||
-            fetchDefaultUrl
-              ? defaultOption
-              : undefined
-          }
-          isLoading={optionsLoading || defaultOptionLoading}
-          onChange={(option) => {
-            fetchDefaultUrl = undefined;
-            props.onChange?.(option);
-            onChange(option.value);
-          }}
-          onSearch={handleSearch}
-          onRemove={() => {
-            fetchDefaultUrl = undefined;
-            props.onRemove?.();
-            setFilter("");
-          }}
-          {...props}
-        />
-      )}
-      name={props.name}
-      control={props.control}
+    <Dropdown
+      key={optionSelected?.value.toString() ?? "none"}
+      {...props}
+      ref={dropdownRef}
+      options={concatenatedOptions}
+      selected={optionSelected}
+      isLoading={optionsLoading || defaultOptionLoading}
+      onChange={(option) => {
+        fetchDefaultUrl = undefined;
+        props.onChange?.(option);
+        // field.onChange(option.value);
+      }}
+      onSearch={handleSearch}
+      onRemove={() => {
+        fetchDefaultUrl = undefined;
+        props.onRemove?.();
+        setFilter("");
+      }}
     />
   );
 }

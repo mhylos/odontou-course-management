@@ -2,6 +2,7 @@ import Input from "@/components/common/Input";
 import { MultiplyValues } from "@/lib/definitions";
 import { decimalNumberFormat, isPercentage } from "@/lib/utils";
 import { ExpensesSchemaType } from "@/lib/zod";
+import { MultiplyWith } from "@prisma/client";
 import Decimal from "decimal.js";
 import { useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -24,7 +25,7 @@ export default function ExpenseAmount({
   const multiply = useWatch({ control, name: `expenses.${index}.multiply` });
 
   useEffect(() => {
-    if (multiply) {
+    if (multiply !== MultiplyWith.manual) {
       const cleanMultiplier = multiplier.replace(/[^0-9.]/g, "");
       if (
         !multiplier ||
@@ -47,7 +48,10 @@ export default function ExpenseAmount({
   return (
     <div className="flex gap-2 items-center">
       <span className="text-xl font-light">$</span>
-      <Input {...register(`expenses.${index}.amount`)} disabled={!!multiply} />
+      <Input
+        {...register(`expenses.${index}.amount`)}
+        disabled={multiply !== MultiplyWith.manual}
+      />
     </div>
   );
 }

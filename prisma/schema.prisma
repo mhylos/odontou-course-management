@@ -90,7 +90,8 @@ model Enrolled {
   student_fk      Int
   course_fk       Int
   payment_type_fk Int?
-  status          Boolean         @default(false)
+  status          Boolean         @default(true)
+  detailed_status StudentStatus? 
   discount        Decimal         @default(0) @db.Decimal(6, 3)
   ticket_num      Int?
   payment_date    DateTime?
@@ -99,6 +100,7 @@ model Enrolled {
   installments    Int?            @default(1)
   paid            Int?            @default(0)
   refund          Boolean?        @default(false)
+  refund_explanation String? 
   enroll_type     EnrollTypes     @default(autofinanciado)
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
@@ -116,7 +118,7 @@ model Expenses {
   name       String
   type       MultiplierTypes
   multiplier Decimal         @db.Decimal(10, 2)
-  multiply   MultiplyWith?
+  multiply   MultiplyWith       @default(manual)
   amount     Int             @default(0)
   created_at DateTime        @default(now())
   updated_at DateTime        @updatedAt
@@ -137,7 +139,7 @@ model Department {
   director_fk Int?
   created_at  DateTime   @default(now())
   updated_at  DateTime   @updatedAt
-  academic    Academic[]
+  // academic    Academic[]
   courses     Course[]
   director    User?      @relation(fields: [director_fk], references: [rut])
 }
@@ -233,12 +235,12 @@ model Participation {
 
 model Academic {
   user_fk       Int             @id
-  department_fk Int
+  // department_fk Int
   isFOUCH       Boolean
   phone         Int?
   created_at    DateTime        @default(now())
   updated_at    DateTime        @updatedAt
-  department    Department      @relation(fields: [department_fk], references: [id])
+  // department    Department      @relation(fields: [department_fk], references: [id])
   user          User            @relation(fields: [user_fk], references: [rut])
   honorarium    Honorarium[]
   manages       Participation[]
@@ -337,6 +339,7 @@ enum MultiplyWith {
   students_enrolled
   enroll_incomes
   elearning_incomes
+  manual
 }
 
 enum ResponsibleFunctions {
@@ -355,4 +358,11 @@ enum Actions {
   delete
   login
   logout
+}
+
+enum StudentStatus {
+  activo
+  inactivo
+  graduado
+  suspendido
 }

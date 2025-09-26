@@ -167,10 +167,6 @@ export default function ExpensesTable({
                     name={`expenses.${i}.multiply`}
                     control={form.control}
                     render={({ field: { value, onChange } }) => {
-                      const handleClick = (selected: MultiplyWith) => {
-                        if (value === selected) onChange(null);
-                      };
-
                       return (
                         <>
                           <RadioButton
@@ -183,8 +179,6 @@ export default function ExpensesTable({
                               value: MultiplyWith.enroll_incomes,
                               id: `enroll_value_${i}`,
                               onChange: onChange,
-                              onClick: () =>
-                                handleClick(MultiplyWith.enroll_incomes),
                             }}
                           />
                           <RadioButton
@@ -195,8 +189,6 @@ export default function ExpensesTable({
                               value: MultiplyWith.students_enrolled,
                               id: `students_${i}`,
                               onChange: onChange,
-                              onClick: () =>
-                                handleClick(MultiplyWith.students_enrolled),
                             }}
                           />
                           <RadioButton
@@ -211,8 +203,16 @@ export default function ExpensesTable({
                               value: MultiplyWith.elearning_incomes,
                               id: `elearning_${i}`,
                               onChange: onChange,
-                              onClick: () =>
-                                handleClick(MultiplyWith.elearning_incomes),
+                            }}
+                          />
+                          <RadioButton
+                            label={"Manual"}
+                            description={"Ingreso manual del total del gasto"}
+                            inputProps={{
+                              checked: value === MultiplyWith.manual,
+                              value: MultiplyWith.manual,
+                              id: `manual_${i}`,
+                              onChange: onChange,
                             }}
                           />
                         </>

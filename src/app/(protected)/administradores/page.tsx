@@ -1,4 +1,4 @@
-import RevokeButton from "@/components/adminisrador/RevokeButton";
+import RevokeButton from "@/components/administrador/RevokeButton";
 import RestartPasswordButton from "@/components/common/Table/RestartPasswordButton";
 import Table, { Cell, Row } from "@/components/common/Table/Table";
 import TitlePage from "@/components/common/TitlePage";

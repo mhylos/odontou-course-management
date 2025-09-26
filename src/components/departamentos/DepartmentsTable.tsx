@@ -13,9 +13,8 @@ export default function DepartmentsTable({
     <Table
       headers={[
         { title: "Nombre", width: "40%" },
-        { title: "Director", width: "20%" },
+        { title: "Director", width: "25%" },
         { title: "Cursos" },
-        { title: "Académicos" },
         { title: "Acciones", width: "15%" },
       ]}
       className="overflow-visible"

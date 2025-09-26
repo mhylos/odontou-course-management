@@ -23,8 +23,8 @@ export default async function CourseAcademics({
         <TableDropdown title="Académicos FOUCh">
           <Table
             headers={[
-              { title: "Nombre", width: "30%" },
-              { title: "Departamento", width: "20%" },
+              { title: "Nombre", width: "25%" },
+              { title: "RUT", width: "15%" },
               { title: "Jerarquía" },
               { title: "Hrs. de dedicación", width: "10%" },
               { title: "Hrs. de contrato", width: "10%" },
@@ -33,12 +33,14 @@ export default async function CourseAcademics({
           >
             {academicsFouch.map((person, i) => (
               <Row key={person.academic.user.rut} currentRow={i + 1}>
-                <Cell>
+                <Cell className="overflow-hidden overflow-ellipsis text-nowrap">
                   <span className="capitalize">
                     {person.academic.user.name?.toLowerCase()}
                   </span>
                 </Cell>
-                <Cell>{person.academic.department.name}</Cell>
+                <Cell className="text-nowrap">
+                  {restoreRun(person.academic.user.rut)}
+                </Cell>
                 <Cell>{person.hierarchy_type.name}</Cell>
                 <Cell>{person.dedicated_hours ?? ""}</Cell>
                 <Cell>{person.contract_hours ?? ""}</Cell>

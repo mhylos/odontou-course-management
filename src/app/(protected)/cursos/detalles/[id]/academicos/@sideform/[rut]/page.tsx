@@ -18,16 +18,25 @@ export default async function EditAcademic({
     return <div>El curso no existe</div>;
   }
 
+  if (!participation) {
+    return (
+      <div>
+        La participación de este académico no existe o hubo un error al cargar
+        sus datos
+      </div>
+    );
+  }
+
   return (
     <>
       <Overlay backHref={`/cursos/detalles/${id}/academicos`} />
       <RightSidebar
-        title="Ingresar académico"
+        title="Actualización académica"
         backHref={`/cursos/detalles/${id}/academicos`}
       >
         <AcademicParticipationForm
           courseId={parseInt(id)}
-          values={participation ?? undefined}
+          values={participation}
         />
       </RightSidebar>
     </>

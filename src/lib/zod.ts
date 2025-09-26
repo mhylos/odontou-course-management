@@ -16,6 +16,7 @@ import {
   MultiplyWith,
   AcademicFunctions,
   ResponsibleFunctions,
+  StudentStatus,
 } from "@prisma/client";
 
 export const loginSchema = object({
@@ -43,19 +44,24 @@ export const registerSchema = object({
 });
 
 export const studentSchema = object({
-  rut: string({ required_error: "El RUT es requerido" })
+  rut: coerce
+    .string({ required_error: "El RUT es requerido" })
     .min(9, "El RUT debe tener al menos 9 caracteres")
     .max(12, "El RUT debe tener a lo más 12 caracteres")
     .transform((val) => format.dotDash(val)),
   name: string({ required_error: "El nombre es requerido" }),
-  email: z.union([z.literal(""), z.string().email("El email no es válido")]),
+  email: z.union([
+    z.literal("", { message: "El email es requerido" }),
+    z.string().email("El email no es válido"),
+  ]),
   genre: nativeEnum(Genres, {
     required_error: "El género es requerido",
   }).nullable(),
 });
 
 export const enrollSchema = object({
-  status: boolean({ required_error: "El estado es requerido" }).default(true),
+  // status: boolean({ required_error: "El estado es requerido" }).default(true),
+  detailed_status: nativeEnum(StudentStatus),
   ticket_num: coerce
     .number()
     .optional()
@@ -81,6 +87,7 @@ export const enrollSchema = object({
   installments: number().default(1),
   paid: coerce.number().default(0),
   refund: boolean().default(false),
+  refund_explanation: string().optional().nullable(),
   // file: z
   //   .instanceof(File)
   //   .optional()
@@ -93,7 +100,7 @@ export const enrollSchema = object({
 });
 
 export const studentEnrollSchema = object({
-  student: studentSchema,
+  rut: number({ required_error: "El RUT es requerido" }),
   enroll: enrollSchema,
 });
 
@@ -103,30 +110,32 @@ export const createCourseSchema = object({
   }),
   direct_hours: string({
     required_error: "Las horas directas son requeridas",
-  }),
+  }).nonempty("Las horas directas no pueden estar vacías"),
   indirect_hours: string({
     required_error: "Las horas indirectas son requeridas",
-  }),
+  }).nonempty("Las horas indirectas no pueden estar vacías"),
   inperson_hours: string({
     required_error: "Las horas presenciales son requeridas",
-  }),
+  }).nonempty("Las horas presenciales no pueden estar vacías"),
   online_hours: string({
     required_error: "Las horas online son requeridas",
-  }),
+  }).nonempty("Las horas online no pueden estar vacías"),
   name: string({ required_error: "El nombre es requerido" }),
   objective: string({ required_error: "El objetivo es requerido" }),
   additional_comments: string().default(""),
-  date_from: coerce.date({
-    errorMap: (issue, { defaultError }) => ({
-      message: issue.code === "invalid_date" ? "Fecha invalida" : defaultError,
-    }),
-  }),
+  date_from: coerce
+    .date({
+      errorMap: (issue, { defaultError }) => ({
+        message:
+          issue.code === "invalid_date" ? "Fecha invalida" : defaultError,
+      }),
+    })
+    .min(new Date(2000, 0, 1), "La fecha no puede ser anterior al año 2000"),
   date_to: coerce.date({
     errorMap: (issue, { defaultError }) => ({
       message: issue.code === "invalid_date" ? "Fecha invalida" : defaultError,
     }),
   }),
-
   department_fk: number({ required_error: "El departamento es requerido" }),
   program_fk: number({ required_error: "El tipo de programa es requerido" }),
   course_director_fk: number({
@@ -140,11 +149,12 @@ export const academicSchema = object({
     .min(9, "El RUT debe tener al menos 9 caracteres")
     .max(12, "El RUT debe tener a lo más 12 caracteres")
     .transform((val) => format.notDotDash(val)),
-  name: string({ required_error: "El nombre es requerido" }),
+  name: string({ required_error: "El nombre es requerido" }).nonempty(
+    "El nombre no puede estar vacío"
+  ),
   email: z.union([z.literal(""), z.string().email("El email no es válido")]),
   phone: coerce.number().optional().nullable(),
   isFOUCH: boolean().default(true),
-  department_fk: number({ required_error: "El departamento es requerido" }),
 });
 
 export const createDepartmentSchema = object({
@@ -196,7 +206,7 @@ export const expenseSchema = object({
   multiplier: string({
     required_error: "El multiplicador es requerido",
   }).transform((val) => val.replace(/[^0-9.]/g, "")),
-  multiply: nativeEnum(MultiplyWith).optional().nullish(),
+  multiply: nativeEnum(MultiplyWith),
   amount: coerce.number().default(0),
 });
 
@@ -287,6 +297,12 @@ export const adminSchema = object({
     .transform((val) => format.dotDash(val)),
 });
 
+export const searchCourseFiltersSchema = object({
+  name: string().optional(),
+  payments: z.enum(["cumplidos", "atrasados"]).optional(),
+  year: coerce.number().min(2000).max(new Date().getFullYear()).optional(),
+});
+
 export type AdminSchemaType = z.infer<typeof adminSchema>;
 export type ChangePasswordSchemaType = z.infer<typeof changePasswordSchema>;
 export type PaymentSchemaType = z.infer<typeof paymentSchema>;
@@ -317,3 +333,6 @@ export type EnrollSchemaType = z.infer<typeof enrollSchema>;
 export type StudentEnrollSchemaType = z.infer<typeof studentEnrollSchema>;
 export type LoginSchemaType = z.infer<typeof loginSchema>;
 export type RegisterSchemaType = z.infer<typeof registerSchema>;
+export type SearchCourseFiltersSchemaType = z.infer<
+  typeof searchCourseFiltersSchema
+>;

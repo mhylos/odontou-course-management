@@ -12,6 +12,7 @@ import {
   DISTRIBUTION_INTERNAL_PERCENTAGE,
   DISTRIBUTION_TYPE_TOTAL,
   OVERHEAD_PERCENTAGE,
+  RECORDS_PER_PAGE,
 } from "@/lib/constants";
 import {
   Actions,
@@ -23,9 +24,13 @@ import {
 import Decimal from "decimal.js";
 import { upsertResponsiblesHonorariums } from "./honorariumServices";
 import { registerAction } from "./loggerServices";
+import { CourseFilters } from "@/components/cursos/CourseList";
+import { Pagination } from "@/lib/definitions";
 
 export async function createCourse(data: CreateCourseSchemaType) {
   try {
+    console.log(data);
+
     const program = await prisma.program.findUnique({
       where: {
         id: data.program_fk,
@@ -314,9 +319,8 @@ export async function getStudentsEnrolled(courseId: number, filter?: string) {
 }
 
 export async function getAllCourses(
-  name?: string,
-  payment?: string,
-  year?: number
+  { name, payments, year }: CourseFilters = {},
+  pagination: Pagination = { page: 1, pageSize: RECORDS_PER_PAGE }
 ) {
   const where: Prisma.CourseWhereInput = {
     name: {
@@ -328,12 +332,14 @@ export async function getAllCourses(
   if (year) {
     where.date_from = {
       gte: new Date(year, 0, 1),
-      lt: new Date(year + 1, 0, 1),
+      lte: new Date(year + 1, 0, 1),
     };
   }
 
   const courses = await prisma.course.findMany({
     where,
+    skip: (pagination.page - 1) * pagination.pageSize,
+    take: pagination.pageSize,
     omit: {
       program_fk: true,
       department_fk: true,
@@ -382,6 +388,10 @@ export async function getAllCourses(
     },
   });
 
+  const totalPages = Math.ceil(
+    (await prisma.course.count({ where })) / pagination.pageSize
+  );
+
   const extendedCourses = courses.map((course) => {
     const students = course.enrolled.length;
     const paidStudents = course.enrolled.filter(
@@ -402,14 +412,32 @@ export async function getAllCourses(
     };
   });
 
-  switch (payment) {
-    case "delayed":
+  switch (payments) {
+    case "atrasados":
       return extendedCourses.filter((course) => course.incompleteStudents);
-    case "current":
+    case "cumplidos":
       return extendedCourses.filter((course) => !course.incompleteStudents);
     default:
       return extendedCourses;
   }
+}
+
+export async function getCoursesCount(filters: CourseFilters = {}) {
+  const where: Prisma.CourseWhereInput = {
+    name: {
+      contains: filters.name,
+      mode: "insensitive",
+    },
+  };
+
+  if (filters.year) {
+    where.date_from = {
+      gte: new Date(filters.year, 0, 1),
+      lte: new Date(filters.year + 1, 0, 1),
+    };
+  }
+
+  return await prisma.course.count({ where });
 }
 
 export async function isStudentEnrolled(courseId: number, rut: string) {
@@ -448,7 +476,6 @@ export async function getAcademicsByCourse(courseId: number) {
         select: {
           phone: true,
           isFOUCH: true,
-          department: { select: { name: true } },
           user: { select: { name: true, rut: true, email: true } },
         },
       },
@@ -524,6 +551,27 @@ export async function getPaymentOptions() {
   }));
 
   return options;
+}
+
+export async function getPaymentOptionById(paymentTypeId: number) {
+  const paymentType = await prisma.paymentTypes.findUnique({
+    where: {
+      id: paymentTypeId,
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  if (!paymentType) {
+    return null;
+  }
+  const option: Option = {
+    name: paymentType.name,
+    value: paymentType.id,
+  };
+  return option;
 }
 
 export async function getIncomesValues(courseId: number) {

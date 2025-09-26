@@ -4,7 +4,6 @@ import { academicSchema, AcademicSchemaType } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import Button from "@/components/common/Button";
-import FetchDropdown from "@/components/common/FetchDropdown";
 import FloatingInput from "@/components/common/FloatingInput";
 import FormFieldset from "@/components/forms/FormFieldset";
 import Checkbox from "@/components/common/Checkbox";
@@ -13,6 +12,7 @@ import { createAcademic, updateAcademic } from "@/services/academicsServices";
 import { toast } from "react-toastify";
 import AboutPassword from "@/components/common/AboutPassword";
 import LoadingSpinner from "../common/LoadingSpinner";
+import ResetFormButton from "./ResetFormButton";
 
 interface AcademicFormProps {
   className?: string;
@@ -30,15 +30,30 @@ export default function AcademicForm({
       rut: "",
       name: "",
       email: undefined,
-      department_fk: undefined,
+      // department_fk: undefined,
+      phone: undefined,
       isFOUCH: false,
       ...defaultValues,
     },
     resolver: zodResolver(academicSchema),
   });
 
+  const isUpdate = defaultValues;
+
+  const resetForm = () => {
+    form.reset({
+      name: "",
+      email: "",
+      phone: undefined,
+      isFOUCH: false,
+    });
+    if (!isUpdate) {
+      form.setValue("rut", "");
+    }
+  };
+
   const createOrUpdate = async (data: AcademicSchemaType) => {
-    if (defaultValues) {
+    if (isUpdate) {
       return await updateAcademic(runToNumber(data.rut), data);
     } else {
       return await createAcademic(data);
@@ -72,15 +87,15 @@ export default function AcademicForm({
       >
         <FormFieldset legend="Datos personales">
           <Controller
-            render={({ field: { onChange, value }, fieldState: { error } }) => (
+            disabled={defaultValues?.rut !== undefined}
+            render={({ field, fieldState: { error } }) => (
               <FloatingInput
-                disabled={defaultValues?.rut !== undefined}
+                {...field}
                 label="RUT"
                 error={error?.message}
-                value={value}
                 onChange={(value) => {
                   const formatted = runFormatter(value.currentTarget.value);
-                  onChange(formatted);
+                  field.onChange(formatted);
                 }}
               />
             )}
@@ -98,15 +113,16 @@ export default function AcademicForm({
             error={form.formState.errors.email?.message}
           />
           <Controller
-            render={({ field: { onChange, value }, fieldState: { error } }) => (
+            render={({ field, fieldState: { error } }) => (
               <FloatingInput
+                {...field}
+                value={field.value ?? ""}
                 label="Número de teléfono"
                 error={error?.message}
-                value={value || ""}
                 onChange={(e) => {
                   const value = e.currentTarget.value.replace(/\D/g, "");
 
-                  onChange(value);
+                  field.onChange(value);
                 }}
               />
             )}
@@ -115,17 +131,6 @@ export default function AcademicForm({
           />
         </FormFieldset>
         <FormFieldset legend="Datos académicos">
-          <FetchDropdown
-            name="department_fk"
-            label="Departamento perteneciente"
-            control={form.control}
-            fetchUrl="/api/department/options"
-            fetchDefaultUrl={
-              defaultValues?.department_fk
-                ? `/api/department/options/${defaultValues.department_fk}`
-                : undefined
-            }
-          />
           <Checkbox
             id="isFOUCH"
             label="Pertenece a la facultad"
@@ -147,6 +152,7 @@ export default function AcademicForm({
                   Volver
                 </Button>
               )}
+              <ResetFormButton type="button" onClick={resetForm} />
               <Button type="submit" form="academic-form">
                 Guardar
               </Button>

@@ -34,7 +34,7 @@ export default async function CourseStudents({
           className="w-full"
         />
         <Link
-          href={"estudiantes/ingresar"}
+          href={`/cursos/detalles/${id}/estudiantes/ingresar`}
           className="group bg-primary text-white rounded place-items-center flex flex-col justify-center px-2 text-center"
         >
           <div>
@@ -60,13 +60,15 @@ export default async function CourseStudents({
       >
         {enrolls.map((enroll, i) => (
           <Row key={enroll.student.rut} currentRow={i + 1}>
-            <Cell>{enroll.student.name}</Cell>
-            <Cell>
+            <Cell className="capitalize">
+              {enroll.student.name.toLowerCase()}
+            </Cell>
+            <Cell className="text-nowrap">
               {format.dotDash(
                 enroll.student.rut.toString() + calculateDv(enroll.student.rut)
               )}
             </Cell>
-            <Cell>{enroll.status ? "Matriculado" : "No matriculado"}</Cell>
+            <Cell className="capitalize">{enroll.detailed_status ?? ""}</Cell>
             <Cell>{enroll.ticket_num ?? ""}</Cell>
             <Cell>
               {enroll.payment_date
