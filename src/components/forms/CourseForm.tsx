@@ -34,12 +34,11 @@ export default function CourseForm({
     defaultValues: {
       enroll_value: 0,
       ...values,
-      // the values requires date in "yyyy-MM-dd" format string, but the input internally manages Date objects
-      // @ts-ignore
+      // @ts-expect-error the values requires date in "yyyy-MM-dd" format string, but the input internally manages Date objects
       date_from: values?.date_from
         ? formatInTimeZone(values.date_from, "UTC", "yyyy-MM-dd")
         : undefined,
-      // @ts-ignore
+      // @ts-expect-error the values requires date in "yyyy-MM-dd" format string, but the input internally manages Date objects
       date_to: values?.date_to
         ? formatInTimeZone(values.date_to, "UTC", "yyyy-MM-dd")
         : undefined,
@@ -120,7 +119,7 @@ export default function CourseForm({
             }) => (
               <FetchDropdown
                 label="Tipo de programa"
-                id="program_fk"
+                id={name}
                 fetchUrl="/api/courses/programs/options"
                 fetchDefaultUrl={
                   values?.program_fk
@@ -193,7 +192,7 @@ export default function CourseForm({
             }) => (
               <FetchDropdown
                 label="Departamento Ejecutor"
-                id="department_fk"
+                id={name}
                 fetchUrl="/api/department/options"
                 create={() => setCurrentForm("department")}
                 fetchDefaultUrl={

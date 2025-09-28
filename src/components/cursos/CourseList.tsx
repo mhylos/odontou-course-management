@@ -1,10 +1,6 @@
-import { getAllCourses, getCoursesCount } from "@/services/courseServices";
+import { getAllCourses } from "@/services/courseServices";
 import CoursePreview from "@/components/cursos/CoursePreview";
 import { Pagination } from "@/lib/definitions";
-
-interface CourseListProps {
-  filters?: CourseFilters;
-}
 
 export interface CourseFilters {
   name?: string;

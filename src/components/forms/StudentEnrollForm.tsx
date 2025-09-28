@@ -10,7 +10,6 @@ import { toast } from "react-toastify";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
 import LoadingSpinner from "../common/LoadingSpinner";
-import ResetFormButton from "./ResetFormButton";
 import { upsertStudentEnroll } from "@/services/studentServices";
 import StudentForm from "./StudentForm_new";
 import {
@@ -58,7 +57,7 @@ export default function StudentEnrollForm({
         ...values?.enroll,
         total: values?.enroll?.total ?? enrollValue,
         discount: values?.enroll?.discount.toString() ?? "0",
-        // @ts-ignore
+        // @ts-expect-error the values requires date in "yyyy-MM-dd" format string, but the input internally manages Date objects
         payment_date: formatInTimeZone(
           values?.enroll?.payment_date ?? new Date(),
           "UTC",
@@ -173,28 +172,42 @@ export default function StudentEnrollForm({
             />
             <div className="relative">
               <Controller
-                render={({ field, fieldState: { error } }) => (
-                  <FloatingInput
-                    {...field}
-                    label="Descuento"
-                    error={error?.message}
-                    onChange={(e) => {
-                      const value = decimalNumberFormat(e.target.value);
-                      const n = new Decimal(!value ? 0 : value);
+                render={({ field, fieldState: { error } }) => {
+                  const percentage = new Decimal(
+                    !field.value ? 0 : field.value
+                  ).dividedBy(100);
+                  const moneyDiscounted = percentage.times(enrollValue);
+                  return (
+                    <FloatingInput
+                      {...field}
+                      label={`Descuento (-${convertToMoney(
+                        moneyDiscounted.toNumber()
+                      )})`}
+                      type="text"
+                      value={field.value ?? "0"}
+                      error={error?.message}
+                      onChange={(e) => {
+                        const value = decimalNumberFormat(e.target.value);
+                        const n = new Decimal(!value ? 0 : value);
 
-                      if (n.greaterThan(100)) {
-                        return;
-                      }
+                        if (n.greaterThan(100)) {
+                          return;
+                        }
 
-                      form.setValue(
-                        "enroll.total",
-                        enrollValue -
-                          n.dividedBy(100).times(enrollValue).floor().toNumber()
-                      );
-                      field.onChange(value);
-                    }}
-                  />
-                )}
+                        form.setValue(
+                          "enroll.total",
+                          enrollValue -
+                            n
+                              .dividedBy(100)
+                              .times(enrollValue)
+                              .floor()
+                              .toNumber()
+                        );
+                        field.onChange(value);
+                      }}
+                    />
+                  );
+                }}
                 name="enroll.discount"
                 control={form.control}
               />
@@ -373,6 +386,15 @@ export default function StudentEnrollForm({
               rows={2}
             />
           )}
+        </FormFieldset>
+        <FormFieldset legend="Otras observaciones">
+          <FloatingTextarea
+            label="Observaciones"
+            {...form.register("enroll.observation")}
+            error={form.formState.errors.enroll?.observation?.message}
+            rows={2}
+            className="col-span-2"
+          />
         </FormFieldset>
         <div className="flex gap-2 mt-2">
           <Button type="submit" disabled={form.formState.isSubmitting}>

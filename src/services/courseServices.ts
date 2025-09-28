@@ -388,9 +388,9 @@ export async function getAllCourses(
     },
   });
 
-  const totalPages = Math.ceil(
-    (await prisma.course.count({ where })) / pagination.pageSize
-  );
+  // const totalPages = Math.ceil(
+  //   (await prisma.course.count({ where })) / pagination.pageSize
+  // );
 
   const extendedCourses = courses.map((course) => {
     const students = course.enrolled.length;

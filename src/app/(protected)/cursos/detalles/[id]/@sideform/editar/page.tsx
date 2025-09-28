@@ -3,7 +3,6 @@ import RightSidebar from "@/components/common/RightSidebar";
 import { getCourseById } from "@/services/courseServices";
 import { notFound } from "next/navigation";
 import Overlay from "@/components/common/Overlay";
-import { formatInTimeZone } from "date-fns-tz/formatInTimeZone";
 import { CreateCourseSchemaType } from "@/lib/zod";
 
 export default async function EditCourse({
@@ -25,8 +24,6 @@ export default async function EditCourse({
     course_director_fk: course.course_director.rut,
     department_fk: course.department.id,
     program_fk: course.program.id,
-    // date_from: formatInTimeZone(course.date_from, "UTC", "yyyy-MM-dd"),
-    // date_to: formatInTimeZone(course.date_to, "UTC", "yyyy-MM-dd"),
   };
 
   return (

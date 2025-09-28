@@ -4,11 +4,9 @@ import Image from "next/image";
 import SidebarItem from "./SidebarItem";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/app/context/sidebarContext";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { ReactNode } from "react";
 import SidebarItemDescription from "./SidebarItemDescription";
-import Skeleton from "react-loading-skeleton";
 import { Session } from "next-auth";
 
 export interface SidebarProps {

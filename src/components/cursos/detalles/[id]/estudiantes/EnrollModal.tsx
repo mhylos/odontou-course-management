@@ -5,6 +5,7 @@ import Modal from "@/components/common/Modal/Modal";
 import ModalHeader from "@/components/common/Modal/ModalHeader";
 import EnrollForm from "@/components/forms/EnrollForm";
 import StudentForm from "@/components/forms/StudentForm";
+import { runToNumber } from "@/lib/utils";
 import {
   enrollSchema,
   EnrollSchemaType,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/zod";
 import { upsertStudentEnroll } from "@/services/studentServices";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { StudentStatus } from "@prisma/client";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -30,7 +32,7 @@ export default function EnrollModal({ course, values }: EnrollModalProps) {
   const enrollForm = useForm<EnrollSchemaType>({
     resolver: zodResolver(enrollSchema),
     defaultValues: values?.enroll ?? {
-      status: false,
+      detailed_status: StudentStatus.inactivo,
       discount: "0",
       total: course?.enroll_value,
       installments: 1,
@@ -73,8 +75,11 @@ export default function EnrollModal({ course, values }: EnrollModalProps) {
 
     const response = await upsertStudentEnroll(
       course.id,
-      studentValuesParsed.data,
-      enrollValuesParsed.data
+
+      {
+        rut: runToNumber(studentValuesParsed.data.rut),
+        enroll: enrollValuesParsed.data,
+      }
     );
 
     if (response.success) {

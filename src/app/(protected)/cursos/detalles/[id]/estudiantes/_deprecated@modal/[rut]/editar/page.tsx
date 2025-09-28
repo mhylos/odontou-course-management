@@ -3,6 +3,7 @@ import { restoreRun } from "@/lib/utils";
 import { EnrollSchemaType, StudentSchemaType } from "@/lib/zod";
 import { getCourseById } from "@/services/courseServices";
 import { getEnroll } from "@/services/studentServices";
+import { StudentStatus } from "@prisma/client";
 
 interface StudentDetailsProps {
   params: Promise<{ id: string; rut: string }>;
@@ -27,7 +28,8 @@ export default async function StudentDetails({ params }: StudentDetailsProps) {
       genre: enroll?.student.genre ?? null,
     },
     enroll: {
-      status: enroll?.status ?? false,
+      // status: enroll?.status ?? false,
+      detailed_status: enroll?.detailed_status ?? StudentStatus.inactivo,
       ticket_num: enroll?.ticket_num ?? null,
       payment_date: enroll?.payment_date ?? null,
       discount: enroll?.discount ?? "0",

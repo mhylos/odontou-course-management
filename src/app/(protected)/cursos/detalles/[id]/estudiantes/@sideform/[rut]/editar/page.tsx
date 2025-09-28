@@ -1,13 +1,7 @@
 import Overlay from "@/components/common/Overlay";
 import RightSidebar from "@/components/common/RightSidebar";
-import EnrollModal from "@/components/cursos/detalles/[id]/estudiantes/EnrollModal";
 import StudentEnrollForm from "@/components/forms/StudentEnrollForm";
-import { restoreRun } from "@/lib/utils";
-import {
-  EnrollSchemaType,
-  StudentEnrollSchemaType,
-  StudentSchemaType,
-} from "@/lib/zod";
+import { EnrollSchemaType, StudentEnrollSchemaType } from "@/lib/zod";
 import { getCourseById } from "@/services/courseServices";
 import { getEnroll } from "@/services/studentServices";
 

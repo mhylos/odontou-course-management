@@ -1,4 +1,3 @@
-import { getAcademicOptionByRun } from "@/services/academicsServices";
 import { getPaymentOptionById } from "@/services/courseServices";
 
 export async function GET(

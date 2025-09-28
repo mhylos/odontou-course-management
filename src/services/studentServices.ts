@@ -8,11 +8,7 @@ import {
   restoreRun,
   runToNumber,
 } from "@/lib/utils";
-import {
-  EnrollSchemaType,
-  StudentEnrollSchemaType,
-  StudentSchemaType,
-} from "@/lib/zod";
+import { StudentEnrollSchemaType, StudentSchemaType } from "@/lib/zod";
 import { Actions } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { recalculateFee } from "./incomesServices";
@@ -39,18 +35,18 @@ export async function getAllStudents() {
 }
 
 export async function upsertStudent(student: StudentSchemaType) {
-  const rut = runToNumber(student.rut);
-  const { rut: _, ...studentData } = student;
+  const { rut, ...studentData } = student;
+  const formattedRut = runToNumber(student.rut);
 
   try {
     const studentUpserted = await prisma.student.upsert({
       where: {
-        rut: rut,
+        rut: formattedRut,
       },
       create: {
         ...studentData,
         name: student.name.toUpperCase(),
-        rut: rut,
+        rut: formattedRut,
         ...(student.email ? { email: student.email.toLocaleLowerCase() } : {}),
       },
       update: {
@@ -65,9 +61,7 @@ export async function upsertStudent(student: StudentSchemaType) {
     });
     registerAction(
       Actions.create,
-      `Estudiante **${capitalizeAll(student.name)}**, **RUT: ${restoreRun(
-        rut
-      )}** $${
+      `Estudiante **${capitalizeAll(student.name)}**, **RUT: ${rut}** $${
         studentUpserted.created_at === studentUpserted.updated_at
           ? "creado"
           : "actualizado"

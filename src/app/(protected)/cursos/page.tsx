@@ -4,10 +4,7 @@ import CourseList from "@/components/cursos/CourseList";
 import CoursePreview from "@/components/cursos/CoursePreview";
 import SearchCourses from "@/components/cursos/SearchCourses";
 import { RECORDS_PER_PAGE } from "@/lib/constants";
-import {
-  searchCourseFiltersSchema,
-  SearchCourseFiltersSchemaType,
-} from "@/lib/zod";
+import { searchCourseFiltersSchema } from "@/lib/zod";
 import { getCoursesCount } from "@/services/courseServices";
 import Link from "next/link";
 import { Suspense } from "react";

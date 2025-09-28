@@ -1,11 +1,6 @@
 "use client";
 
-import LoadingSpinner from "@/components/common/LoadingSpinner";
-import DeleteRowButton from "@/components/common/Table/DeleteRowButton";
 import EditRowButton from "@/components/common/Table/EditRowButton";
-import { removeParticipation } from "@/services/academicsServices";
-import { useState } from "react";
-import { toast } from "react-toastify";
 
 interface ActionsProps {
   rut: number;
@@ -13,11 +8,11 @@ interface ActionsProps {
 }
 
 export default function Actions({ rut, courseId }: ActionsProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  // if (isLoading) {
+  //   return <LoadingSpinner />;
+  // }
 
   // const handleRemove = async () => {
   //   setIsLoading(true);
